@@ -9,6 +9,7 @@ name = "pypi"
 sqlalchemy = "*"
 flask = "*"
 "psycopg2" = "*"
+pudb = "*"
 
 [requires]
 python_version = "3.5"
