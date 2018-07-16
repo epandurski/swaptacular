@@ -1,15 +1,14 @@
 [[source]]
-url = "https://github.com/epandurski/swaptacular"
+url = "https://pypi.org/simple"
 verify_ssl = true
-name = "swaptacular_agent"
+name = "pypi"
 
 [dev-packages]
 
 [packages]
-"psycopg2" = "*"
-sqlalchemy = "*"
 flask = "*"
 pudb = "*"
+"psycopg2" = "*"
 
 [requires]
-python_version = "2.7"
+python_version = "3.5"
