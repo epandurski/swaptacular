@@ -5,8 +5,6 @@ info.
 
 ## How to debug
 
-Set a breakpoint in the code with `pdb.set_trace()` and run:
-
 ```
-$ docker-compose run -p 5001:80 users python users.py
+$ docker-compose run -p 5001:80 users python -m pudb users.py
 ```
