@@ -8,7 +8,7 @@ name = "pypi"
 [packages]
 flask = "*"
 pudb = "*"
-"psycopg2" = "*"
+pymongo = "*"
 
 [requires]
 python_version = "3.5"
