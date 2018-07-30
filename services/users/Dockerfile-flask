@@ -1,8 +1,6 @@
-# base image
 FROM python:3.5.3-alpine
-
-# set working directory
 WORKDIR /usr/src/app
+EXPOSE 80
 
 # add and install requirements
 ADD Pipfile* ./
@@ -13,4 +11,4 @@ RUN pipenv install
 ADD users.py .
 
 # run server
-CMD pipenv run python -m flask run -h 0.0.0.0
+CMD pipenv run python -m flask run -h 0.0.0.0 --port 80

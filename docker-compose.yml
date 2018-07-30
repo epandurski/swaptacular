@@ -21,7 +21,7 @@ services:
     volumes:
       - './services/users:/usr/src/app'
     ports:
-      - 5001:5000
+      - 5001:80
     environment:
       - FLASK_APP=users.py
       - FLASK_ENV=development
