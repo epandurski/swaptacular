@@ -3,13 +3,13 @@ WORKDIR /usr/src/app
 EXPOSE 80
 
 # add and install requirements
-ADD Pipfile* ./
+COPY Pipfile* ./
 RUN pip install pipenv
 RUN pipenv install --system
 RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
 
-# add app
-ADD users.py .
+# add the app
+COPY src ./
 
 # run server
 CMD python -m flask run -h 0.0.0.0 --port 80

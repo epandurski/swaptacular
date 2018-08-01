@@ -19,7 +19,7 @@ services:
       context: ./services/users
       dockerfile: Dockerfile-flask
     volumes:
-      - './services/users:/usr/src/app'
+      - './services/users/src:/usr/src/app'
     ports:
       - 5001:80
     environment:
