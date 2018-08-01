@@ -2,14 +2,17 @@ FROM python:3.5.3-alpine
 WORKDIR /usr/src/app
 EXPOSE 80
 
-# add and install requirements
+# add files and install requirements
 COPY Pipfile* ./
-RUN pip install pipenv
+COPY gunicorn.conf /gunicorn.conf
+RUN pip install pipenv gunicorn
 RUN pipenv install --system
-RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
+
+# configure pudb not to show a welcome screen
+RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i || true
 
 # add the app
 COPY src ./
 
 # run server
-CMD python -m flask run -h 0.0.0.0 --port 80
+CMD ["gunicorn", "--config", "/gunicorn.conf", "-b", ":80", "users:app"]
