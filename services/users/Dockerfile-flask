@@ -15,4 +15,4 @@ RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i ||
 COPY src ./
 
 # run server
-CMD ["gunicorn", "--config", "/gunicorn.conf", "-b", ":80", "users:app"]
+CMD ["gunicorn", "--config", "/gunicorn.conf", "-b", ":80", "wsgi:app"]

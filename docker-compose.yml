@@ -24,14 +24,12 @@ services:
       - 5001:80
     environment:
       - PYTHONDONTWRITEBYTECODE=true
-      - FLASK_APP=users.py
       - FLASK_ENV=development
       - GUNICORN_ACCESSLOG=-
-      - GUNICORN_ERRORLOG=-
       - GUNICORN_WORKERS=1
       - GUNICORN_THREADS=1
       # - APP_SETTINGS=project.config.DevelopmentConfig
-    # command: python -m flask run -h 0.0.0.0 --port 80
+    command: python -m flask run -h 0.0.0.0 --port 80
     depends_on:
       - users-mongo
 
