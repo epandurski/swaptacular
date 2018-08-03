@@ -4,10 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
+pudb = "*"
 
 [packages]
 flask = "*"
-pudb = "*"
 pymongo = "*"
 
 [requires]

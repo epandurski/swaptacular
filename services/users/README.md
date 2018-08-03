@@ -6,5 +6,5 @@ info.
 ## How to debug
 
 ```
-$ docker-compose run -p 5001:80 users python -m pudb wsgi.py
+$ docker-compose run -p 5001:80 users debug
 ```

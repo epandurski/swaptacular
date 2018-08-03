@@ -5,14 +5,33 @@ EXPOSE 80
 # add files and install requirements
 COPY Pipfile* ./
 COPY gunicorn.conf /gunicorn.conf
-RUN pip install pipenv gunicorn
+COPY entrypoint-flask.sh /usr/local/bin/
+RUN pip install pipenv gunicorn pudb
 RUN pipenv install --system
 
 # configure pudb not to show a welcome screen
-RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i || true
+RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
 
 # add the app
 COPY src ./
 
-# run server
-CMD ["gunicorn", "--config", "/gunicorn.conf", "-b", ":80", "wsgi:app"]
+ENTRYPOINT ["entrypoint-flask.sh"]
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV GUNICORN_ACCESSLOG=-
+
+################################################################################
+
+# Set this to the type of workers to use with gunicorn.
+ENV GUNICORN_WORKER_CLASS=sync
+
+# Set this to the number of worker processes for handling requests --
+# a positive integer generally in the 2-4 * $NUM_CORES range. You may
+# want to vary this a bit to find the best for your particular
+# workload.
+ENV GUNICORN_WORKERS=1
+
+# Set this to the number of worker threads for handling
+# requests. (Runs each worker with the specified number of threads.)
+# This setting only affects the "gthread" and "sync" worker types.
+ENV GUNICORN_THREADS=1

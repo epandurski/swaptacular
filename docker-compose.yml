@@ -22,14 +22,9 @@ services:
       - './services/users/src:/usr/src/app'
     ports:
       - 5001:80
-    environment:
-      - PYTHONDONTWRITEBYTECODE=true
-      - FLASK_ENV=development
-      - GUNICORN_ACCESSLOG=-
-      - GUNICORN_WORKERS=1
-      - GUNICORN_THREADS=1
-      # - APP_SETTINGS=project.config.DevelopmentConfig
-    command: python -m flask run -h 0.0.0.0 --port 80
+    # environment:
+    #   - APP_SETTINGS=project.config.DevelopmentConfig
+    command: develop
     depends_on:
       - users-mongo
 
