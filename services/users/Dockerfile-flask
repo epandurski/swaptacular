@@ -22,6 +22,10 @@ ENV GUNICORN_ACCESSLOG=-
 
 ################################################################################
 
+# Set this to the desired granularity of log outputs. Valid level
+# names are: debug, info, warning, error, critical
+ENV GUNICORN_LOGLEVEL=warning
+
 # Set this to the type of workers to use with gunicorn.
 ENV GUNICORN_WORKER_CLASS=sync
 
