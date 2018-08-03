@@ -17,7 +17,6 @@ COPY src ./
 
 ENTRYPOINT ["entrypoint-flask.sh"]
 
-ENV PYTHONDONTWRITEBYTECODE=1
 ENV GUNICORN_ACCESSLOG=-
 
 ################################################################################

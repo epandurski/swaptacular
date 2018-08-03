@@ -2,6 +2,8 @@
 #
 # This file is used by "Dockerfile-flask".
 
+export PYTHONDONTWRITEBYTECODE=1
+
 case $1 in
     develop)
         shift;
@@ -14,6 +16,7 @@ case $1 in
         exec python -m pudb wsgi.py "$@"
         ;;
     '')
+        export -n PYTHONDONTWRITEBYTECODE
         exec gunicorn --config /gunicorn.conf -b :80 wsgi:app
         ;;
     *)
