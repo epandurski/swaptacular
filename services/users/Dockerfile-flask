@@ -17,8 +17,6 @@ COPY src ./
 
 ENTRYPOINT ["entrypoint-flask.sh"]
 
-ENV GUNICORN_ACCESSLOG=-
-
 ################################################################################
 
 # Set this to the desired granularity of log outputs. Valid level
