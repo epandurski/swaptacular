@@ -5,8 +5,9 @@ EXPOSE 80
 # add files and install requirements
 COPY Pipfile* ./
 COPY gunicorn.conf /gunicorn.conf
+COPY logging.conf /logging.conf
 COPY entrypoint-flask.sh /usr/local/bin/
-RUN pip install pipenv gunicorn pudb
+RUN pip install pipenv gunicorn json-logging-py pudb
 RUN pipenv install --system
 
 # configure pudb not to show a welcome screen

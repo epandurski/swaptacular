@@ -17,7 +17,7 @@ case $1 in
         ;;
     '')
         export -n PYTHONDONTWRITEBYTECODE
-        exec gunicorn --config /gunicorn.conf -b :80 wsgi:app
+        exec gunicorn --config /gunicorn.conf --log-config /logging.conf -b :80 wsgi:app
         ;;
     *)
         exec "$@"
