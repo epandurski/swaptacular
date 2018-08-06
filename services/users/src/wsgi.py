@@ -1,10 +1,18 @@
 from flask import Flask
+from flask_env import MetaFlaskEnv
+
+
+class Configuration(metaclass=MetaFlaskEnv):
+    MESSAGE = 'Hello, World!'
+
+
 app = Flask(__name__)
+app.config.from_object(Configuration)
 
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return app.config['MESSAGE']
 
 
 if __name__ == '__main__':

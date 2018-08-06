@@ -9,6 +9,7 @@ pudb = "*"
 [packages]
 flask = "*"
 pymongo = "*"
+flask-env = "*"
 
 [requires]
 python_version = "3.5"

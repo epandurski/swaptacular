@@ -22,8 +22,8 @@ services:
       - './services/users/src:/usr/src/app'
     ports:
       - 5001:80
-    # environment:
-    #   - APP_SETTINGS=project.config.DevelopmentConfig
+    environment:
+      - MESSAGE=Hello, Developer
     command: develop
     depends_on:
       - users-mongo
