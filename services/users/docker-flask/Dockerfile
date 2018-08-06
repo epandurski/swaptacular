@@ -4,9 +4,9 @@ EXPOSE 80
 
 # add files and install requirements
 COPY Pipfile* ./
-COPY gunicorn.conf /gunicorn.conf
-COPY logging.conf /logging.conf
-COPY entrypoint-flask.sh /usr/local/bin/
+COPY docker-flask/gunicorn.conf /gunicorn.conf
+COPY docker-flask/logging.conf /logging.conf
+COPY docker-flask/entrypoint.sh /usr/local/bin/
 RUN pip install pipenv gunicorn json-logging-py pudb
 RUN pipenv install --system
 
@@ -16,7 +16,7 @@ RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
 # add the app
 COPY src ./
 
-ENTRYPOINT ["entrypoint-flask.sh"]
+ENTRYPOINT ["entrypoint.sh"]
 
 ################################################################################
 

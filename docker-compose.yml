@@ -5,7 +5,7 @@ services:
   users-mongo:
     build:
       context: ./services/users
-      dockerfile: Dockerfile-mongo
+      dockerfile: docker-mongo/Dockerfile
     restart: always
     environment:
       MONGO_INITDB_DATABASE: users
@@ -17,7 +17,7 @@ services:
   users:
     build:
       context: ./services/users
-      dockerfile: Dockerfile-flask
+      dockerfile: docker-flask/Dockerfile
     volumes:
       - './services/users/src:/usr/src/app'
     ports:
