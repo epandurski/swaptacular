@@ -2,17 +2,13 @@ version: '3.6'
 
 services:
 
-  users-mongo:
-    build:
-      context: ./services/users
-      dockerfile: docker-mongo/Dockerfile
-    restart: always
-    environment:
-      MONGO_INITDB_DATABASE: users
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+  postgres:
+    image: postgres:10.4
     volumes:
-      - users-data-volume:/data/db
+      - pg-data-volume:/var/lib/postgresql/data
+    deploy:
+      mode: global
+
 
   users:
     build:
@@ -26,19 +22,8 @@ services:
       - MESSAGE=Hello, Developer
     command: develop
     depends_on:
-      - users-mongo
+      - postgres
 
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_SERVER: users-mongo
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-    depends_on:
-      - users-mongo
 
 volumes:
-  users-data-volume:
+  pg-data-volume:
