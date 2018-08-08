@@ -8,8 +8,11 @@ pudb = "*"
 
 [packages]
 flask = "*"
-pymongo = "*"
 flask-env = "*"
+flask-migrate = "*"
+flask-sqlalchemy = "*"
+sqlalchemy = "*"
+"psycopg2" = "*"
 
 [requires]
 python_version = "3.5"

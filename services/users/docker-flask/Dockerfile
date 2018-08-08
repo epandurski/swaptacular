@@ -2,19 +2,26 @@ FROM python:3.5.3-alpine
 WORKDIR /usr/src/app
 EXPOSE 80
 
-# add files and install requirements
+# copy files
 COPY Pipfile* ./
 COPY docker-flask/gunicorn.conf /gunicorn.conf
 COPY docker-flask/logging.conf /logging.conf
 COPY docker-flask/entrypoint.sh /usr/local/bin/
+COPY src ./
+
+# install packages
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    python3-dev \
+    postgresql-dev \
+  && true
+RUN pip install --upgrade pip
 RUN pip install pipenv gunicorn json-logging-py pudb
 RUN pipenv install --system
 
 # configure pudb not to show a welcome screen
 RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
-
-# add the app
-COPY src ./
 
 ENTRYPOINT ["entrypoint.sh"]
 
