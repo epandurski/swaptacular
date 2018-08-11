@@ -15,9 +15,9 @@ EOF
 }
 
 flask_db_upgrade() {
+    error_file='/flask-db-upgrade.error'
     n_errors_to_ignore=6
     retry_after=1
-    error_file='/flask-db-upgrade.error'
     threshold=$((1 << n_errors_to_ignore))
     echo -n "Running flask db upgrade ... "
     while true; do
