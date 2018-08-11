@@ -3,12 +3,11 @@ version: '3.6'
 services:
 
   pg:
-    image: postgres:10.4
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     volumes:
       - pg-data-volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=swaptacular
-      - POSTGRES_PASSWORD=mysecretpassword
     deploy:
       mode: global
 
@@ -22,7 +21,7 @@ services:
     ports:
       - 5001:80
     environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:mysecretpassword@pg/swaptacular
+      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/postgres
       - MESSAGE=Hello, Developer
     command: develop
     depends_on:
