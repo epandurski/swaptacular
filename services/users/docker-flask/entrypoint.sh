@@ -15,6 +15,10 @@ case $1 in
         export FLASK_ENV=development
         exec python -m pudb wsgi.py "$@"
         ;;
+    db)
+        shift;
+        exec flask db "$@"
+        ;;
     '')
         export -n PYTHONDONTWRITEBYTECODE
         exec gunicorn --config /gunicorn.conf --log-config /logging.conf -b :80 wsgi:app
