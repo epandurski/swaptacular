@@ -1,13 +1,25 @@
 from flask import Flask
 from flask_env import MetaFlaskEnv
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 
 class Configuration(metaclass=MetaFlaskEnv):
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = ''
     MESSAGE = 'Hello, World!'
 
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
+
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
+class User(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
 
 
 @app.route('/')
