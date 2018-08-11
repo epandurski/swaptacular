@@ -41,7 +41,7 @@ flask_db_upgrade() {
                 return 0
                 ;;
             *)
-                echo "error"
+                echo "error" && py_log_error "$error_file"
                 return $error_code
                 ;;
         esac
