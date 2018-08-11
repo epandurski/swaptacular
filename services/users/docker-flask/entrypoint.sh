@@ -2,39 +2,39 @@
 #
 # This file is used by "Dockerfile-flask".
 
-LOGGING_CONF='/logging.conf'
-GUNICORN_CONF='/gunicorn.conf'
+logging_conf='/logging.conf'
+gunicorn_conf='/gunicorn.conf'
 
 py_log_error() {
     python - <<EOF
 import logging
 import logging.config
-logging.config.fileConfig('$LOGGING_CONF')
+logging.config.fileConfig('$logging_conf')
 logging.error(open('$1').read())
 EOF
 }
 
 flask_db_upgrade() {
-    N_ERRORS_TO_IGNORE=6
-    RETRY_AFTER=1
-    ERROR_FILE='/flask-db-upgrade.error'
+    n_errors_to_ignore=6
+    retry_after=1
+    error_file='/flask-db-upgrade.error'
+    threshold=$((1 << n_errors_to_ignore))
     echo -n "Running flask db upgrade ... "
     while true; do
         set +e
-        flask db upgrade 2>$ERROR_FILE
-        ERROR_CODE=$?
+        flask db upgrade 2>$error_file
+        error_code=$?
         set -e
-        case $ERROR_CODE in
+        case $error_code in
             0)
                 echo "ok"
                 return 0
                 ;;
             1)
-                TIME_LIMIT=$((1 << N_ERRORS_TO_IGNORE))
-                [[ $RETRY_AFTER -eq $TIME_LIMIT ]] && echo "retrying"
-                [[ $RETRY_AFTER -ge $TIME_LIMIT ]] && py_log_error "$ERROR_FILE"
-                sleep $RETRY_AFTER
-                RETRY_AFTER=$((2 * RETRY_AFTER))
+                [[ $retry_after -eq $threshold ]] && echo "retrying"
+                [[ $retry_after -ge $threshold ]] && py_log_error "$error_file"
+                sleep $retry_after
+                retry_after=$((2 * retry_after))
                 ;;
             2)
                 echo "not installed"
@@ -42,7 +42,7 @@ flask_db_upgrade() {
                 ;;
             *)
                 echo "error"
-                return $ERROR_CODE
+                return $error_code
                 ;;
         esac
     done
@@ -68,8 +68,8 @@ case $1 in
     '')
         export -n PYTHONDONTWRITEBYTECODE
         flask_db_upgrade
-        gunicorn --config "$GUNICORN_CONF" \
-                 --log-config "$LOGGING_CONF" \
+        gunicorn --config "$gunicorn_conf" \
+                 --log-config "$logging_conf" \
                  -b :80 wsgi:app
         ;;
     *)
