@@ -4,6 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 
+class CustomAlchemy(SQLAlchemy):
+    def apply_driver_hacks(self, app, info, options):
+        if "isolation_level" not in options:
+            options["isolation_level"] = "REPEATABLE_READ"
+        return super().apply_driver_hacks(app, info, options)
+
+
 class Configuration(metaclass=MetaFlaskEnv):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
@@ -14,7 +21,7 @@ app = Flask(__name__)
 app.config.from_object(Configuration)
 
 
-db = SQLAlchemy(app)
+db = CustomAlchemy(app)
 migrate = Migrate(app, db)
 
 
