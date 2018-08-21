@@ -71,7 +71,7 @@ EOF
 # `flask-migrate` is not installed.
 perform_db_connect() {
     local retry_after=1
-    while [[ $retry_after -lt 64 ]]; do
+    while [[ $retry_after -lt ${DB_CONNECT_QUIT_DELAY-8} ]]; do
         flask db current &>/dev/null
         case $? in
             0)
