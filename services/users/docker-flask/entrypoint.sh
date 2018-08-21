@@ -33,21 +33,20 @@ import logging.config
 import configparser
 FILE_NAME = '$1'
 logging.config.fileConfig('$logging_conf')
+logger = logging.getLogger('alembic')
 config = configparser.ConfigParser()
 try:
     with open(FILE_NAME) as configfile:
         config.read_file(configfile)
 except FileNotFoundError:
-    logging.error('set_json_log_handler: config file not found (%s).',
-                  FILE_NAME)
+    logger.error('set_json_log_handler: config file not found (%s).', FILE_NAME)
     sys.exit(1)
 try:
     handlers_keys = config['handlers']['keys']
 except KeyError:
     handlers_keys = 'None'
 if  handlers_keys != 'console':
-    logging.error('set_json_log_handler: wrong logging handler keys (%s).',
-                  handlers_keys)
+    logger.error('set_json_log_handler: wrong logging handlers keys (%s).', handlers_keys)
     sys.exit(1)
 config['formatter_json'] = { 'class': 'jsonlogging.JSONFormatter' }
 formatters = config.setdefault('formatters', {})
