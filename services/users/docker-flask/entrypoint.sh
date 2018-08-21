@@ -7,20 +7,21 @@ gunicorn_conf='/gunicorn.conf'
 alembic_conf='migrations/alembic.ini'
 
 
-# This function should be called with a file name. It logs the
-# contents of the file as a JSON-formated message.
+# This function should be called with a message and a filename. It
+# logs the message and the contents of the file as a JSON-formated
+# message.
 py_log_error() {
     python - <<EOF
 import logging
 import logging.config
 logging.config.fileConfig('$logging_conf')
 logger = logging.getLogger('alembic.runtime.migration')
-logger.error(open('$1').read())
+logger.error('$1', extra={'info': open('$2').read()})
 EOF
 }
 
 
-# This function should be called with the file name of the respective
+# This function should be called with the filename of the respective
 # alembic configuration file. It modifies the file, so that alembic
 # will use JSON formatter for its logging messages. The function
 # returns `0` or `1`.
@@ -74,8 +75,7 @@ perform_db_connect() {
     local retry_after=1
     local error_file='/perform-db-connect.error'
     while [[ $retry_after -lt ${DB_CONNECT_QUIT_DELAY-8} ]]; do
-        echo "perform_db_connect: can not connect to the database." >$error_file
-        flask db current 1>>$error_file 2>>$error_file
+        flask db current &>$error_file
         case $? in
             0)
                 set_json_log_handler "$alembic_conf"
@@ -93,7 +93,7 @@ perform_db_connect() {
                 ;;
         esac
     done
-    py_log_error $error_file
+    py_log_error "perform_db_connect: can not connect to the database." $error_file
     return 1
 }
 
@@ -105,20 +105,19 @@ perform_db_upgrade() {
         0)
             # The database is up and running, so we try to upgrade.
             local error_file='/perform-db-upgrade.error'
-            echo "perform_db_upgrade: can not upgrade the schema." >$error_file
-            flask db upgrade 2>>$error_file
-            local error_code=$?
-            [[ -s $error_file ]] && py_log_error $error_file
-            return $error_code
+            if !flask db upgrade 2>$error_file; then
+                py_log_error "perform_db_upgrade: can not upgrade the schema." $error_file
+                return 1
+            fi
             ;;
         2)
             # `flask-migrate` is not installed, so upgrade is not needed.
-            return 0
             ;;
         *)
             return 1
             ;;
     esac
+    return 0
 }
 
 
