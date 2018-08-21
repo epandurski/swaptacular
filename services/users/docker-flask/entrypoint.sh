@@ -14,7 +14,8 @@ py_log_error() {
 import logging
 import logging.config
 logging.config.fileConfig('$logging_conf')
-logging.error(open('$1').read())
+logger = logging.getLogger('alembic.runtime.migration')
+logger.error(open('$1').read())
 EOF
 }
 
@@ -71,8 +72,10 @@ EOF
 # `flask-migrate` is not installed.
 perform_db_connect() {
     local retry_after=1
+    local error_file='/perform-db-connect.error'
     while [[ $retry_after -lt ${DB_CONNECT_QUIT_DELAY-8} ]]; do
-        flask db current &>/dev/null
+        echo "perform_db_connect: can not connect to the database." >$error_file
+        flask db current 1>>$error_file 2>>$error_file
         case $? in
             0)
                 set_json_log_handler "$alembic_conf"
@@ -90,8 +93,6 @@ perform_db_connect() {
                 ;;
         esac
     done
-    local error_file='/db-connect.error'
-    echo -n "perform_db_connect: can not connect to the database." >$error_file
     py_log_error $error_file
     return 1
 }
@@ -103,8 +104,9 @@ perform_db_upgrade() {
     case $? in
         0)
             # The database is up and running, so we try to upgrade.
-            local error_file='/db-upgrade.error'
-            flask db upgrade 2>$error_file
+            local error_file='/perform-db-upgrade.error'
+            echo "perform_db_upgrade: can not upgrade the schema." >$error_file
+            flask db upgrade 2>>$error_file
             local error_code=$?
             [[ -s $error_file ]] && py_log_error $error_file
             return $error_code
