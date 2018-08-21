@@ -20,6 +20,7 @@ services:
       - './services/users/src:/usr/src/app'
     ports:
       - 5001:80
+    hostname: users_service
     environment:
       - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/postgres
       - MESSAGE=Hello, Developer
