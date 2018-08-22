@@ -1,7 +1,11 @@
+import logging
 from flask import Flask
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class CustomAlchemy(SQLAlchemy):
@@ -17,6 +21,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     MESSAGE = 'Hello, World!'
 
 
+logger = logging.getLogger('users.%s' % __name__)
 app = Flask(__name__)
 app.config.from_object(Configuration)
 
@@ -31,6 +36,9 @@ class User(db.Model):
 
 @app.route('/')
 def hello_world():
+    logger.debug('A debug message')
+    logger.info('An info message')
+    logger.warning('A warning message')
     return app.config['MESSAGE']
 
 
