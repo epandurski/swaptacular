@@ -19,7 +19,7 @@ services:
     environment:
       - PGPASSWORD=$POSTGRES_PASSWORD
     command:
-      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/init.sql
+      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/init.sql
     depends_on:
       - pg
     restart: on-failure
@@ -31,7 +31,7 @@ services:
       - LOG_LEVEL=debug
       - HYDRA_SYSTEM_SECRET=youReallyNeedToChangeThis
     command:
-      migrate sql postgres://hydra_service:hydra_service@pg/postgres?sslmode=disable
+      migrate sql postgres://hydra_service:hydra_service@pg/${POSTGRES_DB}?sslmode=disable
     depends_on:
       - pg
     restart: on-failure
@@ -47,7 +47,7 @@ services:
       - 5001:80
     hostname: users_service
     environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/postgres
+      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
       - MESSAGE=Hello, Developer
     command: develop
     depends_on:
