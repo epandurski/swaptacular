@@ -19,7 +19,7 @@ services:
     environment:
       - PGPASSWORD=$POSTGRES_PASSWORD
     command:
-      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/init.sql
+      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/create-users.sql
     depends_on:
       - pg
     restart: on-failure
