@@ -37,6 +37,17 @@ services:
     restart: on-failure
 
 
+  oathkeeper-migrate:
+    image: oryd/oathkeeper:$OATHKEEPER_VERSION
+    environment:
+      - LOG_LEVEL=debug
+    command:
+      migrate sql postgres://oathkeeper_service:oathkeeper_service@pg/${POSTGRES_DB}?sslmode=disable
+    depends_on:
+      - pg
+    restart: on-failure
+
+
   users:
     build:
       context: ./services/users
