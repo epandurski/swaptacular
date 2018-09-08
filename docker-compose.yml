@@ -12,6 +12,31 @@ services:
       - 5433:5432
 
 
+  pg-create-users:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    environment:
+      - PGPASSWORD=$POSTGRES_PASSWORD
+    command:
+      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_DB" -f /docker-entrypoint-initdb.d/init.sql
+    depends_on:
+      - pg
+    restart: on-failure
+
+
+  hydra-migrate:
+    image: oryd/hydra:$HYDRA_VERSION
+    environment:
+      - LOG_LEVEL=debug
+      - HYDRA_SYSTEM_SECRET=youReallyNeedToChangeThis
+    command:
+      migrate sql postgres://hydra_service:hydra_service@pg/postgres?sslmode=disable
+    depends_on:
+      - pg
+    restart: on-failure
+
+
   users:
     build:
       context: ./services/users
