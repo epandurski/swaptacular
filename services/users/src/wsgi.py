@@ -16,6 +16,7 @@ class CustomAlchemy(SQLAlchemy):
 
 
 class Configuration(metaclass=MetaFlaskEnv):
+    PORT = 80
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
     MESSAGE = 'Hello, World!'
@@ -43,4 +44,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True, use_reloader=False, threaded=False)
+    app.run(host='0.0.0.0', port=app.config['PORT'], debug=True, use_reloader=False, threaded=False)

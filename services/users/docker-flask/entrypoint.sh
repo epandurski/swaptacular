@@ -126,7 +126,7 @@ case $1 in
     develop)
         shift;
         export FLASK_ENV=development
-        flask run --host=0.0.0.0 --port 80 "$@"
+        flask run --host=0.0.0.0 --port $PORT "$@"
         ;;
     debug)
         shift;
@@ -145,7 +145,7 @@ case $1 in
         ([[ $DO_NOT_UPGRADE_DB ]] || perform_db_upgrade) && gunicorn \
                 --config "$gunicorn_conf" \
                 --log-config "$logging_conf" \
-                -b :80 wsgi:app
+                -b :$PORT wsgi:app
         ;;
     *)
         "$@"

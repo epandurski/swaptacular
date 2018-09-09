@@ -55,9 +55,10 @@ services:
     volumes:
       - './services/users/src:/usr/src/app'
     ports:
-      - 5001:80
+      - 10001:10001
     hostname: users_service
     environment:
+      - PORT=10001
       - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
       - MESSAGE=Hello, Developer
     command: develop

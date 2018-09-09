@@ -6,11 +6,11 @@ info.
 ## How run a development server
 
 ```
-$ docker-compose run -p 5001:80 users develop
+$ docker-compose run -p 10001:10001 users develop
 ```
 
 ## How to debug
 
 ```
-$ docker-compose run -p 5001:80 users debug
+$ docker-compose run -p 10001:10001 users debug
 ```

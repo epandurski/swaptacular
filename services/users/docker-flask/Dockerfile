@@ -1,6 +1,5 @@
 FROM python:3.5.3-alpine
 WORKDIR /usr/src/app
-EXPOSE 80
 
 RUN apk add --no-cache \
     gcc \
