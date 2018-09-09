@@ -48,6 +48,41 @@ services:
     restart: on-failure
 
 
+  identity-provider:
+    environment:
+      - HYDRA_ADMIN_URL=http://hydra:4445
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - PORT=4488
+    image: oryd/hydra-login-consent-node:$HYDRA_VERSION
+    ports:
+      - 4488:4488
+
+
+  hydra:
+    image: oryd/hydra:$HYDRA_VERSION
+    ports:
+      - 4444:4444
+      - 4445:4445
+    depends_on:
+      - hydra-migrate
+    command:
+      serve all --dangerous-force-http
+    environment:
+      - LOG_LEVEL=debug
+      - SYSTEM_SECRET=$HYDRA_SYSTEM_SECRET
+      - DATABASE_URL=postgres://hydra_service:hydra_service@pg/${POSTGRES_DB}?sslmode=disable
+      - OAUTH2_CONSENT_URL=http://$BROWSER_IDP_HOST:4488/consent
+      - OAUTH2_LOGIN_URL=http://$BROWSER_IDP_HOST:4488/login
+      - OAUTH2_ISSUER_URL=http://$BROWSER_HYDRA_HOST:4444
+      - OAUTH2_SHARE_ERROR_DEBUG=1
+      - HYDRA_ADMIN_URL=http://hydra:4445
+    depends_on:
+      - pg
+      - identity-provider
+    volumes:
+      - './services/hydra/clients:/clients'
+
+
   users:
     build:
       context: ./services/users
