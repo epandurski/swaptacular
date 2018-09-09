@@ -29,7 +29,7 @@ services:
     image: oryd/hydra:$HYDRA_VERSION
     environment:
       - LOG_LEVEL=debug
-      - HYDRA_SYSTEM_SECRET=youReallyNeedToChangeThis
+      - HYDRA_SYSTEM_SECRET=$HYDRA_SYSTEM_SECRET
     command:
       migrate sql postgres://hydra_service:hydra_service@pg/${POSTGRES_DB}?sslmode=disable
     depends_on:
