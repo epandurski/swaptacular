@@ -35,7 +35,7 @@ class User(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
 
 
-@app.route('/')
+@app.route('/users/')
 def hello_world():
     logger.debug('A debug message')
     logger.info('An info message')

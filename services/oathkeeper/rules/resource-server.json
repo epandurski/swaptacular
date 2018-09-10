@@ -5,7 +5,7 @@
       "url": "http://users:10001"
     },
     "match": {
-      "url": "http://localhost:4455<.*>",
+      "url": "http://localhost:4455/users/<.*>",
       "methods": [
         "GET"
       ]
