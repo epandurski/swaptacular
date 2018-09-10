@@ -133,6 +133,8 @@ services:
       - AUTHENTICATOR_ANONYMOUS_USERNAME=anonymous
       - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
       - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
+    volumes:
+      - './services/oathkeeper/rules:/rules'
 
 
   users:
@@ -143,7 +145,6 @@ services:
       - './services/users/src:/usr/src/app'
     ports:
       - 10001:10001
-    hostname: users_service
     environment:
       - PORT=10001
       - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}

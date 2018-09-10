@@ -1,0 +1,25 @@
+[
+  {
+    "id": "resources:oathkeeper:rules:resource-server-oathkeeper",
+    "upstream": {
+      "url": "http://users:10001"
+    },
+    "match": {
+      "url": "http://localhost:4455<.*>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "noop"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "credentials_issuer": {
+        "handler": "noop"
+    }
+  }
+]
