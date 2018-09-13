@@ -8,6 +8,9 @@ services:
       dockerfile: Dockerfile
     volumes:
       - pg-data-volume:/var/lib/postgresql/data
+    ports:
+      # This may be useful during development to access the database directly.
+      - 5433:5432
 
 
   pg-create-users:
@@ -51,6 +54,8 @@ services:
     ports:
       # This is the public Oauth2 endpoint.
       - 4444:4444
+      # This may be useful during development to access the admin API.
+      - 4445:4445
     depends_on:
       - hydra-migrate
     command:
@@ -83,13 +88,15 @@ services:
 
   keto:
     image: oryd/keto:$KETO_VERSION
+    ports:
+      # This may be useful during development to access the admin API.
+      - 4466:4466
     depends_on:
       - keto-migrate
       - hydra
     environment:
       - LOG_LEVEL=debug
       - DISABLE_TELEMETRY=1
-      - PORT=4466
       - DATABASE_URL=postgres://keto_service:keto_service@pg/${POSTGRES_DB}?sslmode=disable
       - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
       - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
@@ -108,6 +115,9 @@ services:
 
   oathkeeper-api:
     image: oryd/oathkeeper:$OATHKEEPER_VERSION
+    ports:
+      # This may be useful during development to access the admin API.
+      - 4456:4456
     depends_on:
       - oathkeeper-migrate
       - hydra

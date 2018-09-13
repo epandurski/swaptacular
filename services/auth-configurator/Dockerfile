@@ -26,10 +26,8 @@ COPY --from=2 /usr/bin/oathkeeper /usr/bin/oathkeeper
 
 RUN pip install supervisor-stdout
 
-# The context of docker-compose is `../` which is why we need to cd back into full-stack
 ADD config /config
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# But it allows us to include the scripts directly
 ADD scripts /scripts
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
