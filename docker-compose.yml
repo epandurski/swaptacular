@@ -48,6 +48,17 @@ services:
     restart: on-failure
 
 
+  keto-migrate:
+    image: oryd/keto:$KETO_VERSION
+    environment:
+      - LOG_LEVEL=debug
+    command:
+      migrate sql postgres://keto_service:keto_service@pg/${POSTGRES_DB}?sslmode=disable
+    depends_on:
+      - pg
+    restart: on-failure
+
+
   identity-provider:
     environment:
       - HYDRA_ADMIN_URL=http://hydra:4445
@@ -135,6 +146,21 @@ services:
       - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
     volumes:
       - './services/oathkeeper/rules:/rules'
+
+
+  keto:
+    image: oryd/keto:$KETO_VERSION
+    ports:
+      - "4466:4466"
+    depends_on:
+      - hydra
+      - keto-migrate
+    environment:
+      - LOG_LEVEL=debug
+      - DISABLE_TELEMETRY=1
+      - DATABASE_URL=postgres://keto_service:keto_service@pg/${POSTGRES_DB}?sslmode=disable
+      - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
+      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
 
 
   users:
