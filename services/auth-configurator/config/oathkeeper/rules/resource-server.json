@@ -12,14 +12,25 @@
     },
     "authenticators": [
       {
-        "handler": "noop"
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": ["scope-a", "scope-b"]
+        }
+      },
+      {
+        "handler": "anonymous"
       }
     ],
     "authorizer": {
       "handler": "allow"
     },
     "credentials_issuer": {
-        "handler": "noop"
+        "handler": "headers",
+        "config": {
+            "headers": {
+                "X-User": "{{ print .Subject }}"
+            }
+        }
     }
   }
 ]

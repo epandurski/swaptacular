@@ -73,7 +73,7 @@ services:
     image: oryd/hydra:$HYDRA_VERSION
     ports:
       - 4444:4444
-      - 4445:4445
+      # - 4445:4445
     depends_on:
       - hydra-migrate
     command:
@@ -123,8 +123,8 @@ services:
 
   oathkeeper-api:
     image: oryd/oathkeeper:$OATHKEEPER_VERSION
-    ports:
-      - 4456:4456
+    # ports:
+    #   - 4456:4456
     depends_on:
       - oathkeeper-migrate
     command:
@@ -150,8 +150,8 @@ services:
 
   keto:
     image: oryd/keto:$KETO_VERSION
-    ports:
-      - "4466:4466"
+    # ports:
+    #   - 4466:4466
     depends_on:
       - hydra
       - keto-migrate
@@ -178,6 +178,44 @@ services:
     command: develop
     depends_on:
       - pg
+
+
+  auth-configurator:
+    build:
+      context: ./services/auth-configurator
+      dockerfile: Dockerfile
+      args:
+        - HYDRA_VERSION=$HYDRA_VERSION
+        - KETO_VERSION=$KETO_VERSION
+        - OATHKEEPER_VERSION=$OATHKEEPER_VERSION
+    depends_on:
+      - hydra
+      - keto
+      - oathkeeper-api
+    environment:
+      # All of these URLs MUST NOT end with a trailing slash. This is very important!
+      - HYDRA_URL=http://hydra:4444
+      - HYDRA_ADMIN_URL=http://hydra:4445
+      - KETO_URL=http://keto:4466
+      - RESOURCE_SERVER_URL=http://resource-server:4478
+      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
+      - OATHKEEPER_PROXY_URL=http://oathkeeper-proxy:4455
+
+      # This sets the prefix for all resource, action, and subject names. Be aware that this prefix is automatically
+      # applied to all OAuth2 Clients as well.
+      - "HYDRA_SUBJECT_PREFIX=subjects:hydra:"
+      - "HYDRA_RESOURCE_PREFIX=resources:hydra:"
+      - "HYDRA_ACTION_PREFIX=actions:hydra:"
+      - "OATHKEEPER_RESOURCE_PREFIX=resources:oathkeeper:"
+      - "OATHKEEPER_ACTION_PREFIX=actions:oathkeeper:"
+      - "KETO_RESOURCE_PREFIX=resources:keto:"
+      - "KETO_ACTION_PREFIX=actions:keto:"
+
+      - OATHKEEPER_HYDRA_JWK_SET_ID=jwk:oathkeeper
+      - OATHKEEPER_HYDRA_CLIENT_ID=clients:oathkeeper-client
+      - OATHKEEPER_HYDRA_CLIENT_SECRET=dummy-oathkeeper-secret
+      - KETO_HYDRA_CLIENT_ID=clients:keto-client
+      - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
 
 
 volumes:
