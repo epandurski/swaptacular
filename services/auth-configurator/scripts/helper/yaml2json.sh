@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# This script tries to convert to JSON all files of a directory
-# ./envsubst.sh path/to/config/files/*
+# This script tries to convert all YAML configuration files to JSON
+# configuration files.
 
 set -euo pipefail
 
