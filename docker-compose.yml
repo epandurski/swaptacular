@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - pg-data-volume:/var/lib/postgresql/data
-    ports:
-      - 5433:5432
 
 
   pg-create-users:
@@ -159,23 +157,6 @@ services:
       - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
 
 
-  users:
-    build:
-      context: ./services/users
-      dockerfile: docker-flask/Dockerfile
-    volumes:
-      - './services/users/src:/usr/src/app'
-    ports:
-      - 10001:10001
-    environment:
-      - PORT=10001
-      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
-      - MESSAGE=Hello, Developer
-    command: develop
-    depends_on:
-      - pg
-
-
   auth-configurator:
     build:
       context: ./services/auth-configurator
@@ -212,6 +193,23 @@ services:
       - OATHKEEPER_HYDRA_CLIENT_SECRET=dummy-oathkeeper-secret
       - KETO_HYDRA_CLIENT_ID=clients:keto-client
       - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
+
+
+  users:
+    build:
+      context: ./services/users
+      dockerfile: docker-flask/Dockerfile
+    volumes:
+      - './services/users/src:/usr/src/app'
+    ports:
+      - 10001:10001
+    environment:
+      - PORT=10001
+      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
+      - MESSAGE=Hello, Developer
+    command: develop
+    depends_on:
+      - pg
 
 
 volumes:
