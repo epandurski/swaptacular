@@ -24,7 +24,7 @@ COPY --from=0 /usr/bin/hydra /usr/bin/hydra
 COPY --from=1 /usr/bin/keto /usr/bin/keto
 COPY --from=2 /usr/bin/oathkeeper /usr/bin/oathkeeper
 
-RUN pip install supervisor-stdout PyYAML
+RUN pip install PyYAML
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD scripts /scripts
