@@ -199,9 +199,9 @@ services:
       - "KETO_ACTION_PREFIX=actions:keto:"
 
       - OATHKEEPER_HYDRA_JWK_SET_ID=jwk:oathkeeper
-      - OATHKEEPER_HYDRA_CLIENT_ID=clients:oathkeeper-client
+      - OATHKEEPER_HYDRA_CLIENT_ID=clients:oathkeeper
       - OATHKEEPER_HYDRA_CLIENT_SECRET=dummy-oathkeeper-secret
-      - KETO_HYDRA_CLIENT_ID=clients:keto-client
+      - KETO_HYDRA_CLIENT_ID=clients:keto
       - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
 
 
