@@ -2,7 +2,7 @@
   upstream:
     url: "${RESOURCE_SERVER_URL}/"
   match:
-    url: "${OATHKEEPER_PROXY_URL}/users/<.*>"
+    url: "${BROWSER_API_PROXY_URL}/users/<.*>"
     methods:
       - GET
   authenticators:
