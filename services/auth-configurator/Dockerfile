@@ -30,6 +30,6 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD scripts /scripts
 ADD config /config
 
-RUN /scripts/helper/yaml2json.sh
+RUN /scripts/build/convert2json.sh
 
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

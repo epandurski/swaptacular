@@ -9,7 +9,7 @@ function yaml2json {
     for filename in $1; do
         if [[ -f $filename ]]; then
             echo "Processing $filename"
-            scripts/yaml2json.py < ${filename} > ${filename}.json
+            /scripts/build/yaml2json.py < ${filename} > ${filename}.json
             rm ${filename}
         fi
     done
