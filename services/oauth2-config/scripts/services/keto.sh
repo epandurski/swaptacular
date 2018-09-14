@@ -13,10 +13,8 @@ for filename in $policy_path; do
     id=$(getid $filename)
     (set -x; keto policies --endpoint $url delete $id || true)
 done
-echo "Deleted all policies in $policy_path!"
 
 echo "Importing policies in $policy_path..."
 for filename in $policy_path; do
     (set -x; keto policies --endpoint $url import $filename)
 done
-echo "Imported all policies in $policy_path!"

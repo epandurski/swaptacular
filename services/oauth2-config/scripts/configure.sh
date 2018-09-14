@@ -4,12 +4,10 @@ set -euo pipefail
 
 cd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
-echo "Sourcing helpers..."
 source /scripts/helper/retry.sh
 source /scripts/helper/envsubstfiles.sh
 source /scripts/helper/getid.sh
 
-echo "Substituting environment variables"
 if [ -d "/config/hydra/clients/" ]; then
     envsubstfiles "/config/hydra/clients/*.json"
 fi
@@ -19,8 +17,6 @@ fi
 if [ -d "/config/oathkeeper/rules/" ]; then
     envsubstfiles "/config/oathkeeper/rules/*.json"
 fi
-
-echo "Executing bootstrap scripts..."
 
 hydra_url=${HYDRA_URL:=undefined}
 hydra_admin_url=${HYDRA_ADMIN_URL:=undefined}
