@@ -1,6 +1,7 @@
 # auth-configurator
 
-Loads all configuration files located in [./config](./config).
+Loads `hydra`, `authkeeper`, and `keto` configuration files located in
+[./config](./config).
 
 ## Configuration files
 
