@@ -184,9 +184,9 @@ services:
       - HYDRA_URL=http://hydra:4444
       - HYDRA_ADMIN_URL=http://hydra:4445
       - KETO_URL=http://keto:4466
-      - RESOURCE_SERVER_URL=http://resource-server:4478
       - OATHKEEPER_API_URL=http://oathkeeper-api:4456
-      - OATHKEEPER_PROXY_URL=http://oathkeeper-proxy:4455
+      - OATHKEEPER_PROXY_URL=http://localhost:4455
+      - RESOURCE_SERVER_URL=http://users:10001
 
       # This sets the prefix for all resource, action, and subject names. Be aware that this prefix is automatically
       # applied to all OAuth2 Clients as well.

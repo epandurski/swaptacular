@@ -1,8 +1,8 @@
-- id: "resources:oathkeeper:rules:resource-server-oathkeeper"
+- id: "${OATHKEEPER_RESOURCE_PREFIX}rules:users"
   upstream:
-    url: "http://users:10001"
+    url: "${RESOURCE_SERVER_URL}/"
   match:
-    url: "http://localhost:4455/users/<.*>"
+    url: "${OATHKEEPER_PROXY_URL}/users/<.*>"
     methods:
       - GET
   authenticators:
