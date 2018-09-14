@@ -1,4 +1,4 @@
-# auth-configurator
+# oauth2-config
 
 Loads `hydra`, `authkeeper`, and `keto` configuration files located in
 [./config](./config).

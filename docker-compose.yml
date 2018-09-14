@@ -167,9 +167,9 @@ services:
       - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
 
 
-  auth-configurator:
+  oauth2-config:
     build:
-      context: ./services/auth-configurator
+      context: ./services/oauth2-config
       dockerfile: Dockerfile
       args:
         - HYDRA_VERSION=$HYDRA_VERSION
