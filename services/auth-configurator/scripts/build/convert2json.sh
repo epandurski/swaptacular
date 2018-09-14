@@ -15,9 +15,9 @@ function yaml2json {
     done
 }
 
-yaml2json /config/hydra/clients/*.yaml
-yaml2json /config/hydra/clients/*.yml
-yaml2json /config/oathkeeper/rules/*.yaml
-yaml2json /config/oathkeeper/rules/*.yml
-yaml2json /config/keto/policies/*.yaml
-yaml2json /config/keto/policies/*.yml
+yaml2json "/config/hydra/clients/*.yaml"
+yaml2json "/config/hydra/clients/*.yml"
+yaml2json "/config/oathkeeper/rules/*.yaml"
+yaml2json "/config/oathkeeper/rules/*.yml"
+yaml2json "/config/keto/policies/*.yaml"
+yaml2json "/config/keto/policies/*.yml"
