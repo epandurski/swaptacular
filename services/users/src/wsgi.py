@@ -1,6 +1,7 @@
 import logging
 from flask import Flask
 from flask import request
+from flask import render_template
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -47,6 +48,36 @@ def hello_world():
     logger.warning('A warning message')
     body = app.config['MESSAGE'] + '\n\n' + '\n'.join('{}: {}'.format(*h) for h in request.headers)
     return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+@app.route('/users/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route('/users/login/verification-code')
+def enter_verification_code():
+    return "/login/code"
+
+
+@app.route('/users/recover-password')
+def recover_password():
+    return "/users/recover-password"
+
+
+@app.route('/users/recover-password/email')
+def report_sent_recover_password_email():
+    return "/users/recover-password/email"
+
+
+@app.route('/users/choose-password/<secret>')
+def choose_password(secret):
+    return "/users/choose-password/{}".format(secret)
+
+
+@app.route('/users/choose-password/success')
+def report_choose_password_success():
+    return "/users/choose-password/success"
 
 
 if __name__ == '__main__':
