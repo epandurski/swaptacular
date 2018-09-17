@@ -206,6 +206,13 @@ services:
       - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
 
 
+  redis-users:
+    image: redis
+    ports:
+      # This may be useful during development to access the DB.
+      - 6379:6379
+
+
   users:
     build:
       context: ./services/users

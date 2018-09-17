@@ -1,5 +1,6 @@
 import logging
 from flask import Flask
+from flask import request
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -32,7 +33,11 @@ migrate = Migrate(app, db)
 
 
 class User(db.Model):
-    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.BigInteger, primary_key=True)
+    email = db.Column(db.Text, unique=True, nullable=False)
+    password_salt = db.Column(db.Text, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
+    recovery_code_hash = db.Column(db.Text, nullable=False)
 
 
 @app.route('/users/')
@@ -40,7 +45,8 @@ def hello_world():
     logger.debug('A debug message')
     logger.info('An info message')
     logger.warning('A warning message')
-    return app.config['MESSAGE']
+    body = app.config['MESSAGE'] + '\n\n' + '\n'.join('{}: {}'.format(*h) for h in request.headers)
+    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
 if __name__ == '__main__':
