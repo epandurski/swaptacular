@@ -50,8 +50,24 @@ def hello_world():
     return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
+@app.route('/users/signup')
+def signup():
+    return "/users/signup"
+
+
+@app.route('/users/signup/email')
+def report_sent_signup_email():
+    return "/users/signup/email"
+
+
+@app.route('/users/signup/success/<secret>')
+def report_signup_success(secret):
+    return "/users/signup/success/{}".format(secret)
+
+
 @app.route('/users/login')
 def login():
+    challenge = request.args['login_challenge']
     return render_template('login.html')
 
 
