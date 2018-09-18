@@ -131,7 +131,7 @@ case $1 in
     debug)
         shift;
         export FLASK_ENV=development
-        python -m pudb wsgi.py "$@"
+        python -u wsgi.py "$@"
         ;;
     db)
         shift;

@@ -97,4 +97,6 @@ def report_choose_password_success():
 
 
 if __name__ == '__main__':
+    from pudb import set_trace
+    set_trace()
     app.run(host='0.0.0.0', port=app.config['PORT'], debug=True, use_reloader=False, threaded=False)
