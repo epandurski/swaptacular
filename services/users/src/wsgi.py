@@ -1,10 +1,11 @@
 import logging
 from flask import Flask
-from flask import request
+from flask import request, redirect, url_for, flash, send_from_directory
 from flask import render_template
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from utils import is_invalid_email
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -21,6 +22,10 @@ class Configuration(metaclass=MetaFlaskEnv):
     PORT = 80
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
+    SECRET_KEY = 'dummy-secret'
+    STYLE_URL = ''  # TODO
+    PASSWORD_MIN_LENGTH = 10
+    PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'
 
 
@@ -50,9 +55,30 @@ def hello_world():
     return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
-@app.route('/users/signup')
+@app.route('/users/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
+
+
+@app.route('/users/signup', methods=['GET', 'POST'])
 def signup():
-    return "/users/signup"
+    if request.method == 'POST':
+        is_valid = False
+        password_length = len(request.form['password'])
+        min_length, max_length = app.config['PASSWORD_MIN_LENGTH'], app.config['PASSWORD_MAX_LENGTH']
+        if is_invalid_email(request.form['email']):
+            flash('The email address is invalid.')
+        elif password_length < min_length:
+            flash('The password should have least {} characters.'.format(min_length))
+        elif password_length > max_length:
+            flash('The password should have at most {} characters.'.format(min_length))
+        elif request.form['password'] != request.form['confirm']:
+            flash('Passwords do not match.')
+        else:
+            is_valid = True
+        if is_valid:
+            return 'OK'
+    return render_template('signup.html')
 
 
 @app.route('/users/signup/email')

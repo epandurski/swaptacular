@@ -2,11 +2,20 @@
 <html>
   <head>
     {% block head %}
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
+    <link rel="stylesheet" href="{{ url_for('serve_static', filename='style.css') }}">
     <title>{% block title %}Login{% endblock %}</title>
     {% endblock %}
   </head>
   <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
       {% block footer %}
