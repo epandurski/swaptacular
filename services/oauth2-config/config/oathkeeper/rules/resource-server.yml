@@ -5,6 +5,7 @@
     url: "${BROWSER_API_PROXY_URL}/users/<.*>"
     methods:
       - GET
+      - POST
   authenticators:
     - handler: oauth2_introspection
       config:
