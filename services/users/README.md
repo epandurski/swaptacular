@@ -47,5 +47,5 @@ $ pipenv run pybabel compile -d translations
 ### Create translation for a new language:
 
 ```
-pipenv run pybabel init -i messages.pot -d translations -l de
+$ pipenv run pybabel init -i messages.pot -d translations -l de
 ```
