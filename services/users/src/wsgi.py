@@ -5,7 +5,7 @@ from flask import render_template
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_babel import Babel, gettext
+from flask_babel import Babel, gettext, get_locale
 from utils import is_invalid_email
 
 
@@ -24,7 +24,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
     SECRET_KEY = 'dummy-secret'
-    SUPPORTED_LANGUAGES = {'bg': 'Bulgarian', 'en': 'English'}
+    SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
+    LANGUAGE_COOKE_NAME = 'users_lang'
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
     STYLE_URL = ''  # TODO
@@ -43,17 +44,23 @@ db = CustomAlchemy(app)
 migrate = Migrate(app, db)
 
 
+@app.context_processor
+def inject_get_locale():
+    return dict(get_locale=get_locale)
+
+
 @babel.localeselector
-def get_locale():
+def select_locale():
     # TODO: use the locale from a cookie.
 
     # Try to guess the language from the user accept header the
     # browser transmits.
-    return request.accept_languages.best_match(app.config['SUPPORTED_LANGUAGES'].keys())
+    lang = request.cookies.get(app.config['LANGUAGE_COOKE_NAME'])
+    return lang or request.accept_languages.best_match(app.config['SUPPORTED_LANGUAGES'].keys())
 
 
 @babel.timezoneselector
-def get_timezone():
+def select_timezone():
     return None
 
 
@@ -77,6 +84,13 @@ def hello_world():
 @app.route('/users/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
+
+
+@app.route('/users/language/<lang>')
+def set_language(lang):
+    response = redirect(request.args['to'])
+    response.set_cookie(app.config['LANGUAGE_COOKE_NAME'], lang)
+    return response
 
 
 @app.route('/users/signup', methods=['GET', 'POST'])

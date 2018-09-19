@@ -7,6 +7,17 @@
     {% endblock %}
   </head>
   <body>
+    {% with locale_code = get_locale()|string, languages=config['SUPPORTED_LANGUAGES'] %}
+      {% if languages|length > 1 %}
+        <ul class="languages">
+          {% for code, language in languages.items() %}
+            {% if code != locale_code %}
+              <li><a href="{{url_for('set_language', lang=code)}}?to={{request.url|urlencode}}">{{language}}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="flashes">
