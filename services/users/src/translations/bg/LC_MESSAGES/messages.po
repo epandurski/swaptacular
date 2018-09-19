@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-09-19 11:31+0300\n"
-"PO-Revision-Date: 2018-09-19 11:48+0300\n"
+"POT-Creation-Date: 2018-09-19 12:52+0300\n"
+"PO-Revision-Date: 2018-09-19 13:00+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
 "Language-Team: bg <LL@li.org>\n"
@@ -20,27 +20,52 @@ msgstr ""
 
 #: wsgi.py:75
 msgid "The email address is invalid."
-msgstr ""
+msgstr "Имейл адреса е невалиден."
 
 #: wsgi.py:77
 #, python-format
-msgid "The password should have least %(min_length)s characters."
-msgstr ""
+msgid "The password should have least %(num)s characters."
+msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
 #: wsgi.py:79
 #, python-format
-msgid "The password should have at most %(max_length)s characters."
-msgstr ""
+msgid "The password should have at most %(num)s characters."
+msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
 #: wsgi.py:81
 msgid "Passwords do not match."
-msgstr ""
+msgstr "Паролите не съвпадат."
 
 #: templates/signup.html:4
 msgid "Sign Up"
-msgstr ""
+msgstr "Регистрация"
 
-#: templates/signup.html:7
+#: templates/signup.html:8
 msgid "Email"
-msgstr ""
+msgstr "Имейл адрес"
+
+#: templates/signup.html:13
+msgid "Enter your email"
+msgstr "Въведете своя имейл адрес"
+
+#: templates/signup.html:19
+msgid "Password"
+msgstr "Парола"
+
+#: templates/signup.html:23
+#, python-format
+msgid "%(num)s characters at least"
+msgstr "Поне %(num)s символа"
+
+#: templates/signup.html:29
+msgid "Re-type Password"
+msgstr "Паролата отново"
+
+#: templates/signup.html:33
+msgid "Enter the password again"
+msgstr "Напишете паролата отново"
+
+#: templates/signup.html:39
+msgid "Submit"
+msgstr "Изпрати"
 

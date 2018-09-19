@@ -24,6 +24,9 @@ class Configuration(metaclass=MetaFlaskEnv):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
     SECRET_KEY = 'dummy-secret'
+    SUPPORTED_LANGUAGES = {'bg': 'Bulgarian', 'en': 'English'}
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
     STYLE_URL = ''  # TODO
     PASSWORD_MIN_LENGTH = 10
     PASSWORD_MAX_LENGTH = 64
@@ -38,6 +41,20 @@ app.config.from_object(Configuration)
 babel = Babel(app)
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
+
+
+@babel.localeselector
+def get_locale():
+    # TODO: use the locale from a cookie.
+
+    # Try to guess the language from the user accept header the
+    # browser transmits.
+    return request.accept_languages.best_match(app.config['SUPPORTED_LANGUAGES'].keys())
+
+
+@babel.timezoneselector
+def get_timezone():
+    return None
 
 
 class User(db.Model):
