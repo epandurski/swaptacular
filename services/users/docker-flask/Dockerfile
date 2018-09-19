@@ -22,6 +22,9 @@ COPY docker-flask/logging.conf /logging.conf
 COPY docker-flask/entrypoint.sh /usr/local/bin/
 COPY src ./
 
+# compile .po files
+RUN ! which pybabel || pybabel compile -d translations
+
 ENTRYPOINT ["entrypoint.sh"]
 
 ################################################################################
