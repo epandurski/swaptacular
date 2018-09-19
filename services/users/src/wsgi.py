@@ -5,6 +5,7 @@ from flask import render_template
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_babel import Babel, gettext
 from utils import is_invalid_email
 
 
@@ -34,6 +35,7 @@ app = Flask(__name__)
 app.config.from_object(Configuration)
 
 
+babel = Babel(app)
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -67,13 +69,13 @@ def signup():
         password_length = len(request.form['password'])
         min_length, max_length = app.config['PASSWORD_MIN_LENGTH'], app.config['PASSWORD_MAX_LENGTH']
         if is_invalid_email(request.form['email']):
-            flash('The email address is invalid.')
+            flash(gettext('The email address is invalid.'))
         elif password_length < min_length:
-            flash('The password should have least {} characters.'.format(min_length))
+            flash(gettext('The password should have least %(num)s characters.', num=min_length))
         elif password_length > max_length:
-            flash('The password should have at most {} characters.'.format(min_length))
+            flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif request.form['password'] != request.form['confirm']:
-            flash('Passwords do not match.')
+            flash(gettext('Passwords do not match.'))
         else:
             is_valid = True
         if is_valid:

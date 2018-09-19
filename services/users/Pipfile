@@ -13,6 +13,7 @@ flask-migrate = "*"
 flask-sqlalchemy = "*"
 sqlalchemy = "*"
 "psycopg2" = "*"
+flask-babel = "*"
 
 [requires]
 python_version = "3.5"

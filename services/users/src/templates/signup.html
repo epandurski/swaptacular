@@ -1,42 +1,44 @@
 {% extends "layout.html" %}
 {% block content %}
-  <h1>Sign Up</h1>
-  <p>
-    <form action="" method="POST">
-      <p>
-        <label for="email">Email</label>
-        <input id="email"
-               name="email"
-               type="email"
-               value="{{request.form.get('email', '')}}"
-               placeholder="Enter your email"
-               maxlength="254"
-               required
-               >
-      </p>
-      <p>
-        <label for="password">Password</label>
-        <input id="password"
-               name="password"
-               type="password"
-               placeholder="{{config.PASSWORD_MIN_LENGTH}} characters at least"
-               maxlength="{{config.PASSWORD_MAX_LENGTH}}"
-               required
-               >
-      </p>
-      <p>
-        <label for="confirm">Re-type Password</label>
-        <input id="confirm"
-               name="confirm"
-               type="password"
-               placeholder="Enter the password again"
-               maxlength="{{config.PASSWORD_MAX_LENGTH}}"
-               required
-               >
-      </p>
-      <p>
-        <input type="submit" value="Submit">
-      </p>
-    </form>
-  </p>
+  <div id="signup-dialog">
+    <h1>{% trans %}Sign Up{% endtrans %}</h1>
+    <div id="signup-form">
+      <form action="" method="POST">
+        <p>
+          <label for="email">{% trans %}Email{% endtrans %}</label>
+          <input id="email"
+                 name="email"
+                 type="email"
+                 value="{{request.form.get('email', '')}}"
+                 placeholder="{% trans %}Enter your email{% endtrans %}"
+                 maxlength="254"
+                 required
+                 >
+        </p>
+        <p>
+          <label for="password">{% trans %}Password{% endtrans %}</label>
+          <input id="password"
+                 name="password"
+                 type="password"
+                 placeholder="{% trans num=config.PASSWORD_MIN_LENGTH %}{{num}} characters at least{% endtrans %}"
+                 maxlength="{{config.PASSWORD_MAX_LENGTH}}"
+                 required
+                 >
+        </p>
+        <p>
+          <label for="confirm">{% trans %}Re-type Password{% endtrans %}</label>
+          <input id="confirm"
+                 name="confirm"
+                 type="password"
+                 placeholder="{% trans %}Enter the password again{% endtrans %}"
+                 maxlength="{{config.PASSWORD_MAX_LENGTH}}"
+                 required
+                 >
+        </p>
+        <p>
+          <input type="submit" value="{% trans %}Submit{% endtrans %}">
+        </p>
+      </form>
+    </div>
+  </div>
 {% endblock %}
