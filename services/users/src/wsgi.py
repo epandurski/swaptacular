@@ -28,7 +28,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     LANGUAGE_COOKE_NAME = 'users_lang'
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
-    STYLE_URL = ''  # TODO
+    HTTP_HEAD_TITLE = 'Swaptacular'
+    STYLE_URL = ''
     PASSWORD_MIN_LENGTH = 10
     PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'
@@ -51,10 +52,8 @@ def inject_get_locale():
 
 @babel.localeselector
 def select_locale():
-    # TODO: use the locale from a cookie.
-
-    # Try to guess the language from the user accept header the
-    # browser transmits.
+    # Try to guess the language from the language cookie and the
+    # accept header the browser transmits.
     lang = request.cookies.get(app.config['LANGUAGE_COOKE_NAME'])
     return lang or request.accept_languages.best_match(app.config['SUPPORTED_LANGUAGES'].keys())
 
@@ -110,13 +109,14 @@ def signup():
         else:
             is_valid = True
         if is_valid:
-            return 'OK'
+            return redirect(url_for('report_sent_signup_email', email=request.form['email']))
     return render_template('signup.html')
 
 
 @app.route('/users/signup/email')
 def report_sent_signup_email():
-    return "/users/signup/email"
+    email = request.args['email']
+    return render_template('report_sent_signup_email.html', email=email)
 
 
 @app.route('/users/signup/success/<secret>')

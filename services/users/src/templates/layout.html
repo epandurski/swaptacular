@@ -2,8 +2,8 @@
 <html>
   <head>
     {% block head %}
-    <link rel="stylesheet" href="{{ url_for('serve_static', filename='style.css') }}">
-    <title>{% block title %}Login{% endblock %}</title>
+    <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css')}}">
+    <title>{% block title %}{{config['HTTP_HEAD_TITLE']}}{% endblock %}</title>
     {% endblock %}
   </head>
   <body>
@@ -12,7 +12,7 @@
         <ul class="languages">
           {% for code, language in languages.items() %}
             {% if code != locale_code %}
-              <li><a href="{{url_for('set_language', lang=code)}}?to={{request.url|urlencode}}">{{language}}</a></li>
+              <li><a href="{{url_for('set_language', lang=code, to=request.url)}}">{{language}}</a></li>
             {% endif %}
           {% endfor %}
         </ul>
@@ -22,7 +22,7 @@
       {% if messages %}
         <ul class="flashes">
           {% for message in messages %}
-            <li>{{ message }}</li>
+            <li>{{message}}</li>
           {% endfor %}
         </ul>
       {% endif %}
@@ -30,7 +30,7 @@
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
       {% block footer %}
-      &copy; Copyright 2018 by <a href="http://domain.invalid/">you</a>.
+      &copy; Copyright 2018 by <a href="https://github.com/epandurski">Evgeni Pandurski</a>.
       {% endblock %}
     </div>
   </body>
