@@ -131,7 +131,7 @@ case $1 in
     debug)
         shift;
         export FLASK_ENV=development
-        python -u wsgi.py "$@"
+        python -u run.py "$@"
         ;;
     db)
         shift;
@@ -145,7 +145,7 @@ case $1 in
         ([[ $DO_NOT_UPGRADE_DB ]] || perform_db_upgrade) && gunicorn \
                 --config "$gunicorn_conf" \
                 --log-config "$logging_conf" \
-                -b :$PORT wsgi:app
+                -b :$PORT $FLASK_APP:app
         ;;
     *)
         "$@"

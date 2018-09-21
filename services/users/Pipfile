@@ -9,11 +9,10 @@ pudb = "*"
 [packages]
 flask = "*"
 flask-env = "*"
-flask-migrate = "*"
-flask-sqlalchemy = "*"
-sqlalchemy = "*"
-"psycopg2" = "*"
 flask-babel = "*"
+flask-migrate = "*"
+"psycopg2" = "*"
+users = {path = ".", editable = true}
 
 [requires]
 python_version = "3.5"

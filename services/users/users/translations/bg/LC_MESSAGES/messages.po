@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-09-19 12:52+0300\n"
+"POT-Creation-Date: 2018-09-21 11:09+0300\n"
 "PO-Revision-Date: 2018-09-19 13:00+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
@@ -18,23 +18,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: wsgi.py:75
+#: __init__.py:102
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: wsgi.py:77
+#: __init__.py:104
 #, python-format
 msgid "The password should have least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: wsgi.py:79
+#: __init__.py:106
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: wsgi.py:81
+#: __init__.py:108
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
+
+#: templates/report_sent_signup_email.html:4
+#, python-format
+msgid "A confirmation email has been sent to <b>%(email)s</b>."
+msgstr ""
+
+#: templates/report_sent_signup_email.html:5
+msgid ""
+"Check your email messages, and click on the link provided there. Then "
+"come back here and click \"Continue\"."
+msgstr ""
 
 #: templates/signup.html:4
 msgid "Sign Up"

@@ -6,7 +6,7 @@ from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, gettext, get_locale
-from utils import is_invalid_email
+from users.utils import is_invalid_email
 
 
 logging.basicConfig(level=logging.DEBUG)

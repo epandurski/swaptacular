@@ -1,5 +1,6 @@
 FROM python:3.5.3-alpine
 WORKDIR /usr/src/app
+ARG FLASK_APP
 
 RUN apk add --no-cache \
     gcc \
@@ -13,17 +14,17 @@ RUN apk add --no-cache \
 RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
 
 # install required packages
-COPY Pipfile* ./
+COPY ./ ./
 RUN pipenv install --system
+ENV FLASK_APP=$FLASK_APP
 
 # copy files
 COPY docker-flask/gunicorn.conf /gunicorn.conf
 COPY docker-flask/logging.conf /logging.conf
 COPY docker-flask/entrypoint.sh /usr/local/bin/
-COPY src ./
 
 # compile .po files
-RUN ! which pybabel || pybabel compile -d translations
+RUN ! which pybabel || pybabel compile -d $FLASK_APP/translations
 
 ENTRYPOINT ["entrypoint.sh"]
 

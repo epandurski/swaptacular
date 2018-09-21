@@ -20,6 +20,8 @@ $ docker-compose run -p 10001:10001 users debug
 
 ## Hot to handle I18N messages
 
+Change the current directory to `users/users/`, then:
+
 ### Extract all messages to `messages.pot`:
 
 ```

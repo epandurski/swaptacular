@@ -217,8 +217,10 @@ services:
     build:
       context: ./services/users
       dockerfile: docker-flask/Dockerfile
+      args:
+        - FLASK_APP=users
     volumes:
-      - './services/users/src:/usr/src/app'
+      - './services/users:/usr/src/app'
     ports:
       - 10001:10001
     environment:
