@@ -4,6 +4,11 @@ README.md
 
 # Distribution / packaging
 *.egg-info/
+build/
+dist/
+sdist/
+wheels/
+MANIFEST
 
 # Byte-compiled files
 **/__pycache__/

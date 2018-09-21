@@ -20,7 +20,7 @@ class CustomAlchemy(SQLAlchemy):
 
 
 class Configuration(metaclass=MetaFlaskEnv):
-    PORT = 80
+    PORT = 8000
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
     SECRET_KEY = 'dummy-secret'
