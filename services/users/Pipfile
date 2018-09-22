@@ -12,6 +12,7 @@ flask-babel = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
 users = {path = ".", editable = true}
+flask-redis = "*"
 
 [requires]
 python_version = "3.5"

@@ -4,6 +4,7 @@ from flask import request, redirect, url_for, flash, send_from_directory
 from flask import render_template
 from flask_env import MetaFlaskEnv
 from flask_sqlalchemy import SQLAlchemy
+from flask_redis import FlaskRedis
 from flask_migrate import Migrate
 from flask_babel import Babel, gettext, get_locale
 from users.utils import is_invalid_email
@@ -23,6 +24,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     PORT = 8000
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = ''
+    REDIS_URL = 'redis://localhost:6379/0'
     SECRET_KEY = 'dummy-secret'
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
     LANGUAGE_COOKE_NAME = 'users_lang'
@@ -43,6 +45,7 @@ app.config.from_object(Configuration)
 babel = Babel(app)
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
+redis_users = FlaskRedis(app)
 
 
 @app.context_processor
@@ -109,6 +112,7 @@ def signup():
         else:
             is_valid = True
         if is_valid:
+            redis_users.set('message', 'OK')
             return redirect(url_for('report_sent_signup_email', email=request.form['email']))
     return render_template('signup.html')
 
