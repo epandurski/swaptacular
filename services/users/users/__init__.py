@@ -1,7 +1,7 @@
 import logging
+import redis
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_redis import FlaskRedis
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
 from users.config import Configuration
@@ -47,7 +47,7 @@ db = CustomAlchemy(app)
 migrate = Migrate(app, db)
 
 
-redis_users = FlaskRedis(app)
+redis_users = redis.StrictRedis.from_url(app.config['REDIS_URL'], socket_timeout=5)
 
 
 import users.models  # noqa: F401,E402

@@ -7,12 +7,12 @@ name = "pypi"
 pudb = "*"
 
 [packages]
+users = {path = ".", editable = true}
 flask-env = "*"
 flask-babel = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
-users = {path = ".", editable = true}
-flask-redis = "*"
+redis = "*"
 
 [requires]
 python_version = "3.5"
