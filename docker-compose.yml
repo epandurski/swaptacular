@@ -213,6 +213,14 @@ services:
       - 6379:6379
 
 
+  mail:
+    image: mailhog/mailhog
+    ports:
+      # This may be useful during development to send and read emails.
+      - 1025:1025
+      - 8025:8025
+
+
   users:
     build:
       context: ./services/users
@@ -232,6 +240,7 @@ services:
     depends_on:
       - pg
       - redis-users
+      - mail
 
 
 volumes:
