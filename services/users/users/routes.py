@@ -31,19 +31,28 @@ def signup():
     if request.method == 'POST':
         is_valid = False
         email = request.form['email']
-        password_length = len(request.form['password'])
+        password = request.form['password']
         min_length, max_length = app.config['PASSWORD_MIN_LENGTH'], app.config['PASSWORD_MAX_LENGTH']
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
-        elif password_length < min_length:
+        elif len(password) < min_length:
             flash(gettext('The password should have least %(num)s characters.', num=min_length))
-        elif password_length > max_length:
+        elif len(password) > max_length:
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif request.form['password'] != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
         else:
             is_valid = True
         if is_valid:
+            key = 'signup:123'
+            with redis_users.pipeline() as p:
+                p.hmset(key, {
+                    'email': email,
+                    'salt': '123',
+                    'hash': 'abc',
+                })
+                p.expire(key, 60)
+                p.execute()
             redis_users.set('message', 'OK')
             msg = Message(
                 subject="Тема на български",
