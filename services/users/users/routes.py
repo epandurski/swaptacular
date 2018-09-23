@@ -1,6 +1,7 @@
 from flask import request, redirect, url_for, flash, send_from_directory, render_template
 from flask_babel import gettext
-from users import app, logger, redis_users
+from flask_mail import Message
+from users import app, logger, redis_users, mail
 from users.utils import is_invalid_email
 
 
@@ -29,9 +30,10 @@ def set_language(lang):
 def signup():
     if request.method == 'POST':
         is_valid = False
+        email = request.form['email']
         password_length = len(request.form['password'])
         min_length, max_length = app.config['PASSWORD_MIN_LENGTH'], app.config['PASSWORD_MAX_LENGTH']
-        if is_invalid_email(request.form['email']):
+        if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif password_length < min_length:
             flash(gettext('The password should have least %(num)s characters.', num=min_length))
@@ -43,6 +45,8 @@ def signup():
             is_valid = True
         if is_valid:
             redis_users.set('message', 'OK')
+            msg = Message("Тема на български", recipients=[email], body='Тяло на български')
+            mail.send(msg)
             return redirect(url_for('report_sent_signup_email', email=request.form['email']))
     return render_template('signup.html')
 

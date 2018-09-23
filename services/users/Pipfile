@@ -13,6 +13,7 @@ flask-babel = "*"
 flask-migrate = "*"
 "psycopg2" = "*"
 redis = "*"
+flask-mail = "*"
 
 [requires]
 python_version = "3.5"

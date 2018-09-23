@@ -4,6 +4,7 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
+from flask_mail import Mail
 from users.config import Configuration
 
 
@@ -45,6 +46,9 @@ class CustomAlchemy(SQLAlchemy):
 
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
+
+
+mail = Mail(app)
 
 
 redis_users = redis.StrictRedis.from_url(app.config['REDIS_URL'], socket_timeout=5)

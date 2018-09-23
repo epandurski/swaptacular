@@ -235,6 +235,9 @@ services:
       - PORT=10001
       - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
       - REDIS_URL=redis://redis-users:6379/0
+      - MAIL_SERVER=mail
+      - MAIL_PORT=1025
+      - MAIL_DEFAULT_SENDER=no-reply@swaptacular.com
       - MESSAGE=Hello, Developer
     command: develop
     depends_on:
