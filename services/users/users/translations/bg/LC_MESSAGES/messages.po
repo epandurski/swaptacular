@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-09-21 11:09+0300\n"
+"POT-Creation-Date: 2018-09-23 12:39+0300\n"
 "PO-Revision-Date: 2018-09-19 13:00+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
@@ -18,21 +18,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: __init__.py:102
+#: routes.py:37
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: __init__.py:104
+#: routes.py:39
 #, python-format
 msgid "The password should have least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: __init__.py:106
+#: routes.py:41
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: __init__.py:108
+#: routes.py:43
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
@@ -47,7 +47,7 @@ msgid ""
 "come back here and click \"Continue\"."
 msgstr ""
 
-#: templates/signup.html:4
+#: templates/signup.html:4 templates/signup_email.txt:1
 msgid "Sign Up"
 msgstr "Регистрация"
 

@@ -45,7 +45,11 @@ def signup():
             is_valid = True
         if is_valid:
             redis_users.set('message', 'OK')
-            msg = Message("Тема на български", recipients=[email], body='Тяло на български')
+            msg = Message(
+                subject="Тема на български",
+                recipients=[email],
+                body=render_template('signup_email.txt'),
+            )
             mail.send(msg)
             return redirect(url_for('report_sent_signup_email', email=request.form['email']))
     return render_template('signup.html')
