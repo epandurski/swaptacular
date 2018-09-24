@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-09-24 14:48+0300\n"
-"PO-Revision-Date: 2018-09-24 14:52+0300\n"
+"POT-Creation-Date: 2018-09-24 17:50+0300\n"
+"PO-Revision-Date: 2018-09-24 17:52+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
 "Language-Team: bg <LL@li.org>\n"
@@ -22,27 +22,32 @@ msgstr ""
 msgid "You did not solve the \"reCAPTCHA\" challenge."
 msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 
-#: routes.py:49
+#: routes.py:51
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: routes.py:51
+#: routes.py:53
 msgid "Incorrect captcha solution."
 msgstr "Неправилно решение на captcha-та"
 
-#: routes.py:53
+#: routes.py:55
 #, python-format
 msgid "The password should have least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: routes.py:55
+#: routes.py:57
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: routes.py:57
+#: routes.py:59
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
+
+#: routes.py:86
+#, python-format
+msgid "%(site)s: Please confirm your registration"
+msgstr "%(site)s: Моля потвърдете вашата регистрация"
 
 #: templates/report_sent_signup_email.html:4
 #, python-format
@@ -55,7 +60,7 @@ msgid ""
 "come back here and click \"Continue\"."
 msgstr ""
 
-#: templates/signup.html:4 templates/signup_email.txt:1
+#: templates/signup.html:4
 msgid "Sign Up"
 msgstr "Регистрация"
 
@@ -87,4 +92,26 @@ msgstr "Напишете паролата отново"
 #: templates/signup.html:44
 msgid "Submit"
 msgstr "Изпрати"
+
+#: templates/signup_email.txt:1
+#, python-format
+msgid ""
+"Please confirm your registration by clicking on the following link:\n"
+"\n"
+"%(register_link)s\n"
+"\n"
+"This link will expire in %(num)s hours.\n"
+"\n"
+"If you received this email by mistake, simply delete it. You won't be\n"
+"registered if you don't click the confirmation link above.\n"
+msgstr ""
+"Моля потвърдете вашата регистрация, като кикнете върху връзката по-долу:\n"
+"\n"
+"%(register_link)s\n"
+"\n"
+"Връзката ще бъде се деактивира след %(num)s часа.\n"
+"\n"
+"Ако смятате, че сте получили това съобщени поради грешка, просто го "
+"изтрийте.\n"
+"Няма да бъдете регистрирани ако не кликнете върху връзката по-горе.\n"
 

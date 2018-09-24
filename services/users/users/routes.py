@@ -83,7 +83,7 @@ def signup():
                     p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
                     p.execute()
                 msg = Message(
-                    subject=gettext('Email address verification'),
+                    subject=gettext('%(site)s: Please confirm your registration', site=app.config['SITE_TITLE']),
                     recipients=[email],
                     body=render_template('signup_email.txt', email=email, register_link=register_link),
                 )
@@ -99,9 +99,9 @@ def report_sent_signup_email():
     return render_template('report_sent_signup_email.html', email=email)
 
 
-@app.route('/users/signup/success/<secret>')
+@app.route('/users/register/<secret>')
 def report_signup_success(secret):
-    return "/users/signup/success/{}".format(secret)
+    return "/users/register/{}".format(secret)
 
 
 @app.route('/users/login')
