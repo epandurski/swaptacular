@@ -51,7 +51,12 @@ migrate = Migrate(app, db)
 mail = Mail(app)
 
 
-redis_users = redis.StrictRedis.from_url(app.config['REDIS_URL'], socket_timeout=5)
+redis_users = redis.StrictRedis.from_url(
+    app.config['REDIS_URL'],
+    socket_timeout=5,
+    charset="utf-8",
+    decode_responses=True,
+)
 
 
 import users.models  # noqa: F401,E402

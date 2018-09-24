@@ -2,7 +2,8 @@ from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template
 from flask_babel import gettext
 from flask_mail import Message
-from users import app, logger, redis_users, mail, captcha
+from sqlalchemy.exc import IntegrityError
+from users import app, logger, redis_users, mail, captcha, db
 from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
 from users.models import User
 
@@ -63,10 +64,11 @@ def signup():
         # Send an email address verification message.
         if is_valid:
             if User.query.filter_by(email=email).one_or_none():
+                site = app.config['SITE_TITLE']
                 msg = Message(
-                    subject="Тема на български",
+                    subject=gettext('%(site)s: Duplicate registration', site=site),
                     recipients=[email],
-                    body=render_template('signup_email_duplicate.txt'),
+                    body=render_template('signup_email_duplicate.txt', site=site, email=email),
                 )
             else:
                 secret = generate_random_secret()
@@ -101,7 +103,25 @@ def report_sent_signup_email():
 
 @app.route('/users/register/<secret>')
 def report_signup_success(secret):
-    return "/users/register/{}".format(secret)
+    key = 'signup:' + secret
+    email, salt, password_hash = redis_users.hmget(key, ['email', 'salt', 'hash'])
+    if email:
+        redis_users.delete(key)
+        recovery_code = generate_random_secret()
+        user = User(
+            email=email,
+            salt=salt,
+            password_hash=password_hash,
+            recovery_code_hash=calc_crypt_hash(salt, recovery_code),
+        )
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            pass
+        else:
+            return recovery_code
+    return render_template('report_signup_expired.html')
 
 
 @app.route('/users/login')
