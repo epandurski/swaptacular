@@ -25,12 +25,6 @@ Change the current directory to `users/users/`, then:
 ### Extract all messages to `messages.pot`:
 
 ```
-$ pipenv run pybabel extract -F babel.cfg -o messages.pot .
-```
-
-or
-
-```
 $ pipenv run pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
 ```
 
