@@ -34,6 +34,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     LANGUAGE_COOKE_NAME = 'users_lang'
     HTTP_HEAD_TITLE = 'Swaptacular'
     STYLE_URL = ''
+    PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = 10
     PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'

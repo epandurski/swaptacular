@@ -2,7 +2,7 @@ from flask import request, redirect, url_for, flash, send_from_directory, render
 from flask_babel import gettext
 from flask_mail import Message
 from users import app, logger, redis_users, mail, captcha
-from users.utils import is_invalid_email
+from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
 
 
 @app.route('/users/')
@@ -59,18 +59,21 @@ def signup():
             is_valid = True
 
         if is_valid:
-            key = 'signup:123'
+            secret = generate_random_secret()
+            password_salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
+            password_hash = calc_crypt_hash(password_salt, password)
+            key = 'signup:' + secret
             with redis_users.pipeline() as p:
                 p.hmset(key, {
                     'email': email,
-                    'salt': '123',
-                    'hash': 'abc',
+                    'salt': password_salt,
+                    'hash': password_hash,
                 })
                 p.expire(key, 60)
                 p.execute()
             redis_users.set('message', 'OK')
             msg = Message(
-                subject="Тема на български",
+                subject="Тема на български " + key,
                 recipients=[email],
                 body=render_template('signup_email.txt'),
             )
