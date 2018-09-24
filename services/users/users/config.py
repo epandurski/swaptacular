@@ -4,6 +4,8 @@ from flask_env import MetaFlaskEnv
 class Configuration(metaclass=MetaFlaskEnv):
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
+
+    SITE_TITLE = 'Swaptacular'
     SHOW_CAPTCHA_ON_SIGNUP = False
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
     SIGNUP_REQUEST_EXPIRATION_SECONDS = 24 * 60 * 60
@@ -33,7 +35,6 @@ class Configuration(metaclass=MetaFlaskEnv):
 
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
     LANGUAGE_COOKE_NAME = 'users_lang'
-    HTTP_HEAD_TITLE = 'Swaptacular'
     STYLE_URL = ''
     PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = 10

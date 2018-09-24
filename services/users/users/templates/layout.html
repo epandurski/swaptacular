@@ -3,7 +3,7 @@
   <head>
     {% block head %}
     <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css')}}">
-    <title>{% block title %}{{config['HTTP_HEAD_TITLE']}}{% endblock %}</title>
+    <title>{% block title %}{{config['SITE_TITLE']}}{% endblock %}</title>
     {% endblock %}
   </head>
   <body>

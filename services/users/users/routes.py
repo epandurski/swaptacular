@@ -1,8 +1,10 @@
+from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template
 from flask_babel import gettext
 from flask_mail import Message
 from users import app, logger, redis_users, mail, captcha
 from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
+from users.models import User
 
 
 @app.route('/users/')
@@ -58,24 +60,33 @@ def signup():
         else:
             is_valid = True
 
+        # Send an email address verification message.
         if is_valid:
-            secret = generate_random_secret()
-            password_salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
-            password_hash = calc_crypt_hash(password_salt, password)
-            key = 'signup:' + secret
-            with redis_users.pipeline() as p:
-                p.hmset(key, {
-                    'email': email,
-                    'salt': password_salt,
-                    'hash': password_hash,
-                })
-                p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
-                p.execute()
-            msg = Message(
-                subject="Тема на български " + key,
-                recipients=[email],
-                body=render_template('signup_email.txt'),
-            )
+            if User.query.filter_by(email=email).one_or_none():
+                msg = Message(
+                    subject="Тема на български",
+                    recipients=[email],
+                    body=render_template('signup_email_duplicate.txt'),
+                )
+            else:
+                secret = generate_random_secret()
+                password_salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
+                password_hash = calc_crypt_hash(password_salt, password)
+                register_link = urljoin(request.host_url, url_for('report_signup_success', secret=secret))
+                key = 'signup:' + secret
+                with redis_users.pipeline() as p:
+                    p.hmset(key, {
+                        'email': email,
+                        'salt': password_salt,
+                        'hash': password_hash,
+                    })
+                    p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
+                    p.execute()
+                msg = Message(
+                    subject=gettext('Email address verification'),
+                    recipients=[email],
+                    body=render_template('signup_email.txt', email=email, register_link=register_link),
+                )
             mail.send(msg)
             return redirect(url_for('report_sent_signup_email', email=request.form['email']))
 
