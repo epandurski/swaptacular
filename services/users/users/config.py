@@ -4,7 +4,7 @@ from flask_env import MetaFlaskEnv
 class Configuration(metaclass=MetaFlaskEnv):
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
-    SHOW_CAPTCHA_ON_SIGNUP = True
+    SHOW_CAPTCHA_ON_SIGNUP = False
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
     SIGNUP_REQUEST_EXPIRATION_SECONDS = 24 * 60 * 60
 

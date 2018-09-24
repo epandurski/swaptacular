@@ -71,7 +71,6 @@ def signup():
                 })
                 p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
                 p.execute()
-            redis_users.set('message', 'OK')
             msg = Message(
                 subject="Тема на български " + key,
                 recipients=[email],
