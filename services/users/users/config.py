@@ -6,6 +6,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     SECRET_KEY = 'dummy-secret'
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
+    SIGNUP_REQUEST_EXPIRATION_SECONDS = 24 * 60 * 60
 
     REDIS_URL = 'redis://localhost:6379/0'
 

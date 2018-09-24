@@ -69,7 +69,7 @@ def signup():
                     'salt': password_salt,
                     'hash': password_hash,
                 })
-                p.expire(key, 60)
+                p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
                 p.execute()
             redis_users.set('message', 'OK')
             msg = Message(
