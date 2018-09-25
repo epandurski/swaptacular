@@ -7,10 +7,10 @@ from users.utils import is_invalid_email, generate_password_salt, calc_crypt_has
 from users.models import User
 
 
-def _verify_captcha(captcha_is_enabled):
-    """Verify captcha if necessary."""
+def _verify_captcha(captcha_is_required):
+    """Verify captcha if required."""
 
-    if captcha_is_enabled:
+    if captcha_is_required:
         captcha_response = request.form.get(app.config['CAPTCHA_RESPONSE_FIELD_NAME'], '')
         captcha_solution = captcha.verify(captcha_response, request.remote_addr)
         captcha_passed = captcha_solution.is_valid
@@ -23,33 +23,34 @@ def _verify_captcha(captcha_is_enabled):
     return captcha_passed, captcha_error_message
 
 
-def _verify_recovery_code(key, email, recovery_code):
+def _verify_recovery_code(signup_key, email, recovery_code):
+    """Verify if given recovery code is correct for given email."""
+
     user = User.query.filter_by(email=email).one_or_none()
     if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
         return True
-    num_failures = int(redis_users.hincrby(key, 'fails'))
+    num_failures = int(redis_users.hincrby(signup_key, 'fails'))
     if num_failures >= app.config['RECOVERY_CODE_MAX_ATTEMPTS']:
-        redis_users.delete(key)
+        redis_users.delete(signup_key)
         abort(403)
     return False
 
 
 def _create_choose_password_link(email, computer_code, new_user):
+    """Return a temporary link for email verification."""
+
     secret = generate_random_secret()
-    key = 'signup:' + secret
+    signup_key = 'signup:' + secret
     with redis_users.pipeline() as p:
-        p.hmset(key, {
+        p.hmset(signup_key, {
             'email': email,
             'cookie': computer_code,
         })
         if new_user:
-            p.hset(key, 'new', '1')
-        p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
+            p.hset(signup_key, 'new', '1')
+        p.expire(signup_key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
         p.execute()
     return urljoin(request.host_url, url_for('choose_password', secret=secret))
-
-
-_site = app.config['SITE_TITLE']
 
 
 @app.route('/users/')
@@ -85,24 +86,24 @@ def signup():
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            # Send an email address verification message and set a "computer code" cookie.
-            computer_code = generate_random_secret()
+            computer_code = generate_random_secret()  # to be sent to the user as a cookie
+            site = app.config['SITE_TITLE']
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
                     msg = Message(
-                        subject=gettext('%(site)s: Duplicate registration', site=_site),
+                        subject=gettext('%(site)s: Duplicate registration', site=site),
                         recipients=[email],
                         body=render_template(
                             'duplicate_registration.txt',
                             email=email,
-                            site=_site,
+                            site=site,
                         ),
                     )
                 else:
                     account_recovery_link = _create_choose_password_link(email, computer_code, new_user=False)
                     msg = Message(
-                        subject=gettext('%(site)s: Please confirm your email address', site=_site),
+                        subject=gettext('%(site)s: Please confirm your email address', site=site),
                         recipients=[email],
                         body=render_template(
                             'confirm_account_recovery.txt',
@@ -114,7 +115,7 @@ def signup():
             elif is_new_user:
                 register_link = _create_choose_password_link(email, computer_code, new_user=True)
                 msg = Message(
-                    subject=gettext('%(site)s: Please confirm your registration', site=_site),
+                    subject=gettext('%(site)s: Please confirm your registration', site=site),
                     recipients=[email],
                     body=render_template(
                         'confirm_registration.txt',
@@ -138,8 +139,8 @@ def report_sent_signup_email():
 
 @app.route('/users/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
-    key = 'signup:' + secret
-    email, cookie, is_new_user = redis_users.hmget(key, ['email', 'cookie', 'new'])
+    signup_key = 'signup:' + secret
+    email, cookie, is_new_user = redis_users.hmget(signup_key, ['email', 'cookie', 'new'])
     if email is None:
         abort(404)  # invalid registration link
     require_recovery_code = not is_new_user and app.config['USE_RECOVERY_CODE']
@@ -155,10 +156,10 @@ def choose_password(secret):
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
-        elif require_recovery_code and not _verify_recovery_code(key, email, recovery_code):
+        elif require_recovery_code and not _verify_recovery_code(signup_key, email, recovery_code):
             flash(gettext('Incorrect recovery code.'))
         else:
-            redis_users.delete(key)
+            redis_users.delete(signup_key)
             if is_new_user:
                 salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
                 recovery_code = generate_random_secret()
@@ -175,7 +176,7 @@ def choose_password(secret):
                 user.password_hash = calc_crypt_hash(user.salt, password)
                 response = 'ok'
             db.session.commit()
-            redis_users.rpush('cc:' + str(user.user_id), cookie)
+            redis_users.zadd('cc:' + str(user.user_id), 1, cookie)  # TODO: use a function
             return response
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
