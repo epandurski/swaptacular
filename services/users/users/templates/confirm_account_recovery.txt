@@ -1,0 +1,9 @@
+{% trans site=config.SITE_TITLE, num=config.SIGNUP_REQUEST_EXPIRATION_SECONDS // 3600 -%}
+Please confirm your email address by clicking on the following link:
+
+{{account_recovery_link}}
+
+This link will expire in {{num}} hours.
+
+If you received this email by mistake, simply delete it.
+{% endtrans %}
