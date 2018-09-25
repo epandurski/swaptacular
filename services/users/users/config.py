@@ -35,6 +35,7 @@ class Configuration(metaclass=MetaFlaskEnv):
 
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
     LANGUAGE_COOKE_NAME = 'users_lang'
+    COMPUTER_CODE_COOKE_NAME = 'users_cc'
     STYLE_URL = ''
     PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = 10

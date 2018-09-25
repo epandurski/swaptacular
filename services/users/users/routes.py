@@ -1,5 +1,5 @@
 from urllib.parse import urljoin
-from flask import request, redirect, url_for, flash, send_from_directory, render_template
+from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
 from flask_mail import Message
 from sqlalchemy.exc import IntegrityError
@@ -32,7 +32,7 @@ def set_language(lang):
 @app.route('/users/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        # Verify captcha.
+        # Verify captcha if necessary.
         if app.config['SHOW_CAPTCHA_ON_SIGNUP']:
             captcha_response = request.form.get(app.config['CAPTCHA_RESPONSE_FIELD_NAME'], '')
             captcha_solution = captcha.verify(captcha_response, request.remote_addr)
@@ -45,52 +45,44 @@ def signup():
         # Validate the submitted form.
         is_valid = False
         email = request.form['email']
-        password = request.form['password']
-        min_length = app.config['PASSWORD_MIN_LENGTH']
-        max_length = app.config['PASSWORD_MAX_LENGTH']
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif not captcha_passed:
             flash(captcha_error_message or gettext('Incorrect captcha solution.'))
-        elif len(password) < min_length:
-            flash(gettext('The password should have least %(num)s characters.', num=min_length))
-        elif len(password) > max_length:
-            flash(gettext('The password should have at most %(num)s characters.', num=max_length))
-        elif password != request.form['confirm']:
-            flash(gettext('Passwords do not match.'))
         else:
             is_valid = True
 
         # Send an email address verification message.
         if is_valid:
+            site = app.config['SITE_TITLE']
+            computer_code = generate_random_secret()
             if User.query.filter_by(email=email).one_or_none():
-                site = app.config['SITE_TITLE']
                 msg = Message(
                     subject=gettext('%(site)s: Duplicate registration', site=site),
                     recipients=[email],
-                    body=render_template('signup_email_duplicate.txt', site=site, email=email),
+                    body=render_template('signup_email_duplicate.txt', email=email, site=site),
                 )
             else:
                 secret = generate_random_secret()
-                password_salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
-                password_hash = calc_crypt_hash(password_salt, password)
-                register_link = urljoin(request.host_url, url_for('report_signup_success', secret=secret))
+                register_link = urljoin(request.host_url, url_for('choose_password', secret=secret))
                 key = 'signup:' + secret
                 with redis_users.pipeline() as p:
                     p.hmset(key, {
                         'email': email,
-                        'salt': password_salt,
-                        'hash': password_hash,
+                        'cookie': computer_code,
+                        'new': '1',
                     })
                     p.expire(key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
                     p.execute()
                 msg = Message(
-                    subject=gettext('%(site)s: Please confirm your registration', site=app.config['SITE_TITLE']),
+                    subject=gettext('%(site)s: Please confirm your registration', site=site),
                     recipients=[email],
                     body=render_template('signup_email.txt', email=email, register_link=register_link),
                 )
             mail.send(msg)
-            return redirect(url_for('report_sent_signup_email', email=request.form['email']))
+            response = redirect(url_for('report_sent_signup_email', email=email))
+            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
+            return response
 
     return render_template('signup.html', display_captcha=captcha.display_html)
 
@@ -99,6 +91,54 @@ def signup():
 def report_sent_signup_email():
     email = request.args['email']
     return render_template('report_sent_signup_email.html', email=email)
+
+
+@app.route('/users/password/<secret>', methods=['GET', 'POST'])
+def choose_password(secret):
+    key = 'signup:' + secret
+    email, cookie, is_new_user = redis_users.hmget(key, ['email', 'cookie', 'new'])
+    if email is None:
+        # The registration link has expired.
+        abort(404)
+
+    if request.method == 'POST':
+        # Validate the submitted form.
+        is_valid = False
+        password = request.form['password']
+        min_length = app.config['PASSWORD_MIN_LENGTH']
+        max_length = app.config['PASSWORD_MAX_LENGTH']
+        if len(password) < min_length:
+            flash(gettext('The password should have least %(num)s characters.', num=min_length))
+        elif len(password) > max_length:
+            flash(gettext('The password should have at most %(num)s characters.', num=max_length))
+        elif password != request.form['confirm']:
+            flash(gettext('Passwords do not match.'))
+        else:
+            is_valid = True
+
+        # Create new user.
+        if is_valid:
+            redis_users.delete(key)
+            if is_new_user:
+                salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
+                recovery_code = generate_random_secret()
+                user = User(
+                    email=email,
+                    salt=salt,
+                    password_hash=calc_crypt_hash(salt, password),
+                    recovery_code_hash=calc_crypt_hash(salt, recovery_code),
+                )
+                db.session.add(user)
+                response = recovery_code
+            else:
+                user = User.query.filter_by(email=email).one()
+                user.password_hash = calc_crypt_hash(user.salt, password)
+                response = 'ok'
+            db.session.commit()
+            redis_users.rpush('cc:' + str(user.user_id), cookie)
+            return response
+
+    return render_template('choose_password.html')
 
 
 @app.route('/users/register/<secret>')
@@ -143,11 +183,6 @@ def recover_password():
 @app.route('/users/recover-password/email')
 def report_sent_recover_password_email():
     return "/users/recover-password/email"
-
-
-@app.route('/users/choose-password/<secret>')
-def choose_password(secret):
-    return "/users/choose-password/{}".format(secret)
 
 
 @app.route('/users/choose-password/success')
