@@ -14,11 +14,17 @@ RUN apk add --no-cache \
 RUN sed 's/seen_welcome = a/seen_welcome = e034/g' ~/.config/pudb/pudb.cfg -i
 
 # install required packages
-COPY ./ ./
+COPY Pipfile* ./
 RUN pipenv install --system
-ENV FLASK_APP=$FLASK_APP
 
-# copy files
+# install the app
+ENV FLASK_APP=$FLASK_APP
+COPY *.py ./
+COPY $FLASK_APP/ $FLASK_APP/
+COPY migrations/ migrations/
+RUN pip install -e .
+
+# copy configuration files
 COPY docker-flask/gunicorn.conf /gunicorn.conf
 COPY docker-flask/logging.conf /logging.conf
 COPY docker-flask/entrypoint.sh /usr/local/bin/
