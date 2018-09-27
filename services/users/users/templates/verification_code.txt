@@ -1,0 +1,7 @@
+{% trans site=config.SITE_TITLE, num=config.LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS // 60 -%}
+Your login verification code is: {{verification_code}}
+
+This verification code will expire in {{num}} minutes.
+
+If you received this email by mistake, simply delete it.
+{% endtrans %}

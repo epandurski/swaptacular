@@ -54,8 +54,26 @@ def _create_choose_password_link(email, computer_code, new_user):
     return urljoin(request.host_url, url_for('choose_password', secret=secret))
 
 
+def _create_login_verification_code(secret, user_id, login_challenge_id):
+    vcode_key = 'vcode:' + secret
+    verification_code = generate_random_secret(5)
+    with redis_users.pipeline() as p:
+        p.hmset(vcode_key, {
+            'id': user_id,
+            'code': verification_code,
+            'chal': login_challenge_id,
+        })
+        p.expire(vcode_key, app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'])
+        p.execute()
+    return verification_code
+
+
+def _get_hydra_login_request_url(challenge_id):
+    return urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/') + challenge_id
+
+
 def _fetch_hydra_login_request(challenge_id):
-    request_url = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/') + challenge_id
+    request_url = _get_hydra_login_request_url(challenge_id)
     r = requests.get(request_url, timeout=1)
     r.raise_for_status()
     login_data = r.json()
@@ -221,7 +239,7 @@ def choose_password(secret):
                 user.password_hash = calc_crypt_hash(user.salt, password)
                 response = 'ok'
             db.session.commit()
-            redis_users.zadd('cc:' + str(user.user_id), 1, cookie)  # TODO: use a function
+            redis_users.sadd('cc:' + str(user.user_id), cookie)  # TODO: use a function
             return response
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
@@ -234,7 +252,8 @@ def report_signup_success():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    request_url, subject = _fetch_hydra_login_request(request.args['login_challenge'])
+    login_challenge = request.args['login_challenge']
+    request_url, subject = _fetch_hydra_login_request(login_challenge)
     if subject:
         # Hydra says the user is logged in already.
         return redirect(_accept_hydra_login_request(request_url, subject))
@@ -244,16 +263,51 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
-            subject = 'user:{}'.format(user.user_id)
-            return redirect(_accept_hydra_login_request(request_url, subject))
+            user_id = user.user_id
+            subject = 'user:{}'.format(user_id)
+            computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
+            if redis_users.sismember('cc:' + str(user_id), computer_code):
+                return redirect(_accept_hydra_login_request(request_url, subject))
+            else:
+                secret = generate_random_secret()
+                verification_code = _create_login_verification_code(secret, user_id, login_challenge)
+                msg = Message(
+                    subject=gettext('%(site)s: Login verification code', site=app.config['SITE_TITLE']),
+                    recipients=[email],
+                    body=render_template('verification_code.txt', verification_code=verification_code),
+                )
+                mail.send(msg)
+                return redirect(
+                    url_for('enter_verification_code',
+                            secret=secret,
+                            login_challenge=login_challenge)
+                )
         flash(gettext('Incorrect email or password.'))
 
     return render_template('login.html')
 
 
-@app.route('/login/verification-code')
-def enter_verification_code():
-    return "/login/verification-code"
+@app.route('/login/<secret>', methods=['GET', 'POST'])
+def enter_verification_code(secret):
+    vcode_key = 'vcode:' + secret
+    user_id, verification_code, challenge_id = redis_users.hmget(vcode_key, ['id', 'code', 'chal'])
+    if user_id is None:
+        abort(404)  # invalid code verification link
+
+    if request.method == 'POST':
+        if verification_code != request.form['verification_code']:
+            # TODO: mark a failure in redis.
+            flash(gettext('Invalid verification code.'))
+        else:
+            computer_code = generate_random_secret()
+            redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
+            subject = 'user:{}'.format(user_id)
+            request_url = _get_hydra_login_request_url(challenge_id)
+            response = redirect(_accept_hydra_login_request(request_url, subject))
+            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
+            return response
+
+    return render_template('enter_verification_code.html')
 
 
 @app.route('/consent', methods=['GET', 'POST'])

@@ -11,6 +11,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
     SIGNUP_REQUEST_EXPIRATION_SECONDS = 24 * 60 * 60
+    LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS = 60 * 60
     RECOVERY_CODE_MAX_ATTEMPTS = 10
 
     REDIS_URL = 'redis://localhost:6379/0'
