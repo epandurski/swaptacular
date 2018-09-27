@@ -30,8 +30,8 @@
         </p>
         <p>
           {% with login_challenge=request.args.login_challenge %}
-            <a href="{{url_for('signup')}}?login_challenge={{login_challenge}}&recover">{% trans %}Forgot password?{% endtrans %}</a>
-            <a href="{{url_for('signup')}}?login_challenge={{login_challenge}}">{% trans %}Create a New Account{% endtrans %}</a>
+            <a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a>
+            <a href="{{url_for('signup', login_challenge=login_challenge)}}">{% trans %}Create a New Account{% endtrans %}</a>
           {% endwith %}
         </p>
       </form>
