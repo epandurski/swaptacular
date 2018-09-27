@@ -13,4 +13,4 @@ redirect_uris:
   - http://localhost:4477/auth/callback
   - http://consumer.localhost:4477/auth/callback
   - http://127.0.0.1:4477/auth/callback
-  - http://localhost:10001/users/
+  - http://localhost:4488/users/hello_world

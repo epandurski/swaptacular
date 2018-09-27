@@ -26,15 +26,15 @@ services:
     restart: on-failure
 
 
-  identity-provider:
-    environment:
-      - HYDRA_ADMIN_URL=http://hydra:4445
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
-      - PORT=4488
-    image: oryd/hydra-login-consent-node:$HYDRA_VERSION
-    ports:
-      # This is the public endpoint for login and consent pages.
-      - 4488:4488
+  # identity-provider:
+  #   environment:
+  #     - HYDRA_ADMIN_URL=http://hydra:4445
+  #     - NODE_TLS_REJECT_UNAUTHORIZED=0
+  #     - PORT=4488
+  #   image: oryd/hydra-login-consent-node:$HYDRA_VERSION
+  #   ports:
+  #     # This is the public endpoint for login and consent pages.
+  #     - 4488:4488
 
 
   hydra-migrate:
@@ -72,7 +72,7 @@ services:
       - HYDRA_ADMIN_URL=http://hydra:4445
     depends_on:
       - pg
-      - identity-provider
+      - users
 
 
   keto-migrate:
@@ -230,14 +230,16 @@ services:
     volumes:
       - './services/users:/usr/src/app'
     ports:
-      - 10001:10001
+      # This is the public endpoint for login and consent pages.
+      - 4488:4488
     environment:
-      - PORT=10001
+      - PORT=4488
       - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
       - REDIS_URL=redis://redis-users:6379/0
       - MAIL_SERVER=mail
       - MAIL_PORT=1025
       - MAIL_DEFAULT_SENDER=no-reply@swaptacular.com
+      - HYDRA_ADMIN_URL=http://hydra:4445
       - MESSAGE=Hello, Developer
     command: develop
     depends_on:

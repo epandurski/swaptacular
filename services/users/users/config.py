@@ -5,6 +5,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
 
+    HYDRA_ADMIN_URL = 'http://hydra:4445'
     SITE_TITLE = 'Swaptacular'
     USE_RECOVERY_CODE = True
     SHOW_CAPTCHA_ON_SIGNUP = True

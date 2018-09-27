@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
 from flask_mail import Message
+import requests
 from users import app, logger, redis_users, mail, captcha, db
 from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
 from users.models import User
@@ -53,7 +54,47 @@ def _create_choose_password_link(email, computer_code, new_user):
     return urljoin(request.host_url, url_for('choose_password', secret=secret))
 
 
-@app.route('/users/')
+def _fetch_hydra_login_request(challenge_id):
+    request_url = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/') + challenge_id
+    r = requests.get(request_url, timeout=1)
+    r.raise_for_status()
+    login_data = r.json()
+    return request_url, login_data['subject'] if login_data['skip'] else None
+
+
+def _accept_hydra_login_request(request_url, subject, remember=False, remember_for=0):
+    """Approve login request, return a URL to redirect to."""
+
+    r = requests.put(request_url + '/accept', json={
+        'subject': subject,
+        'remember': remember,
+        'remember_for': remember_for,
+    })
+    r.raise_for_status()
+    return r.json()['redirect_to']
+
+
+def _fetch_hydra_consent_request(challenge_id):
+    request_url = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/consent/') + challenge_id
+    r = requests.get(request_url, timeout=1)
+    r.raise_for_status()
+    consent_data = r.json()
+    return request_url, [] if consent_data['skip'] else consent_data['requested_scope']
+
+
+def _accept_hydra_consent_request(request_url, grant_scope, remember=False, remember_for=0):
+    """Approve consent request, return a URL to redirect to."""
+
+    r = requests.put(request_url + '/accept', json={
+        'grant_scope': grant_scope,
+        'remember': remember,
+        'remember_for': remember_for,
+    })
+    r.raise_for_status()
+    return r.json()['redirect_to']
+
+
+@app.route('/users/hello_world')
 def hello_world():
     logger.debug('A debug message')
     logger.info('An info message')
@@ -74,10 +115,10 @@ def set_language(lang):
     return response
 
 
-@app.route('/users/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
     is_new_user = 'recover' not in request.args
-    page_head = gettext('Sign Up') if is_new_user else gettext('Recover Your Account')
+    page_head = gettext('Create a New Account') if is_new_user else gettext('Recover Your Account')
     if request.method == 'POST':
         captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
         email = request.form['email']
@@ -131,13 +172,13 @@ def signup():
     return render_template('signup.html', page_head=page_head, display_captcha=captcha.display_html)
 
 
-@app.route('/users/signup/email')
+@app.route('/signup/email')
 def report_sent_signup_email():
     email = request.args['email']
     return render_template('report_sent_signup_email.html', email=email)
 
 
-@app.route('/users/password/<secret>', methods=['GET', 'POST'])
+@app.route('/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
     signup_key = 'signup:' + secret
     email, cookie, is_new_user = redis_users.hmget(signup_key, ['email', 'cookie', 'new'])
@@ -182,27 +223,41 @@ def choose_password(secret):
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
 
-@app.route('/users/signup/success')
+@app.route('/signup/success')
 def report_signup_success():
-    return "/users/signup/success"
+    return "/signup/success"
 
 
-@app.route('/users/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    challenge = request.args['login_challenge']
+    request_url, subject = _fetch_hydra_login_request(request.args['login_challenge'])
+    if subject:
+        # Hydra says the user is logged in already.
+        return redirect(_accept_hydra_login_request(request_url, subject))
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email=email).one_or_none()
+        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+            subject = 'user:{}'.format(user.user_id)
+            return redirect(_accept_hydra_login_request(request_url, subject))
+        flash(gettext('Incorrect email or password.'))
+
     return render_template('login.html')
 
 
-@app.route('/users/login/verification-code')
+@app.route('/login/verification-code')
 def enter_verification_code():
-    return "/login/code"
+    return "/login/verification-code"
 
 
-@app.route('/users/recover-password/email')
-def report_sent_recover_password_email():
-    return "/users/recover-password/email"
+@app.route('/consent', methods=['GET', 'POST'])
+def consent():
+    request_url, requested_scopes = _fetch_hydra_consent_request(request.args['consent_challenge'])
+    if not requested_scopes:
+        # Hydra says all requested scopes are granted already.
+        return redirect(_accept_hydra_consent_request(request_url, requested_scopes))
 
-
-@app.route('/users/choose-password/success')
-def report_choose_password_success():
-    return "/users/choose-password/success"
+    # TODO: show UI.
+    return redirect(_accept_hydra_consent_request(request_url, requested_scopes))
