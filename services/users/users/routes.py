@@ -165,7 +165,11 @@ def signup():
                     ),
                 )
                 mail.send(msg)
-            response = redirect(url_for('report_sent_signup_email', email=email))
+            response = redirect(
+                url_for('report_sent_signup_email',
+                        email=email,
+                        login_challenge=request.args.get('login_challenge'))
+            )
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
             return response
 

@@ -2,7 +2,11 @@
 {% block content %}
   <div id="signup-sent-email">
     <p>{% trans email=email %}A confirmation email has been sent to <b>{{email}}</b>.{% endtrans %}</p>
-    <p>{% trans %}Check your email messages, and click on the link provided there. Then come back here and click "Continue".{% endtrans %}</p>
-    <p><a href="">Continue</a></p>
+    <p>{% trans %}Check your email messages, and click on the link provided there.{% endtrans %}</p>
+    {% with login_challenge=request.args.login_challenge %}
+      {% if login_challenge %}
+        <p><a href="{{url_for('login', login_challenge=login_challenge)}}">Log In</a></p>
+      {% endif %}
+    {% endwith %}
   </div>
 {% endblock %}
