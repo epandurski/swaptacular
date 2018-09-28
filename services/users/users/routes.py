@@ -283,10 +283,15 @@ def login():
             else:
                 secret = generate_random_secret()
                 verification_code = _create_login_verification_code(secret, user_id, login_request.challenge_id)
+                change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
                 msg = Message(
                     subject=gettext('%(site)s: Login verification code', site=app.config['SITE_TITLE']),
                     recipients=[email],
-                    body=render_template('verification_code.txt', verification_code=verification_code),
+                    body=render_template(
+                        'verification_code.txt',
+                        verification_code=verification_code,
+                        change_password_page=change_password_page,
+                    ),
                 )
                 mail.send(msg)
                 return redirect(

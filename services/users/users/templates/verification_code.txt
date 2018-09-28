@@ -3,5 +3,10 @@ Your login verification code is: {{verification_code}}
 
 This verification code will expire in {{num}} minutes.
 
-If you received this email by mistake, simply delete it.
+If you haven't been trying to log in to {{site}} recently, chances are
+that someone else knows your password. If you suspect that this is the
+case, you must change your account password immediately by clicking on
+the following link:
+
+{{change_password_page}}
 {% endtrans %}
