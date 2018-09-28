@@ -37,7 +37,7 @@ def _verify_recovery_code(signup_key, email, recovery_code):
     return False
 
 
-def _create_choose_password_link(email, computer_code, new_user):
+def _create_change_password_link(email, computer_code, new_user):
     """Return a temporary link for email verification."""
 
     secret = generate_random_secret()
@@ -147,8 +147,9 @@ def set_language(lang):
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
-    page_head = gettext('Create a New Account') if is_new_user else gettext('Recover Your Account')
+    page_head = gettext('Create a New Account') if is_new_user else gettext('Change Account Password')
     if request.method == 'POST':
         captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
         email = request.form['email']
@@ -172,21 +173,21 @@ def signup():
                         ),
                     )
                 else:
-                    account_recovery_link = _create_choose_password_link(email, computer_code, new_user=False)
+                    change_password_link = _create_change_password_link(email, computer_code, new_user=False)
                     msg = Message(
-                        subject=gettext('%(site)s: Please confirm your email address', site=site),
+                        subject=gettext('%(site)s: Proceed with changing your password', site=site),
                         recipients=[email],
                         body=render_template(
-                            'confirm_account_recovery.txt',
+                            'change_password.txt',
                             email=email,
-                            account_recovery_link=account_recovery_link,
+                            change_password_link=change_password_link,
                         ),
                     )
                 mail.send(msg)
             elif is_new_user:
-                register_link = _create_choose_password_link(email, computer_code, new_user=True)
+                register_link = _create_change_password_link(email, computer_code, new_user=True)
                 msg = Message(
-                    subject=gettext('%(site)s: Please confirm your registration', site=site),
+                    subject=gettext('%(site)s: Proceed with your registration', site=site),
                     recipients=[email],
                     body=render_template(
                         'confirm_registration.txt',
@@ -203,7 +204,7 @@ def signup():
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
             return response
 
-    return render_template('signup.html', page_head=page_head, display_captcha=captcha.display_html)
+    return render_template('signup.html', page_head=page_head, email=email, display_captcha=captcha.display_html)
 
 
 @app.route('/signup/email')

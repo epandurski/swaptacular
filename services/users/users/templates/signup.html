@@ -9,7 +9,7 @@
           <input id="email"
                  name="email"
                  type="email"
-                 value="{{request.form.get('email', '')}}"
+                 value="{{email}}"
                  placeholder="{% trans %}Enter your email{% endtrans %}"
                  maxlength="254"
                  required
@@ -21,7 +21,7 @@
         </p>
         {% endif %}
         <p>
-          <input type="submit" value="{% trans %}Submit{% endtrans %}">
+          <input type="submit" value="{% trans %}Send me a Secret Link{% endtrans %}">
         </p>
       </form>
     </div>
