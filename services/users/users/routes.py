@@ -150,7 +150,6 @@ def set_language(lang):
 def signup():
     email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
-    page_head = gettext('Create a New Account') if is_new_user else gettext('Change Account Password')
     if request.method == 'POST':
         captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
         email = request.form['email']
@@ -159,7 +158,7 @@ def signup():
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            computer_code = generate_random_secret()  # to be sent to the user as a cookie
+            computer_code = generate_random_secret()  # to be sent to the user as a login cookie
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
@@ -167,18 +166,30 @@ def signup():
                 else:
                     change_password_link = _create_change_password_link(email, computer_code, new_user=False)
                     emails.send_change_password_email(email, change_password_link)
-            elif is_new_user:
-                register_link = _create_change_password_link(email, computer_code, new_user=True)
-                emails.send_confirm_registration_email(email, register_link)
-            response = redirect(
-                url_for('report_sent_email',
-                        email=email,
-                        login_challenge=request.args.get('login_challenge'))
-            )
+            else:
+                if is_new_user:
+                    register_link = _create_change_password_link(email, computer_code, new_user=True)
+                    emails.send_confirm_registration_email(email, register_link)
+                else:
+                    # We are asked to change the password of a
+                    # non-existing user. In this case we fail
+                    # silently, so as not to reveal if the email is
+                    # registered or not.
+                    pass
+            response = redirect(url_for(
+                'report_sent_email',
+                email=email,
+                login_challenge=request.args.get('login_challenge'),
+            ))
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
             return response
 
-    return render_template('signup.html', page_head=page_head, email=email, display_captcha=captcha.display_html)
+    return render_template(
+        'signup.html',
+        email=email,
+        is_new_user=is_new_user,
+        display_captcha=captcha.display_html,
+    )
 
 
 @app.route('/signup/email')

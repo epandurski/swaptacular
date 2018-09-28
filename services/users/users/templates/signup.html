@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
   <div id="signup-dialog">
-    <h1>{{page_head}}</h1>
+    <h1>
+      {% if is_new_user %}
+        {% trans %}Create a New Account{% endtrans %}
+      {% else %}
+        {% trans %}Change Account Password{% endtrans %}
+      {% endif %}
+    </h1>
     <div id="signup-form">
       <form action="" method="POST">
         <p>
