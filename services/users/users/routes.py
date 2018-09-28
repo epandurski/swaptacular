@@ -1,9 +1,10 @@
 from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
-from flask_mail import Message
 import requests
-from users import app, logger, redis_users, mail, captcha, db
+from users import app, logger, redis_users, db
+from users import captcha
+from users import emails
 from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
 from users.models import User
 
@@ -159,43 +160,16 @@ def signup():
             flash(captcha_error_message)
         else:
             computer_code = generate_random_secret()  # to be sent to the user as a cookie
-            site = app.config['SITE_TITLE']
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
-                    msg = Message(
-                        subject=gettext('%(site)s: Duplicate registration', site=site),
-                        recipients=[email],
-                        body=render_template(
-                            'duplicate_registration.txt',
-                            email=email,
-                            site=site,
-                        ),
-                    )
+                    emails.send_duplicate_registration_email(email)
                 else:
                     change_password_link = _create_change_password_link(email, computer_code, new_user=False)
-                    msg = Message(
-                        subject=gettext('%(site)s: Proceed with changing your password', site=site),
-                        recipients=[email],
-                        body=render_template(
-                            'change_password.txt',
-                            email=email,
-                            change_password_link=change_password_link,
-                        ),
-                    )
-                mail.send(msg)
+                    emails.send_change_password_email(email, change_password_link)
             elif is_new_user:
                 register_link = _create_change_password_link(email, computer_code, new_user=True)
-                msg = Message(
-                    subject=gettext('%(site)s: Proceed with your registration', site=site),
-                    recipients=[email],
-                    body=render_template(
-                        'confirm_registration.txt',
-                        email=email,
-                        register_link=register_link,
-                    ),
-                )
-                mail.send(msg)
+                emails.send_confirm_registration_email(email, register_link)
             response = redirect(
                 url_for('report_sent_signup_email',
                         email=email,
@@ -284,16 +258,7 @@ def login():
                 secret = generate_random_secret()
                 verification_code = _create_login_verification_code(secret, user_id, login_request.challenge_id)
                 change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
-                msg = Message(
-                    subject=gettext('%(site)s: Login verification code', site=app.config['SITE_TITLE']),
-                    recipients=[email],
-                    body=render_template(
-                        'verification_code.txt',
-                        verification_code=verification_code,
-                        change_password_page=change_password_page,
-                    ),
-                )
-                mail.send(msg)
+                emails.send_verification_code_email(email, verification_code, change_password_page)
                 return redirect(
                     url_for('enter_verification_code',
                             secret=secret,
