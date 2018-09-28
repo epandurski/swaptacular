@@ -171,7 +171,7 @@ def signup():
                 register_link = _create_change_password_link(email, computer_code, new_user=True)
                 emails.send_confirm_registration_email(email, register_link)
             response = redirect(
-                url_for('report_sent_signup_email',
+                url_for('report_sent_email',
                         email=email,
                         login_challenge=request.args.get('login_challenge'))
             )
@@ -182,9 +182,9 @@ def signup():
 
 
 @app.route('/signup/email')
-def report_sent_signup_email():
+def report_sent_email():
     email = request.args['email']
-    return render_template('report_sent_signup_email.html', email=email)
+    return render_template('report_sent_email.html', email=email)
 
 
 @app.route('/password/<secret>', methods=['GET', 'POST'])
