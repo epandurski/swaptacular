@@ -68,48 +68,60 @@ def _create_login_verification_code(secret, user_id, login_challenge_id):
     return verification_code
 
 
-def _get_hydra_login_request_url(challenge_id):
-    return urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/') + challenge_id
+class HydraLoginRequest:
+    BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')
+    TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
+
+    def __init__(self, challenge_id):
+        self.challenge_id = challenge_id
+        self.request_url = self.BASE_URL + challenge_id
+
+    def fetch(self):
+        """Return the subject if already logged, `None` otherwise."""
+
+        r = requests.get(self.request_url, timeout=self.TIMEOUT)
+        r.raise_for_status()
+        fetched_data = r.json()
+        return fetched_data['subject'] if fetched_data['skip'] else None
+
+    def accept(self, subject, remember=False, remember_for=0):
+        """Approve the request, return an URL to redirect to."""
+
+        r = requests.put(self.request_url + '/accept', timeout=self.TIMEOUT, json={
+            'subject': subject,
+            'remember': remember,
+            'remember_for': remember_for,
+        })
+        r.raise_for_status()
+        return r.json()['redirect_to']
 
 
-def _fetch_hydra_login_request(challenge_id):
-    request_url = _get_hydra_login_request_url(challenge_id)
-    r = requests.get(request_url, timeout=1)
-    r.raise_for_status()
-    login_data = r.json()
-    return request_url, login_data['subject'] if login_data['skip'] else None
+class HydraConsentRequest:
+    BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/consent/')
+    TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
 
+    def __init__(self, challenge_id):
+        self.challenge_id = challenge_id
+        self.request_url = self.BASE_URL + challenge_id
 
-def _accept_hydra_login_request(request_url, subject, remember=False, remember_for=0):
-    """Approve login request, return a URL to redirect to."""
+    def fetch(self):
+        """Return the list of requested scopes, or an empty list if no consent is required."""
 
-    r = requests.put(request_url + '/accept', json={
-        'subject': subject,
-        'remember': remember,
-        'remember_for': remember_for,
-    })
-    r.raise_for_status()
-    return r.json()['redirect_to']
+        r = requests.get(self.request_url, timeout=self.TIMEOUT)
+        r.raise_for_status()
+        fetched_data = r.json()
+        return [] if fetched_data['skip'] else fetched_data['requested_scope']
 
+    def accept(self, grant_scope, remember=False, remember_for=0):
+        """Approve the request, return an URL to redirect to."""
 
-def _fetch_hydra_consent_request(challenge_id):
-    request_url = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/consent/') + challenge_id
-    r = requests.get(request_url, timeout=1)
-    r.raise_for_status()
-    consent_data = r.json()
-    return request_url, [] if consent_data['skip'] else consent_data['requested_scope']
-
-
-def _accept_hydra_consent_request(request_url, grant_scope, remember=False, remember_for=0):
-    """Approve consent request, return a URL to redirect to."""
-
-    r = requests.put(request_url + '/accept', json={
-        'grant_scope': grant_scope,
-        'remember': remember,
-        'remember_for': remember_for,
-    })
-    r.raise_for_status()
-    return r.json()['redirect_to']
+        r = requests.put(self.request_url + '/accept', timeout=self.TIMEOUT, json={
+            'grant_scope': grant_scope,
+            'remember': remember,
+            'remember_for': remember_for,
+        })
+        r.raise_for_status()
+        return r.json()['redirect_to']
 
 
 @app.route('/users/hello_world')
@@ -252,11 +264,10 @@ def report_signup_success():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    login_challenge = request.args['login_challenge']
-    request_url, subject = _fetch_hydra_login_request(login_challenge)
+    login_request = HydraLoginRequest(request.args['login_challenge'])
+    subject = login_request.fetch()
     if subject:
-        # Hydra says the user is logged in already.
-        return redirect(_accept_hydra_login_request(request_url, subject))
+        return redirect(login_request.accept(subject))
 
     if request.method == 'POST':
         email = request.form['email']
@@ -267,10 +278,10 @@ def login():
             subject = 'user:{}'.format(user_id)
             computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
             if redis_users.sismember('cc:' + str(user_id), computer_code):
-                return redirect(_accept_hydra_login_request(request_url, subject))
+                return redirect(login_request.accept(subject))
             else:
                 secret = generate_random_secret()
-                verification_code = _create_login_verification_code(secret, user_id, login_challenge)
+                verification_code = _create_login_verification_code(secret, user_id, login_request.challenge_id)
                 msg = Message(
                     subject=gettext('%(site)s: Login verification code', site=app.config['SITE_TITLE']),
                     recipients=[email],
@@ -280,7 +291,7 @@ def login():
                 return redirect(
                     url_for('enter_verification_code',
                             secret=secret,
-                            login_challenge=login_challenge)
+                            login_challenge=login_request.challenge_id)
                 )
         flash(gettext('Incorrect email or password.'))
 
@@ -302,8 +313,8 @@ def enter_verification_code(secret):
             computer_code = generate_random_secret()
             redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
             subject = 'user:{}'.format(user_id)
-            request_url = _get_hydra_login_request_url(challenge_id)
-            response = redirect(_accept_hydra_login_request(request_url, subject))
+            login_request = HydraLoginRequest(challenge_id)
+            response = redirect(login_request.accept(subject))
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
             return response
 
@@ -312,10 +323,10 @@ def enter_verification_code(secret):
 
 @app.route('/consent', methods=['GET', 'POST'])
 def consent():
-    request_url, requested_scopes = _fetch_hydra_consent_request(request.args['consent_challenge'])
-    if not requested_scopes:
-        # Hydra says all requested scopes are granted already.
-        return redirect(_accept_hydra_consent_request(request_url, requested_scopes))
+    consent_request = HydraConsentRequest(request.args['consent_challenge'])
+    requested_scope = consent_request.fetch()
+    if not requested_scope:
+        return redirect(consent_request.accept(requested_scope))
 
     # TODO: show UI.
-    return redirect(_accept_hydra_consent_request(request_url, requested_scopes))
+    return redirect(consent_request.accept(requested_scope))
