@@ -9,7 +9,7 @@ from users.utils import is_invalid_email, generate_password_salt, calc_crypt_has
 from users.models import User
 
 
-def _verify_captcha(captcha_is_required):
+def verify_captcha(captcha_is_required):
     """Verify captcha if required."""
 
     if captcha_is_required:
@@ -25,7 +25,7 @@ def _verify_captcha(captcha_is_required):
     return captcha_passed, captcha_error_message
 
 
-def _verify_recovery_code(signup_key, email, recovery_code):
+def verify_recovery_code(signup_key, email, recovery_code):
     """Verify if given recovery code is correct for given email."""
 
     user = User.query.filter_by(email=email).one_or_none()
@@ -38,7 +38,7 @@ def _verify_recovery_code(signup_key, email, recovery_code):
     return False
 
 
-def _create_change_password_link(email, computer_code, new_user):
+def create_change_password_link(email, computer_code, new_user):
     """Return a temporary link for email verification."""
 
     secret = generate_random_secret()
@@ -55,7 +55,7 @@ def _create_change_password_link(email, computer_code, new_user):
     return urljoin(request.host_url, url_for('choose_password', secret=secret))
 
 
-def _create_login_verification_code(secret, user_id, login_challenge_id):
+def create_login_verification_code(secret, user_id, login_challenge_id):
     vcode_key = 'vcode:' + secret
     verification_code = generate_random_secret(5)
     with redis_users.pipeline() as p:
@@ -151,7 +151,7 @@ def signup():
     email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
+        captcha_passed, captcha_error_message = verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
         email = request.form['email']
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
@@ -164,11 +164,11 @@ def signup():
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    change_password_link = _create_change_password_link(email, computer_code, new_user=False)
+                    change_password_link = create_change_password_link(email, computer_code, new_user=False)
                     emails.send_change_password_email(email, change_password_link)
             else:
                 if is_new_user:
-                    register_link = _create_change_password_link(email, computer_code, new_user=True)
+                    register_link = create_change_password_link(email, computer_code, new_user=True)
                     emails.send_confirm_registration_email(email, register_link)
                 else:
                     # We are asked to change the password of a
@@ -217,7 +217,7 @@ def choose_password(secret):
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
-        elif require_recovery_code and not _verify_recovery_code(signup_key, email, recovery_code):
+        elif require_recovery_code and not verify_recovery_code(signup_key, email, recovery_code):
             flash(gettext('Incorrect recovery code.'))
         else:
             redis_users.delete(signup_key)
@@ -267,7 +267,7 @@ def login():
                 return redirect(login_request.accept(subject))
             else:
                 secret = generate_random_secret()
-                verification_code = _create_login_verification_code(secret, user_id, login_request.challenge_id)
+                verification_code = create_login_verification_code(secret, user_id, login_request.challenge_id)
                 change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
                 emails.send_verification_code_email(email, verification_code, change_password_page)
                 return redirect(
