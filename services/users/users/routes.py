@@ -25,24 +25,7 @@ def verify_captcha(captcha_is_required):
     return captcha_passed, captcha_error_message
 
 
-def create_login_verification_code(secret, user_id, login_challenge_id):
-    vcode_key = 'vcode:' + secret
-    verification_code = generate_random_secret(5)
-    with redis_users.pipeline() as p:
-        p.hmset(vcode_key, {
-            'id': user_id,
-            'code': verification_code,
-            'chal': login_challenge_id,
-        })
-        p.expire(vcode_key, app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'])
-        p.execute()
-    return verification_code
-
-
-class SignUpRequest:
-    REDIS_PREFIX = 'signup:'
-    ENTRIES = ['email', 'cc', 'recover']
-
+class RedisSecretHashRecord:
     @property
     def key(self):
         return self.REDIS_PREFIX + self.secret
@@ -54,7 +37,7 @@ class SignUpRequest:
         instance._data = data
         with redis_users.pipeline() as p:
             p.hmset(instance.key, data)
-            p.expire(instance.key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
+            p.expire(instance.key, cls.EXPIRATION_SECONDS)
             p.execute()
         return instance
 
@@ -63,19 +46,31 @@ class SignUpRequest:
         instance = cls()
         instance.secret = secret
         instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
-        return instance if instance._data.get('email') is not None else None
+        return instance if instance._data.get(cls.ENTRIES[0]) is not None else None
 
     def __getattr__(self, name):
         return self._data[name]
 
+    def _delete(self):
+        redis_users.delete(self.key)
+
+
+class LoginVerificationRequest(RedisSecretHashRecord):
+    EXPIRATION_SECONDS = app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS']
+    REDIS_PREFIX = 'vcode:'
+    ENTRIES = ['user_id', 'code', 'challenge_id']
+
+
+class SignUpRequest(RedisSecretHashRecord):
+    EXPIRATION_SECONDS = app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS']
+    REDIS_PREFIX = 'signup:'
+    ENTRIES = ['email', 'cc', 'recover']
+
     def _register_recovery_code_failure(self):
         num_failures = int(redis_users.hincrby(self.key, 'fails'))
         if num_failures >= app.config['RECOVERY_CODE_MAX_ATTEMPTS']:
-            self._delete_from_redis()
+            self._delete()
             abort(403)
-
-    def _delete_from_redis(self):
-        redis_users.delete(self.key)
 
     def get_link(self):
         return urljoin(request.host_url, url_for('choose_password', secret=self.secret))
@@ -88,7 +83,7 @@ class SignUpRequest:
         return False
 
     def accept(self, password):
-        self._delete_from_redis()
+        self._delete()
         if self.recover:
             recovery_code = None
             user = User.query.filter_by(email=self.email).one()
@@ -288,13 +283,17 @@ def login():
             if redis_users.sismember('cc:' + str(user_id), computer_code):
                 return redirect(login_request.accept(subject))
             else:
-                secret = generate_random_secret()
-                verification_code = create_login_verification_code(secret, user_id, login_request.challenge_id)
+                verification_code = generate_random_secret(5)
+                login_verification = LoginVerificationRequest.create(
+                    user_id=user_id,
+                    code=verification_code,
+                    challenge_id=login_request.challenge_id,
+                )
                 change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
                 emails.send_verification_code_email(email, verification_code, change_password_page)
                 return redirect(
                     url_for('enter_verification_code',
-                            secret=secret,
+                            secret=login_verification.secret,
                             login_challenge=login_request.challenge_id)
                 )
         flash(gettext('Incorrect email or password.'))
@@ -304,20 +303,20 @@ def login():
 
 @app.route('/login/<secret>', methods=['GET', 'POST'])
 def enter_verification_code(secret):
-    vcode_key = 'vcode:' + secret
-    user_id, verification_code, challenge_id = redis_users.hmget(vcode_key, ['id', 'code', 'chal'])
-    if user_id is None:
-        abort(404)  # invalid code verification link
+    verification_request = LoginVerificationRequest.from_secret(secret)
+    if not verification_request:
+        abort(404)
 
     if request.method == 'POST':
-        if verification_code != request.form['verification_code']:
+        if verification_request.code != request.form['verification_code']:
             # TODO: mark a failure in redis.
             flash(gettext('Invalid verification code.'))
         else:
+            user_id = verification_request.user_id
             computer_code = generate_random_secret()
             redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
             subject = 'user:{}'.format(user_id)
-            login_request = HydraLoginRequest(challenge_id)
+            login_request = HydraLoginRequest(verification_request.challenge_id)
             response = redirect(login_request.accept(subject))
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
             return response
