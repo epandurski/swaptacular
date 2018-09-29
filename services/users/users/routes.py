@@ -25,36 +25,6 @@ def verify_captcha(captcha_is_required):
     return captcha_passed, captcha_error_message
 
 
-def verify_recovery_code(signup_key, email, recovery_code):
-    """Verify if given recovery code is correct for given email."""
-
-    user = User.query.filter_by(email=email).one_or_none()
-    if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
-        return True
-    num_failures = int(redis_users.hincrby(signup_key, 'fails'))
-    if num_failures >= app.config['RECOVERY_CODE_MAX_ATTEMPTS']:
-        redis_users.delete(signup_key)
-        abort(403)
-    return False
-
-
-def create_change_password_link(email, computer_code, new_user):
-    """Return a temporary link for email verification."""
-
-    secret = generate_random_secret()
-    signup_key = 'signup:' + secret
-    with redis_users.pipeline() as p:
-        p.hmset(signup_key, {
-            'email': email,
-            'cookie': computer_code,
-        })
-        if new_user:
-            p.hset(signup_key, 'new', '1')
-        p.expire(signup_key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
-        p.execute()
-    return urljoin(request.host_url, url_for('choose_password', secret=secret))
-
-
 def create_login_verification_code(secret, user_id, login_challenge_id):
     vcode_key = 'vcode:' + secret
     verification_code = generate_random_secret(5)
@@ -67,6 +37,75 @@ def create_login_verification_code(secret, user_id, login_challenge_id):
         p.expire(vcode_key, app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'])
         p.execute()
     return verification_code
+
+
+class SignUpRequest:
+    REDIS_PREFIX = 'signup:'
+    ENTRIES = ['email', 'cc', 'recover']
+
+    @property
+    def key(self):
+        return self.REDIS_PREFIX + self.secret
+
+    @classmethod
+    def create(cls, **data):
+        instance = cls()
+        instance.secret = generate_random_secret()
+        instance._data = data
+        with redis_users.pipeline() as p:
+            p.hmset(instance.key, data)
+            p.expire(instance.key, app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS'])
+            p.execute()
+        return instance
+
+    @classmethod
+    def from_redis(cls, secret):
+        instance = cls()
+        instance.secret = secret
+        instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
+        return instance if instance._data.get('email') is not None else None
+
+    def __getattr__(self, name):
+        return self._data[name]
+
+    def _register_recovery_code_failure(self):
+        num_failures = int(redis_users.hincrby(self.key, 'fails'))
+        if num_failures >= app.config['RECOVERY_CODE_MAX_ATTEMPTS']:
+            self._delete_from_redis()
+            abort(403)
+
+    def _delete_from_redis(self):
+        redis_users.delete(self.key)
+
+    def get_link(self):
+        return urljoin(request.host_url, url_for('choose_password', secret=self.secret))
+
+    def verify_recovery_code(self, recovery_code):
+        user = User.query.filter_by(email=self.email).one_or_none()
+        if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
+            return True
+        self._register_recovery_code_failure()
+        return False
+
+    def accept(self, password):
+        self._delete_from_redis()
+        if self.recover:
+            recovery_code = None
+            user = User.query.filter_by(email=self.email).one()
+            user.password_hash = calc_crypt_hash(user.salt, password)
+        else:
+            recovery_code = generate_random_secret()
+            salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
+            user = User(
+                email=self.email,
+                salt=salt,
+                password_hash=calc_crypt_hash(salt, password),
+                recovery_code_hash=calc_crypt_hash(salt, recovery_code),
+            )
+            db.session.add(user)
+        db.session.commit()
+        self.user_id = user.user_id
+        return recovery_code
 
 
 class HydraLoginRequest:
@@ -164,12 +203,12 @@ def signup():
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    change_password_link = create_change_password_link(email, computer_code, new_user=False)
-                    emails.send_change_password_email(email, change_password_link)
+                    change_password_request = SignUpRequest.create(email=email, cc=computer_code, recover='yes')
+                    emails.send_change_password_email(email, change_password_request.get_link())
             else:
                 if is_new_user:
-                    register_link = create_change_password_link(email, computer_code, new_user=True)
-                    emails.send_confirm_registration_email(email, register_link)
+                    register_request = SignUpRequest.create(email=email, cc=computer_code)
+                    emails.send_confirm_registration_email(email, register_request.get_link())
                 else:
                     # We are asked to change the password of a
                     # non-existing user. In this case we fail
@@ -200,11 +239,10 @@ def report_sent_email():
 
 @app.route('/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
-    signup_key = 'signup:' + secret
-    email, cookie, is_new_user = redis_users.hmget(signup_key, ['email', 'cookie', 'new'])
-    if email is None:
-        abort(404)  # invalid registration link
-    require_recovery_code = not is_new_user and app.config['USE_RECOVERY_CODE']
+    signup_request = SignUpRequest.from_redis(secret)
+    if not signup_request:
+        abort(404)
+    require_recovery_code = signup_request.recover and app.config['USE_RECOVERY_CODE']
 
     if request.method == 'POST':
         recovery_code = request.form.get('recovery_code', '')
@@ -217,28 +255,12 @@ def choose_password(secret):
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
-        elif require_recovery_code and not verify_recovery_code(signup_key, email, recovery_code):
+        elif require_recovery_code and not signup_request.verify_recovery_code(recovery_code):
             flash(gettext('Incorrect recovery code.'))
         else:
-            redis_users.delete(signup_key)
-            if is_new_user:
-                salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
-                recovery_code = generate_random_secret()
-                user = User(
-                    email=email,
-                    salt=salt,
-                    password_hash=calc_crypt_hash(salt, password),
-                    recovery_code_hash=calc_crypt_hash(salt, recovery_code),
-                )
-                db.session.add(user)
-                response = recovery_code
-            else:
-                user = User.query.filter_by(email=email).one()
-                user.password_hash = calc_crypt_hash(user.salt, password)
-                response = 'ok'
-            db.session.commit()
-            redis_users.sadd('cc:' + str(user.user_id), cookie)  # TODO: use a function
-            return response
+            recovery_code = signup_request.accept(password)
+            redis_users.sadd('cc:' + str(signup_request.user_id), signup_request.cc)  # TODO: use a function
+            return recovery_code or 'ok'
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
