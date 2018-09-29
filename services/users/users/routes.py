@@ -59,7 +59,7 @@ class SignUpRequest:
         return instance
 
     @classmethod
-    def from_redis(cls, secret):
+    def from_secret(cls, secret):
         instance = cls()
         instance.secret = secret
         instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
@@ -239,7 +239,7 @@ def report_sent_email():
 
 @app.route('/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
-    signup_request = SignUpRequest.from_redis(secret)
+    signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
         abort(404)
     require_recovery_code = signup_request.recover and app.config['USE_RECOVERY_CODE']
