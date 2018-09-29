@@ -48,6 +48,12 @@ class RedisSecretHashRecord:
         instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
         return instance if instance._data.get(cls.ENTRIES[0]) is not None else None
 
+    def register_code_failure(self):
+        num_failures = int(redis_users.hincrby(self.key, 'fails'))
+        if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
+            self._delete()
+            abort(403)
+
     def __getattr__(self, name):
         return self._data[name]
 
@@ -66,12 +72,6 @@ class SignUpRequest(RedisSecretHashRecord):
     REDIS_PREFIX = 'signup:'
     ENTRIES = ['email', 'cc', 'recover']
 
-    def _register_recovery_code_failure(self):
-        num_failures = int(redis_users.hincrby(self.key, 'fails'))
-        if num_failures >= app.config['RECOVERY_CODE_MAX_ATTEMPTS']:
-            self._delete()
-            abort(403)
-
     def get_link(self):
         return urljoin(request.host_url, url_for('choose_password', secret=self.secret))
 
@@ -79,7 +79,7 @@ class SignUpRequest(RedisSecretHashRecord):
         user = User.query.filter_by(email=self.email).one_or_none()
         if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
             return True
-        self._register_recovery_code_failure()
+        self.register_code_failure()
         return False
 
     def accept(self, password):
@@ -284,7 +284,7 @@ def login():
                 return redirect(login_request.accept(subject))
             else:
                 verification_code = generate_random_secret(5)
-                login_verification = LoginVerificationRequest.create(
+                login_verification_request = LoginVerificationRequest.create(
                     user_id=user_id,
                     code=verification_code,
                     challenge_id=login_request.challenge_id,
@@ -293,7 +293,7 @@ def login():
                 emails.send_verification_code_email(email, verification_code, change_password_page)
                 return redirect(
                     url_for('enter_verification_code',
-                            secret=login_verification.secret,
+                            secret=login_verification_request.secret,
                             login_challenge=login_request.challenge_id)
                 )
         flash(gettext('Incorrect email or password.'))
@@ -308,14 +308,14 @@ def enter_verification_code(secret):
         abort(404)
 
     if request.method == 'POST':
-        if verification_request.code != request.form['verification_code']:
-            # TODO: mark a failure in redis.
+        if request.form['verification_code'] != verification_request.code:
+            verification_request.register_code_failure()
             flash(gettext('Invalid verification code.'))
         else:
-            user_id = verification_request.user_id
+            user_id = int(verification_request.user_id)
+            subject = 'user:{}'.format(user_id)
             computer_code = generate_random_secret()
             redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
-            subject = 'user:{}'.format(user_id)
             login_request = HydraLoginRequest(verification_request.challenge_id)
             response = redirect(login_request.accept(subject))
             response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
