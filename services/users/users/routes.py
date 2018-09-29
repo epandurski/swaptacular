@@ -151,9 +151,10 @@ def login():
             subject = 'user:{}'.format(user_id)
             computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
             if redis_users.sismember('cc:' + str(user_id), computer_code):
+                # Log the user in.
                 return redirect(login_request.accept(subject))
             else:
-                verification_code = generate_random_secret(5)
+                verification_code = generate_random_secret(5)  # TODO: use numbers only
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user_id,
                     code=verification_code,
@@ -161,19 +162,18 @@ def login():
                 )
                 change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
                 emails.send_verification_code_email(email, verification_code, change_password_page)
-                return redirect(
-                    url_for('enter_verification_code',
-                            secret=login_verification_request.secret,
-                            login_challenge=login_request.challenge_id)
-                )
+                response = redirect(url_for('enter_verification_code'))
+                response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], login_verification_request.secret)
+                return response
         flash(gettext('Incorrect email or password.'))
 
     return render_template('login.html')
 
 
-@app.route('/login/<secret>', methods=['GET', 'POST'])
-def enter_verification_code(secret):
-    verification_request = LoginVerificationRequest.from_secret(secret)
+@app.route('/login/verify', methods=['GET', 'POST'])
+def enter_verification_code():
+    computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
+    verification_request = LoginVerificationRequest.from_secret(computer_code)
     if not verification_request:
         abort(404)
 
@@ -182,14 +182,12 @@ def enter_verification_code(secret):
             verification_request.register_code_failure()
             flash(gettext('Invalid verification code.'))
         else:
+            # Log the user in.
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
-            computer_code = generate_random_secret()
             redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
             login_request = HydraLoginRequest(verification_request.challenge_id)
-            response = redirect(login_request.accept(subject))
-            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
-            return response
+            return redirect(login_request.accept(subject))
 
     return render_template('enter_verification_code.html')
 
