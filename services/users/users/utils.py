@@ -4,6 +4,7 @@ import random
 import string
 import base64
 import struct
+import time
 from urllib.parse import urljoin
 from crypt import crypt
 import requests
@@ -38,6 +39,28 @@ def calc_crypt_hash(salt, message):
 
 def is_invalid_email(email):
     return not EMAIL_REGEX.match(email)
+
+
+class UserLoginsBucket:
+    """Contain identification codes from the last logins of a given user."""
+
+    REDIS_PREFIX = 'cc:'
+    MAX_COUNT = app.config['LOGIN_VERIFIED_DEVICES_MAX_COUNT']
+
+    def __init__(self, user_id):
+        self.key = self.REDIS_PREFIX + str(user_id)
+
+    def contains(self, element):
+        return element in redis_users.zrevrange(self.key, 0, self.MAX_COUNT - 1)
+
+    def add(self, element):
+        with redis_users.pipeline() as p:
+            p.zremrangebyrank(self.key, 0, -self.MAX_COUNT)
+            p.zadd(self.key, time.time(), element)
+            p.execute()
+
+    def touch(self, element):
+        return self.add(element)
 
 
 class RedisSecretHashRecord:

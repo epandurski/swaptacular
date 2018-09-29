@@ -2,13 +2,14 @@ from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
 import user_agents
-from users import app, logger, redis_users
+from users import app, logger
 from users import captcha
 from users import emails
 from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
+    UserLoginsBucket,
 )
 
 
@@ -125,7 +126,7 @@ def choose_password(secret):
             flash(gettext('Incorrect recovery code.'))
         else:
             recovery_code = signup_request.accept(password)
-            redis_users.sadd('cc:' + str(signup_request.user_id), signup_request.cc)  # TODO: use a function
+            UserLoginsBucket(signup_request.user_id).add(signup_request.cc)
             return recovery_code or 'ok'
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
@@ -151,8 +152,10 @@ def login():
             user_id = user.user_id
             subject = 'user:{}'.format(user_id)
             computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
-            if redis_users.sismember('cc:' + str(user_id), computer_code):
+            user_login_bucket = UserLoginsBucket(user_id)
+            if user_login_bucket.contains(computer_code):
                 # Log the user in.
+                user_login_bucket.touch(computer_code)
                 return redirect(login_request.accept(subject))
             else:
                 verification_code = generate_verification_code()
@@ -187,7 +190,7 @@ def enter_verification_code():
             # Log the user in.
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
-            redis_users.sadd('cc:' + str(user_id), computer_code)  # TODO: use a function
+            UserLoginsBucket(user_id).add(computer_code)
             login_request = HydraLoginRequest(verification_request.challenge_id)
             return redirect(login_request.accept(subject))
 
