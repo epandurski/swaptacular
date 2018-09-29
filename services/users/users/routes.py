@@ -1,15 +1,17 @@
 from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
-import requests
-from users import app, logger, redis_users, db
+from users import app, logger, redis_users
 from users import captcha
 from users import emails
-from users.utils import is_invalid_email, generate_password_salt, calc_crypt_hash, generate_random_secret
 from users.models import User
+from users.utils import (
+    is_invalid_email, calc_crypt_hash, generate_random_secret,
+    HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
+)
 
 
-def verify_captcha(captcha_is_required):
+def _verify_captcha(captcha_is_required):
     """Verify captcha if required."""
 
     if captcha_is_required:
@@ -25,138 +27,8 @@ def verify_captcha(captcha_is_required):
     return captcha_passed, captcha_error_message
 
 
-class RedisSecretHashRecord:
-    @property
-    def key(self):
-        return self.REDIS_PREFIX + self.secret
-
-    @classmethod
-    def create(cls, **data):
-        instance = cls()
-        instance.secret = generate_random_secret()
-        instance._data = data
-        with redis_users.pipeline() as p:
-            p.hmset(instance.key, data)
-            p.expire(instance.key, cls.EXPIRATION_SECONDS)
-            p.execute()
-        return instance
-
-    @classmethod
-    def from_secret(cls, secret):
-        instance = cls()
-        instance.secret = secret
-        instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
-        return instance if instance._data.get(cls.ENTRIES[0]) is not None else None
-
-    def register_code_failure(self):
-        num_failures = int(redis_users.hincrby(self.key, 'fails'))
-        if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
-            self._delete()
-            abort(403)
-
-    def __getattr__(self, name):
-        return self._data[name]
-
-    def _delete(self):
-        redis_users.delete(self.key)
-
-
-class LoginVerificationRequest(RedisSecretHashRecord):
-    EXPIRATION_SECONDS = app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS']
-    REDIS_PREFIX = 'vcode:'
-    ENTRIES = ['user_id', 'code', 'challenge_id']
-
-
-class SignUpRequest(RedisSecretHashRecord):
-    EXPIRATION_SECONDS = app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS']
-    REDIS_PREFIX = 'signup:'
-    ENTRIES = ['email', 'cc', 'recover']
-
-    def get_link(self):
-        return urljoin(request.host_url, url_for('choose_password', secret=self.secret))
-
-    def verify_recovery_code(self, recovery_code):
-        user = User.query.filter_by(email=self.email).one_or_none()
-        if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
-            return True
-        self.register_code_failure()
-        return False
-
-    def accept(self, password):
-        self._delete()
-        if self.recover:
-            recovery_code = None
-            user = User.query.filter_by(email=self.email).one()
-            user.password_hash = calc_crypt_hash(user.salt, password)
-        else:
-            recovery_code = generate_random_secret()
-            salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
-            user = User(
-                email=self.email,
-                salt=salt,
-                password_hash=calc_crypt_hash(salt, password),
-                recovery_code_hash=calc_crypt_hash(salt, recovery_code),
-            )
-            db.session.add(user)
-        db.session.commit()
-        self.user_id = user.user_id
-        return recovery_code
-
-
-class HydraLoginRequest:
-    BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')
-    TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
-
-    def __init__(self, challenge_id):
-        self.challenge_id = challenge_id
-        self.request_url = self.BASE_URL + challenge_id
-
-    def fetch(self):
-        """Return the subject if already logged, `None` otherwise."""
-
-        r = requests.get(self.request_url, timeout=self.TIMEOUT)
-        r.raise_for_status()
-        fetched_data = r.json()
-        return fetched_data['subject'] if fetched_data['skip'] else None
-
-    def accept(self, subject, remember=False, remember_for=0):
-        """Approve the request, return an URL to redirect to."""
-
-        r = requests.put(self.request_url + '/accept', timeout=self.TIMEOUT, json={
-            'subject': subject,
-            'remember': remember,
-            'remember_for': remember_for,
-        })
-        r.raise_for_status()
-        return r.json()['redirect_to']
-
-
-class HydraConsentRequest:
-    BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/consent/')
-    TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
-
-    def __init__(self, challenge_id):
-        self.challenge_id = challenge_id
-        self.request_url = self.BASE_URL + challenge_id
-
-    def fetch(self):
-        """Return the list of requested scopes, or an empty list if no consent is required."""
-
-        r = requests.get(self.request_url, timeout=self.TIMEOUT)
-        r.raise_for_status()
-        fetched_data = r.json()
-        return [] if fetched_data['skip'] else fetched_data['requested_scope']
-
-    def accept(self, grant_scope, remember=False, remember_for=0):
-        """Approve the request, return an URL to redirect to."""
-
-        r = requests.put(self.request_url + '/accept', timeout=self.TIMEOUT, json={
-            'grant_scope': grant_scope,
-            'remember': remember,
-            'remember_for': remember_for,
-        })
-        r.raise_for_status()
-        return r.json()['redirect_to']
+def _get_choose_password_link(signup_request):
+    return urljoin(request.host_url, url_for('choose_password', secret=signup_request.secret))
 
 
 @app.route('/users/hello_world')
@@ -185,7 +57,7 @@ def signup():
     email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
+        captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
         email = request.form['email']
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
@@ -198,17 +70,15 @@ def signup():
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    change_password_request = SignUpRequest.create(email=email, cc=computer_code, recover='yes')
-                    emails.send_change_password_email(email, change_password_request.get_link())
+                    r = SignUpRequest.create(email=email, cc=computer_code, recover='yes')
+                    emails.send_change_password_email(email, _get_choose_password_link(r))
             else:
                 if is_new_user:
-                    register_request = SignUpRequest.create(email=email, cc=computer_code)
-                    emails.send_confirm_registration_email(email, register_request.get_link())
+                    r = SignUpRequest.create(email=email, cc=computer_code)
+                    emails.send_confirm_registration_email(email, _get_choose_password_link(r))
                 else:
-                    # We are asked to change the password of a
-                    # non-existing user. In this case we fail
-                    # silently, so as not to reveal if the email is
-                    # registered or not.
+                    # We are asked to change the password of a non-existing user. In this case
+                    # we fail silently, so as not to reveal if the email is registered or not.
                     pass
             response = redirect(url_for(
                 'report_sent_email',
