@@ -7,7 +7,7 @@ from users import captcha
 from users import emails
 from users.models import User
 from users.utils import (
-    is_invalid_email, calc_crypt_hash, generate_random_secret,
+    is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
 )
 
@@ -155,7 +155,7 @@ def login():
                 # Log the user in.
                 return redirect(login_request.accept(subject))
             else:
-                verification_code = generate_random_secret(5)  # TODO: use numbers only
+                verification_code = generate_verification_code()
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user_id,
                     code=verification_code,
@@ -180,7 +180,7 @@ def enter_verification_code():
         abort(404)
 
     if request.method == 'POST':
-        if request.form['verification_code'] != verification_request.code:
+        if request.form['verification_code'].strip() != verification_request.code:
             verification_request.register_code_failure()
             flash(gettext('Invalid verification code.'))
         else:

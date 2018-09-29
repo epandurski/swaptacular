@@ -3,6 +3,7 @@ import re
 import random
 import string
 import base64
+import struct
 from urllib.parse import urljoin
 from crypt import crypt
 import requests
@@ -17,6 +18,12 @@ PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
 
 def generate_random_secret(num_bytes=15):
     return base64.urlsafe_b64encode(os.urandom(num_bytes)).decode('ascii')
+
+
+def generate_verification_code(num_digits=6):
+    assert 1 <= num_digits < 10
+    random_number = struct.unpack('<L', os.urandom(4))[0] % (10 ** num_digits)
+    return str(random_number).zfill(num_digits)
 
 
 def generate_password_salt(method):
