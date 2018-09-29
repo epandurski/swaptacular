@@ -4,17 +4,14 @@ from flask_mail import Message
 from users import app, mail
 
 
-site = app.config['SITE_TITLE']
-
-
 def send_duplicate_registration_email(email):
     msg = Message(
-        subject=gettext('%(site)s: Duplicate registration', site=site),
+        subject=gettext('Duplicate Registration'),
         recipients=[email],
         body=render_template(
             'duplicate_registration.txt',
             email=email,
-            site=site,
+            site=app.config['SITE_TITLE'],
         ),
     )
     mail.send(msg)
@@ -22,7 +19,7 @@ def send_duplicate_registration_email(email):
 
 def send_change_password_email(email, change_password_link):
     msg = Message(
-        subject=gettext('%(site)s: Proceed with changing your password', site=site),
+        subject=gettext('Change Account Password'),
         recipients=[email],
         body=render_template(
             'change_password.txt',
@@ -35,7 +32,7 @@ def send_change_password_email(email, change_password_link):
 
 def send_confirm_registration_email(email, register_link):
     msg = Message(
-        subject=gettext('%(site)s: Proceed with your registration', site=site),
+        subject=gettext('Create a New Account'),
         recipients=[email],
         body=render_template(
             'confirm_registration.txt',
@@ -46,13 +43,14 @@ def send_confirm_registration_email(email, register_link):
     mail.send(msg)
 
 
-def send_verification_code_email(email, verification_code, change_password_page):
+def send_verification_code_email(email, verification_code, user_agent, change_password_page):
     msg = Message(
-        subject=gettext('%(site)s: Login verification code', site=site),
+        subject=gettext('New login from %(user_agent)s', user_agent=user_agent),
         recipients=[email],
         body=render_template(
             'verification_code.txt',
             verification_code=verification_code,
+            user_agent=user_agent,
             change_password_page=change_password_page,
         ),
     )

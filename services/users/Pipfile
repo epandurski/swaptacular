@@ -14,6 +14,7 @@ flask-migrate = "*"
 redis = "*"
 flask-mail = "*"
 requests = "*"
+user-agents = "*"
 
 [requires]
 python_version = "3.5"

@@ -238,7 +238,7 @@ services:
       - REDIS_URL=redis://redis-users:6379/0
       - MAIL_SERVER=mail
       - MAIL_PORT=1025
-      - MAIL_DEFAULT_SENDER=no-reply@swaptacular.com
+      - MAIL_DEFAULT_SENDER=Swaptacular <no-reply@swaptacular.com>
       - HYDRA_ADMIN_URL=http://hydra:4445
       - MESSAGE=Hello, Developer
     command: develop

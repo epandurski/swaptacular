@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
 from flask_babel import gettext
+import user_agents
 from users import app, logger, redis_users
 from users import captcha
 from users import emails
@@ -161,7 +162,8 @@ def login():
                     challenge_id=login_request.challenge_id,
                 )
                 change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
-                emails.send_verification_code_email(email, verification_code, change_password_page)
+                user_agent = str(user_agents.parse(request.headers.get('User-Agent', '')))
+                emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
                 response = redirect(url_for('enter_verification_code'))
                 response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], login_verification_request.secret)
                 return response
