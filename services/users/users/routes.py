@@ -59,7 +59,7 @@ def signup():
     is_new_user = 'recover' not in request.args
     if request.method == 'POST':
         captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
-        email = request.form['email']
+        email = request.form['email'].strip()
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif not captcha_passed:
@@ -111,7 +111,7 @@ def choose_password(secret):
     require_recovery_code = signup_request.recover and app.config['USE_RECOVERY_CODE']
 
     if request.method == 'POST':
-        recovery_code = request.form.get('recovery_code', '')
+        recovery_code = request.form.get('recovery_code', '').strip()
         password = request.form['password']
         min_length = app.config['PASSWORD_MIN_LENGTH']
         max_length = app.config['PASSWORD_MAX_LENGTH']
@@ -144,7 +144,7 @@ def login():
         return redirect(login_request.accept(subject))
 
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form['email'].strip()
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
