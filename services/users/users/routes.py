@@ -190,17 +190,15 @@ def enter_verification_code():
         abort(404)
 
     if request.method == 'POST':
-        if request.form['verification_code'].strip() != verification_request.code:
-            verification_request.register_code_failure()
-            flash(gettext('Invalid verification code.'))
-        else:
-            # Log the user in.
-            # TODO: delete the LoginVerificationRequest
+        if request.form['verification_code'].strip() == verification_request.code:
+            login_request = HydraLoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
+            verification_request.delete()
             UserLoginsHistory(user_id).add(computer_code)
-            login_request = HydraLoginRequest(verification_request.challenge_id)
             return redirect(login_request.accept(subject))
+        verification_request.register_code_failure()
+        flash(gettext('Invalid verification code.'))
 
     return render_template('enter_verification_code.html')
 

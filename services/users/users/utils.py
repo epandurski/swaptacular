@@ -86,14 +86,14 @@ class RedisSecretHashRecord:
     def register_code_failure(self):
         num_failures = int(redis_users.hincrby(self.key, 'fails'))
         if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
-            self._delete()
+            self.delete()
             abort(403)
+
+    def delete(self):
+        redis_users.delete(self.key)
 
     def __getattr__(self, name):
         return self._data[name]
-
-    def _delete(self):
-        redis_users.delete(self.key)
 
 
 class LoginVerificationRequest(RedisSecretHashRecord):
@@ -115,7 +115,7 @@ class SignUpRequest(RedisSecretHashRecord):
         return False
 
     def accept(self, password):
-        self._delete()
+        self.delete()
         if self.recover:
             recovery_code = None
             user = User.query.filter_by(email=self.email).one()
