@@ -41,7 +41,7 @@ def is_invalid_email(email):
     return not EMAIL_REGEX.match(email)
 
 
-class UserLoginsBucket:
+class UserLoginsHistory:
     """Contain identification codes from the last logins of a given user."""
 
     REDIS_PREFIX = 'cc:'
@@ -58,9 +58,6 @@ class UserLoginsBucket:
             p.zremrangebyrank(self.key, 0, -self.MAX_COUNT)
             p.zadd(self.key, time.time(), element)
             p.execute()
-
-    def touch(self, element):
-        return self.add(element)
 
 
 class RedisSecretHashRecord:
@@ -124,13 +121,19 @@ class SignUpRequest(RedisSecretHashRecord):
             user = User.query.filter_by(email=self.email).one()
             user.password_hash = calc_crypt_hash(user.salt, password)
         else:
-            recovery_code = generate_random_secret()
             salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
+            if app.config['USE_RECOVERY_CODE']:
+                recovery_code = generate_random_secret()
+                recovery_code_hash = calc_crypt_hash(salt, recovery_code)
+            else:
+                recovery_code = None
+                recovery_code_hash = None
             user = User(
                 email=self.email,
                 salt=salt,
                 password_hash=calc_crypt_hash(salt, password),
-                recovery_code_hash=calc_crypt_hash(salt, recovery_code),
+                recovery_code_hash=recovery_code_hash,
+                two_factor_login=bool(recovery_code_hash),
             )
             db.session.add(user)
         db.session.commit()

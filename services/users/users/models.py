@@ -6,4 +6,5 @@ class User(db.Model):
     email = db.Column(db.Text, unique=True, nullable=False)
     salt = db.Column(db.Text, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
-    recovery_code_hash = db.Column(db.Text, nullable=False)
+    recovery_code_hash = db.Column(db.Text, nullable=True)
+    two_factor_login = db.Column(db.Boolean, nullable=False)

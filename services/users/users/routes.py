@@ -9,7 +9,7 @@ from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsBucket,
+    UserLoginsHistory,
 )
 
 
@@ -104,7 +104,7 @@ def report_sent_email():
     return render_template('report_sent_email.html', email=email)
 
 
-@app.route('/password/<secret>', methods=['GET', 'POST'])
+@app.route('/signup/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
     signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
@@ -126,7 +126,7 @@ def choose_password(secret):
             flash(gettext('Incorrect recovery code.'))
         else:
             recovery_code = signup_request.accept(password)
-            UserLoginsBucket(signup_request.user_id).add(signup_request.cc)
+            UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             return recovery_code or 'ok'
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
@@ -151,25 +151,32 @@ def login():
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
             user_id = user.user_id
             subject = 'user:{}'.format(user_id)
-            computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
-            user_login_bucket = UserLoginsBucket(user_id)
-            if user_login_bucket.contains(computer_code):
-                # Log the user in.
-                user_login_bucket.touch(computer_code)
+            if not user.two_factor_login:
                 return redirect(login_request.accept(subject))
-            else:
-                verification_code = generate_verification_code()
-                login_verification_request = LoginVerificationRequest.create(
-                    user_id=user_id,
-                    code=verification_code,
-                    challenge_id=login_request.challenge_id,
-                )
-                change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
-                user_agent = str(user_agents.parse(request.headers.get('User-Agent', '')))
-                emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
-                response = redirect(url_for('enter_verification_code'))
-                response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], login_verification_request.secret)
-                return response
+
+            # Two factor login: require a cookie containing a secret
+            # "computer code" as well. The cookie proves that there
+            # was a previous successful login attempt from this computer.
+            computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'])
+            if computer_code:
+                user_logins_history = UserLoginsHistory(user_id)
+                if user_logins_history.contains(computer_code):
+                    user_logins_history.add(computer_code)
+                    return redirect(login_request.accept(subject))
+
+            # A two factor login verification code is required.
+            verification_code = generate_verification_code()
+            login_verification_request = LoginVerificationRequest.create(
+                user_id=user_id,
+                code=verification_code,
+                challenge_id=login_request.challenge_id,
+            )
+            user_agent = str(user_agents.parse(request.headers.get('User-Agent', '')))
+            change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
+            emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
+            response = redirect(url_for('enter_verification_code'))
+            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], login_verification_request.secret)
+            return response
         flash(gettext('Incorrect email or password.'))
 
     return render_template('login.html')
@@ -188,9 +195,10 @@ def enter_verification_code():
             flash(gettext('Invalid verification code.'))
         else:
             # Log the user in.
+            # TODO: delete the LoginVerificationRequest
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
-            UserLoginsBucket(user_id).add(computer_code)
+            UserLoginsHistory(user_id).add(computer_code)
             login_request = HydraLoginRequest(verification_request.challenge_id)
             return redirect(login_request.accept(subject))
 
