@@ -105,7 +105,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
 class SignUpRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS']
     REDIS_PREFIX = 'signup:'
-    ENTRIES = ['email', 'cc', 'recover']
+    ENTRIES = ['email', 'cc', 'recover', 'has_rc']
 
     def verify_recovery_code(self, recovery_code):
         user = User.query.filter_by(email=self.email).one_or_none()

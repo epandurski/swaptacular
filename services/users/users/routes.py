@@ -72,7 +72,12 @@ def signup():
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    r = SignUpRequest.create(email=email, cc=computer_code, recover='yes')
+                    r = SignUpRequest.create(
+                        email=email,
+                        cc=computer_code,
+                        recover='yes',
+                        has_rc='yes' if user.recovery_code_hash else 'no',
+                    )
                     emails.send_change_password_email(email, _get_choose_password_link(r))
             else:
                 if is_new_user:
@@ -109,7 +114,9 @@ def choose_password(secret):
     signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
         abort(404)
-    require_recovery_code = signup_request.recover and app.config['USE_RECOVERY_CODE']
+    require_recovery_code = (signup_request.recover == 'yes' and
+                             signup_request.has_rc == 'yes' and
+                             app.config['USE_RECOVERY_CODE'])
 
     if request.method == 'POST':
         recovery_code = request.form.get('recovery_code', '').strip()

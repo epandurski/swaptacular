@@ -44,6 +44,6 @@ class Configuration(metaclass=MetaFlaskEnv):
     COMPUTER_CODE_COOKE_NAME = 'users_cc'
     STYLE_URL = ''
     PASSWORD_HASHING_METHOD = '6'
-    PASSWORD_MIN_LENGTH = 10
+    PASSWORD_MIN_LENGTH = 8
     PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'
