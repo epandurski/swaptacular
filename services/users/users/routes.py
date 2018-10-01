@@ -66,7 +66,7 @@ def signup():
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            computer_code = generate_random_secret()  # to be sent to the user as a login cookie
+            computer_code = generate_random_secret()  # will be sent to the user as a login cookie
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
@@ -125,9 +125,10 @@ def choose_password(secret):
         elif require_recovery_code and not signup_request.verify_recovery_code(recovery_code):
             flash(gettext('Incorrect recovery code.'))
         else:
-            recovery_code = signup_request.accept(password)
+            # TODO: show the recovery code screen
+            new_recovery_code = signup_request.accept(password)
             UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
-            return recovery_code or 'ok'
+            return new_recovery_code or 'ok'
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
