@@ -33,6 +33,16 @@ def _get_choose_password_link(signup_request):
     return urljoin(request.host_url, url_for('choose_password', secret=signup_request.secret))
 
 
+def _set_computer_code_cookie(response, computer_code):
+    response.set_cookie(
+        app.config['COMPUTER_CODE_COOKE_NAME'],
+        computer_code,
+        max_age=1000000000,
+        httponly=True,
+        secure=not app.config['DEBUG'],
+    )
+
+
 @app.route('/users/hello_world')
 def hello_world():
     logger.debug('A debug message')
@@ -47,10 +57,10 @@ def serve_static(filename):
     return send_from_directory('static', filename)
 
 
-@app.route('/users/language/<lang>')
+@app.route('/signup/language/<lang>')
 def set_language(lang):
     response = redirect(request.args['to'])
-    response.set_cookie(app.config['LANGUAGE_COOKE_NAME'], lang)
+    response.set_cookie(app.config['LANGUAGE_COOKE_NAME'], lang, max_age=1000000000)
     return response
 
 
@@ -92,7 +102,7 @@ def signup():
                 email=email,
                 login_challenge=request.args.get('login_challenge'),
             ))
-            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], computer_code)
+            _set_computer_code_cookie(response, computer_code)
             return response
 
     return render_template(
@@ -114,7 +124,8 @@ def choose_password(secret):
     signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
         abort(404)
-    require_recovery_code = (signup_request.recover == 'yes' and
+    is_password_recovery = signup_request.recover == 'yes'
+    require_recovery_code = (is_password_recovery and
                              signup_request.has_rc == 'yes' and
                              app.config['USE_RECOVERY_CODE'])
 
@@ -132,10 +143,19 @@ def choose_password(secret):
         elif require_recovery_code and not signup_request.verify_recovery_code(recovery_code):
             flash(gettext('Incorrect recovery code.'))
         else:
-            # TODO: show the recovery code screen
             new_recovery_code = signup_request.accept(password)
             UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
-            return new_recovery_code or 'ok'
+            if is_password_recovery:
+                return render_template(
+                    'report_recovery_success.html',
+                    email=signup_request.email,
+                )
+            else:
+                return render_template(
+                    'report_signup_success.html',
+                    email=signup_request.email,
+                    recovery_code=new_recovery_code,
+                )
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
@@ -183,7 +203,7 @@ def login():
             change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
             emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
             response = redirect(url_for('enter_verification_code'))
-            response.set_cookie(app.config['COMPUTER_CODE_COOKE_NAME'], login_verification_request.secret)
+            _set_computer_code_cookie(response, login_verification_request.secret)
             return response
         flash(gettext('Incorrect email or password.'))
 

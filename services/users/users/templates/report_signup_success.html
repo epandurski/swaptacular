@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div id="signup-success">
+    <p>
+      {% trans email='<strong>{}</strong>'.format(email)|safe %}
+        A new account for {{email}} has been created.
+      {% endtrans %}
+    </p>
+    {% if recovery_code %}
+      <p>
+        {% trans %}Your recovery code is {{recovery_code}}{% endtrans %}
+      </p>
+    {% endif %}
+    <p>{% trans %}You can log in now.{% endtrans %}</p>
+  </div>
+{% endblock %}
