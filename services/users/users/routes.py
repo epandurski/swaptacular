@@ -215,7 +215,7 @@ def enter_verification_code():
     computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
     verification_request = LoginVerificationRequest.from_secret(computer_code)
     if not verification_request:
-        abort(404)
+        abort(403)
 
     if request.method == 'POST':
         if request.form['verification_code'].strip() == verification_request.code:
