@@ -141,6 +141,7 @@ def choose_password(secret):
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
         elif require_recovery_code and not signup_request.verify_recovery_code(recovery_code):
+            signup_request.register_code_failure()
             flash(gettext('Incorrect recovery code.'))
         else:
             new_recovery_code = signup_request.accept(password)

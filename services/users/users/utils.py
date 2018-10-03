@@ -41,6 +41,10 @@ def is_invalid_email(email):
     return not EMAIL_REGEX.match(email)
 
 
+def get_user_code_failures_redis_key(user_id):
+    return 'vcfails:' + str(user_id)
+
+
 class UserLoginsHistory:
     """Contain identification codes from the last logins of a given user."""
 
@@ -83,12 +87,6 @@ class RedisSecretHashRecord:
         instance._data = dict(zip(cls.ENTRIES, redis_users.hmget(instance.key, cls.ENTRIES)))
         return instance if instance._data.get(cls.ENTRIES[0]) is not None else None
 
-    def register_code_failure(self):
-        num_failures = int(redis_users.hincrby(self.key, 'fails'))
-        if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
-            self.delete()
-            abort(403)
-
     def delete(self):
         redis_users.delete(self.key)
 
@@ -101,6 +99,25 @@ class LoginVerificationRequest(RedisSecretHashRecord):
     REDIS_PREFIX = 'vcode:'
     ENTRIES = ['user_id', 'code', 'challenge_id']
 
+    @classmethod
+    def create(cls, **data):
+        # We register a "code failure" after the creation of each
+        # login verification request. This prevents maliciously
+        # creating huge numbers of them.
+        instance = super().create(**data)
+        instance.register_code_failure()
+        return instance
+
+    def register_code_failure(self):
+        code_failures_key = get_user_code_failures_redis_key(self.user_id)
+        with redis_users.pipeline() as p:
+            p.incrby(code_failures_key)
+            p.expire(code_failures_key, self.EXPIRATION_SECONDS)
+            num_failures = int(p.execute()[0] or '0')
+        if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
+            self.delete()
+            abort(403)
+
 
 class SignUpRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['SIGNUP_REQUEST_EXPIRATION_SECONDS']
@@ -108,11 +125,14 @@ class SignUpRequest(RedisSecretHashRecord):
     ENTRIES = ['email', 'cc', 'recover', 'has_rc']
 
     def verify_recovery_code(self, recovery_code):
-        user = User.query.filter_by(email=self.email).one_or_none()
-        if user and user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code):
-            return True
-        self.register_code_failure()
-        return False
+        user = User.query.filter_by(email=self.email).one()
+        return user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code)
+
+    def register_code_failure(self):
+        num_failures = int(redis_users.hincrby(self.key, 'fails'))
+        if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
+            self.delete()
+            abort(403)
 
     def accept(self, password):
         self.delete()
@@ -120,6 +140,11 @@ class SignUpRequest(RedisSecretHashRecord):
             recovery_code = None
             user = User.query.filter_by(email=self.email).one()
             user.password_hash = calc_crypt_hash(user.salt, password)
+
+            # After changing the password, we "forget" past login
+            # verification failures, thus guaranteeing that the user
+            # will be able to log in immediately.
+            redis_users.delete(get_user_code_failures_redis_key(user.user_id))
         else:
             salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
             if app.config['USE_RECOVERY_CODE']:
