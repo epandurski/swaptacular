@@ -8,7 +8,6 @@ import time
 from urllib.parse import urljoin
 from crypt import crypt
 import requests
-from flask import abort
 from users import app, db, redis_users
 from users.models import User
 
@@ -119,14 +118,15 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         # login verification request. This prevents maliciously
         # creating huge numbers of them.
         instance = super().create(**data)
-        instance.register_code_failure()
+        instance.report_code_failure()
         return instance
 
-    def register_code_failure(self):
+    def report_code_failure(self):
         num_failures = register_user_code_failure(self.user_id)
         if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
-            abort(403)
+            return True
+        return False
 
     def accept(self):
         clear_user_verification_code_failures(self.user_id)
@@ -138,15 +138,16 @@ class SignUpRequest(RedisSecretHashRecord):
     REDIS_PREFIX = 'signup:'
     ENTRIES = ['email', 'cc', 'recover', 'has_rc']
 
-    def verify_recovery_code(self, recovery_code):
+    def is_correct_recovery_code(self, recovery_code):
         user = User.query.filter_by(email=self.email).one()
         return user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code)
 
-    def register_code_failure(self):
+    def report_code_failure(self):
         num_failures = int(redis_users.hincrby(self.key, 'fails'))
         if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
-            abort(403)
+            return True
+        return False
 
     def accept(self, password):
         self.delete()

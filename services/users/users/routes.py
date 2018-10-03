@@ -140,8 +140,9 @@ def choose_password(secret):
             flash(gettext('The password should have at most %(num)s characters.', num=max_length))
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
-        elif require_recovery_code and not signup_request.verify_recovery_code(recovery_code):
-            signup_request.register_code_failure()
+        elif require_recovery_code and not signup_request.is_correct_recovery_code(recovery_code):
+            if signup_request.report_code_failure():
+                abort(403)
             flash(gettext('Incorrect recovery code.'))
         else:
             new_recovery_code = signup_request.accept(password)
@@ -226,7 +227,8 @@ def enter_verification_code():
             verification_request.accept()
             UserLoginsHistory(user_id).add(computer_code)
             return redirect(login_request.accept(subject))
-        verification_request.register_code_failure()
+        if verification_request.report_code_failure():
+            abort(403)
         flash(gettext('Invalid verification code.'))
 
     return render_template('enter_verification_code.html')
