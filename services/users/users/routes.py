@@ -143,7 +143,7 @@ def choose_password(secret):
         elif require_recovery_code and not signup_request.is_correct_recovery_code(recovery_code):
             try:
                 signup_request.register_code_failure()
-            except SignUpRequest.ExceededMaxAttempts:
+            except signup_request.ExceededMaxAttempts:
                 abort(404)
             flash(gettext('Incorrect recovery code.'))
         else:
@@ -234,7 +234,7 @@ def enter_verification_code():
             return redirect(login_request.accept(subject))
         try:
             verification_request.register_code_failure()
-        except LoginVerificationRequest.ExceededMaxAttempts:
+        except verification_request.ExceededMaxAttempts:
             abort(403)
         flash(gettext('Invalid verification code.'))
 
