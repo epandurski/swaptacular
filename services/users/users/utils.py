@@ -21,6 +21,10 @@ def generate_random_secret(num_bytes=15):
     return base64.urlsafe_b64encode(os.urandom(num_bytes)).decode('ascii')
 
 
+def generate_recovery_code(num_bytes=10):
+    return base64.b32encode(os.urandom(num_bytes)).decode('ascii')
+
+
 def generate_verification_code(num_digits=6):
     assert 1 <= num_digits < 10
     random_number = struct.unpack('<L', os.urandom(4))[0] % (10 ** num_digits)
@@ -142,6 +146,12 @@ class SignUpRequest(RedisSecretHashRecord):
 
     def is_correct_recovery_code(self, recovery_code):
         user = User.query.filter_by(email=self.email).one()
+
+        # Transform to "normal" base32 representation.
+        recovery_code = recovery_code.replace(' ', '')
+        recovery_code = recovery_code.upper()
+        recovery_code = recovery_code.replace('0', 'O')
+        recovery_code = recovery_code.replace('1', 'I')
         return user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code)
 
     def register_code_failure(self):
@@ -164,7 +174,7 @@ class SignUpRequest(RedisSecretHashRecord):
         else:
             salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
             if app.config['USE_RECOVERY_CODE']:
-                recovery_code = generate_random_secret()
+                recovery_code = generate_recovery_code()
                 recovery_code_hash = calc_crypt_hash(salt, recovery_code)
             else:
                 recovery_code = None
