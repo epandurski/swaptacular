@@ -78,6 +78,9 @@ class UserLoginsHistory:
 
 
 class RedisSecretHashRecord:
+    class ExceededMaxAttempts(Exception):
+        """Too many failed attempts to enter the correct code."""
+
     @property
     def key(self):
         return self.REDIS_PREFIX + self.secret
@@ -118,15 +121,14 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         # login verification request. This prevents maliciously
         # creating huge numbers of them.
         instance = super().create(**data)
-        instance.report_code_failure()
+        instance.register_code_failure()
         return instance
 
-    def report_code_failure(self):
+    def register_code_failure(self):
         num_failures = register_user_code_failure(self.user_id)
         if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
-            return True
-        return False
+            raise self.ExceededMaxAttempts()
 
     def accept(self):
         clear_user_verification_code_failures(self.user_id)
@@ -142,12 +144,11 @@ class SignUpRequest(RedisSecretHashRecord):
         user = User.query.filter_by(email=self.email).one()
         return user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code)
 
-    def report_code_failure(self):
+    def register_code_failure(self):
         num_failures = int(redis_users.hincrby(self.key, 'fails'))
         if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
-            return True
-        return False
+            raise self.ExceededMaxAttempts()
 
     def accept(self, password):
         self.delete()

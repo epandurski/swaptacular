@@ -141,8 +141,10 @@ def choose_password(secret):
         elif password != request.form['confirm']:
             flash(gettext('Passwords do not match.'))
         elif require_recovery_code and not signup_request.is_correct_recovery_code(recovery_code):
-            if signup_request.report_code_failure():
-                abort(403)
+            try:
+                signup_request.register_code_failure()
+            except SignUpRequest.ExceededMaxAttempts:
+                abort(404)
             flash(gettext('Incorrect recovery code.'))
         else:
             new_recovery_code = signup_request.accept(password)
@@ -196,11 +198,14 @@ def login():
 
             # A two factor login verification code is required.
             verification_code = generate_verification_code()
-            login_verification_request = LoginVerificationRequest.create(
-                user_id=user_id,
-                code=verification_code,
-                challenge_id=login_request.challenge_id,
-            )
+            try:
+                login_verification_request = LoginVerificationRequest.create(
+                    user_id=user_id,
+                    code=verification_code,
+                    challenge_id=login_request.challenge_id,
+                )
+            except LoginVerificationRequest.ExceededMaxAttempts:
+                abort(403)
             user_agent = str(user_agents.parse(request.headers.get('User-Agent', '')))
             change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
             emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
@@ -227,7 +232,9 @@ def enter_verification_code():
             verification_request.accept()
             UserLoginsHistory(user_id).add(computer_code)
             return redirect(login_request.accept(subject))
-        if verification_request.report_code_failure():
+        try:
+            verification_request.register_code_failure()
+        except LoginVerificationRequest.ExceededMaxAttempts:
             abort(403)
         flash(gettext('Invalid verification code.'))
 
