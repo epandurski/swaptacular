@@ -15,7 +15,7 @@ from users.models import User
 
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
-SECONDS_1DAY = 24 * 60 * 60
+LOGIN_CODE_FAILURE_EXPIRATION_SECONDS = max(app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'], 24 * 60 * 60)
 
 
 def generate_random_secret(num_bytes=15):
@@ -42,12 +42,21 @@ def is_invalid_email(email):
     return not EMAIL_REGEX.match(email)
 
 
-def get_user_code_failures_redis_key(user_id):
+def get_user_verification_code_failures_redis_key(user_id):
     return 'vcfails:' + str(user_id)
 
 
-def clear_user_code_failures(user_id):
-    redis_users.delete(get_user_code_failures_redis_key(user_id))
+def clear_user_verification_code_failures(user_id):
+    redis_users.delete(get_user_verification_code_failures_redis_key(user_id))
+
+
+def register_user_code_failure(user_id):
+    key = get_user_verification_code_failures_redis_key(user_id)
+    with redis_users.pipeline() as p:
+        p.incrby(key)
+        p.expire(key, LOGIN_CODE_FAILURE_EXPIRATION_SECONDS)
+        num_failures = int(p.execute()[0] or '0')
+    return num_failures
 
 
 class UserLoginsHistory:
@@ -114,17 +123,13 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         return instance
 
     def register_code_failure(self):
-        code_failures_key = get_user_code_failures_redis_key(self.user_id)
-        with redis_users.pipeline() as p:
-            p.incrby(code_failures_key)
-            p.expire(code_failures_key, max(self.EXPIRATION_SECONDS, SECONDS_1DAY))
-            num_failures = int(p.execute()[0] or '0')
+        num_failures = register_user_code_failure(self.user_id)
         if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
             abort(403)
 
     def accept(self):
-        clear_user_code_failures(self.user_id)
+        clear_user_verification_code_failures(self.user_id)
         self.delete()
 
 
@@ -153,7 +158,7 @@ class SignUpRequest(RedisSecretHashRecord):
             # After changing the password, we "forget" past login
             # verification failures, thus guaranteeing that the user
             # will be able to log in immediately.
-            clear_user_code_failures(user.user_id)
+            clear_user_verification_code_failures(user.user_id)
         else:
             salt = generate_password_salt(app.config['PASSWORD_HASHING_METHOD'])
             if app.config['USE_RECOVERY_CODE']:
