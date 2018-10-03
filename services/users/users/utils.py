@@ -49,7 +49,7 @@ def clear_user_verification_code_failures(user_id):
     redis_users.delete(get_user_verification_code_failures_redis_key(user_id))
 
 
-def register_user_code_failure(user_id):
+def register_user_verification_code_failure(user_id):
     key = get_user_verification_code_failures_redis_key(user_id)
     with redis_users.pipeline() as p:
         p.incrby(key)
@@ -125,7 +125,7 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         return instance
 
     def register_code_failure(self):
-        num_failures = register_user_code_failure(self.user_id)
+        num_failures = register_user_verification_code_failure(self.user_id)
         if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
             raise self.ExceededMaxAttempts()
