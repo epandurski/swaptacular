@@ -9,7 +9,7 @@ from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsHistory,
+    UserLoginsHistory, format_recovery_code,
 )
 
 
@@ -158,7 +158,7 @@ def choose_password(secret):
                 return render_template(
                     'report_signup_success.html',
                     email=signup_request.email,
-                    recovery_code=new_recovery_code,
+                    recovery_code=format_recovery_code(new_recovery_code),
                 )
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)

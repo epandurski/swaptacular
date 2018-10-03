@@ -7,8 +7,9 @@
       {% endtrans %}
     </p>
     {% if recovery_code %}
-      <p>
-        {% trans %}Your recovery code is {{recovery_code}}{% endtrans %}
+      <p id="recovery-code">
+        <span>{% trans %}Your recovery code is:{% endtrans %}</span>
+        <strong>{{recovery_code}}</strong>
       </p>
     {% endif %}
     <p>{% trans %}You can log in now.{% endtrans %}</p>

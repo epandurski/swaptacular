@@ -37,6 +37,13 @@ def generate_password_salt(method):
     return salt
 
 
+def format_recovery_code(recovery_code, block_size=4):
+    N = block_size
+    block_count = (len(recovery_code) + N - 1) // N
+    blocks = [recovery_code[N * i:N * i + 4] for i in range(block_count)]
+    return ' '.join(blocks)
+
+
 def calc_crypt_hash(salt, message):
     return crypt(message, salt)
 
