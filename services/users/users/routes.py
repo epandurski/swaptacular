@@ -223,7 +223,7 @@ def enter_verification_code():
             login_request = HydraLoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
-            verification_request.delete()
+            verification_request.accept()
             UserLoginsHistory(user_id).add(computer_code)
             return redirect(login_request.accept(subject))
         verification_request.register_code_failure()
