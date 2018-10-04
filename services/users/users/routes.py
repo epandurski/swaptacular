@@ -130,7 +130,7 @@ def choose_password(secret):
                              app.config['USE_RECOVERY_CODE'])
 
     if request.method == 'POST':
-        recovery_code = request.form.get('recovery_code', '').strip()
+        recovery_code = request.form.get('recovery_code', '')
         password = request.form['password']
         min_length = app.config['PASSWORD_MIN_LENGTH']
         max_length = app.config['PASSWORD_MAX_LENGTH']

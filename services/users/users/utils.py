@@ -25,6 +25,10 @@ def generate_recovery_code(num_bytes=10):
     return base64.b32encode(os.urandom(num_bytes)).decode('ascii')
 
 
+def normalize_recovery_code(recovery_code):
+    return recovery_code.strip().replace(' ', '').replace('0', 'O').replace('1', 'I').upper()
+
+
 def generate_verification_code(num_digits=6):
     assert 1 <= num_digits < 10
     random_number = struct.unpack('<L', os.urandom(4))[0] % (10 ** num_digits)
@@ -153,13 +157,8 @@ class SignUpRequest(RedisSecretHashRecord):
 
     def is_correct_recovery_code(self, recovery_code):
         user = User.query.filter_by(email=self.email).one()
-
-        # Transform to "normal" base32 representation.
-        recovery_code = recovery_code.replace(' ', '')
-        recovery_code = recovery_code.upper()
-        recovery_code = recovery_code.replace('0', 'O')
-        recovery_code = recovery_code.replace('1', 'I')
-        return user.recovery_code_hash == calc_crypt_hash(user.salt, recovery_code)
+        normalized_recovery_code = normalize_recovery_code(recovery_code)
+        return user.recovery_code_hash == calc_crypt_hash(user.salt, normalized_recovery_code)
 
     def register_code_failure(self):
         num_failures = int(redis_users.hincrby(self.key, 'fails'))
