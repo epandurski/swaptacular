@@ -238,7 +238,34 @@ def enter_verification_code():
             abort(403)
         flash(gettext('Invalid verification code.'))
 
-    return render_template('enter_verification_code.html')
+    return render_template('enter_verification_code.html', computer_code=computer_code)
+
+
+@app.route('/signup/choose-email/<secret>', methods=['GET', 'POST'])
+def choose_new_email(secret):
+    verification_request = LoginVerificationRequest.from_secret(secret)
+    if not verification_request:
+        abort(404)
+    user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
+    require_recovery_code = user.recovery_code_hash and app.config['USE_RECOVERY_CODE']
+
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        recovery_code = request.form.get('recovery_code', '')
+        if is_invalid_email(email):
+            flash(gettext('The email address is invalid.'))
+        elif require_recovery_code and not verification_request.is_correct_recovery_code(recovery_code):
+            try:
+                verification_request.register_code_failure()
+            except verification_request.ExceededMaxAttempts:
+                abort(404)
+            flash(gettext('Incorrect recovery code.'))
+        else:
+            # TODO: send email.
+            verification_request.accept()
+            return 'ok'
+
+    return render_template('choose_new_email.html', require_recovery_code=require_recovery_code)
 
 
 @app.route('/consent', methods=['GET', 'POST'])

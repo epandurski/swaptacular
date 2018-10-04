@@ -1,9 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
   <div id="vcode-dialog">
-    <h1>{% trans %}Verification Code{% endtrans %}</h1>
+    <h1>{% trans %}Email Verification{% endtrans %}</h1>
     <div id="vcode-form">
       <form action="" method="POST">
+        <p>
+          {% trans %}
+            An email has been sent to you. Please check your inbox,
+            and enter the verification code provided there.
+          {% endtrans %}
+        </p>
         <p>
           <label for="verification_code">{% trans %}Verification Code{% endtrans %}</label>
           <input id="verification_code"
@@ -17,6 +23,9 @@
         </p>
         <p>
           <input type="submit" value="{% trans %}Log In{% endtrans %}">
+        </p>
+        <p>
+          <a href="{{url_for('choose_new_email', secret=computer_code)}}">{% trans %}Lost access to your email?{% endtrans %}</a>
         </p>
       </form>
     </div>

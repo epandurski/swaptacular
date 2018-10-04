@@ -139,6 +139,11 @@ class LoginVerificationRequest(RedisSecretHashRecord):
         instance.register_code_failure()
         return instance
 
+    def is_correct_recovery_code(self, recovery_code):
+        user = User.query.filter_by(user_id=int(self.user_id)).one()
+        normalized_recovery_code = normalize_recovery_code(recovery_code)
+        return user.recovery_code_hash == calc_crypt_hash(user.salt, normalized_recovery_code)
+
     def register_code_failure(self):
         num_failures = register_user_verification_code_failure(self.user_id)
         if num_failures > app.config['SECRET_CODE_MAX_ATTEMPTS']:
