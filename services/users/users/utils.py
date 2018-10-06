@@ -8,6 +8,7 @@ import time
 from urllib.parse import urljoin
 from crypt import crypt
 import requests
+from sqlalchemy.exc import IntegrityError
 from users import app, db, redis_users
 from users.models import User
 
@@ -207,6 +208,18 @@ class ChangeEmailRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['CHANGE_EMAIL_REQUEST_EXPIRATION_SECONDS']
     REDIS_PREFIX = 'setemail:'
     ENTRIES = ['email', 'user_id']
+
+    class EmailAlredyRegistered(Exception):
+        """The new email is already registered."""
+
+    def accept(self, password):
+        self.delete()
+        user = User.query.filter_by(user_id=int(self.user_id)).one()
+        user.email = self.email
+        try:
+            db.session.commit()
+        except IntegrityError:
+            raise self.EmailAlredyRegistered()
 
 
 class HydraLoginRequest:
