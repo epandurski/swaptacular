@@ -1,16 +1,14 @@
-{% extends "layout.html" %}
-{% block content %}
-  <div id="signup-sent-email">
-    <p>
-      {% trans email='<strong>{}</strong>'.format(email)|safe %}
-        An email has been sent to {{email}}. Please check your inbox,
-        and click on the link provided there.
-      {% endtrans %}
-    </p>
-    {% with login_challenge=request.args.login_challenge %}
-      {% if login_challenge %}
-        <p><a href="{{url_for('login', login_challenge=login_challenge)}}">Go to Login Page</a></p>
-      {% endif %}
-    {% endwith %}
-  </div>
-{% endblock %}
+{% extends "message.html" %}
+{% block message %}
+  <p>
+    {% trans email='<strong>{}</strong>'.format(email)|safe %}
+      An email has been sent to {{email}}. Please check your inbox,
+      and click on the link provided there.
+    {% endtrans %}
+  </p>
+  {% with login_challenge=request.args.login_challenge %}
+    {% if login_challenge %}
+      <p><a href="{{url_for('login', login_challenge=login_challenge)}}">Go to Login Page</a></p>
+    {% endif %}
+  {% endwith %}
+{% endblock message %}

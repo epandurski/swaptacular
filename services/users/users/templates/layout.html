@@ -4,7 +4,7 @@
     {% block head %}
     <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css')}}">
     <title>{% block title %}{{config['SITE_TITLE']}}{% endblock %}</title>
-    {% endblock %}
+    {% endblock head %}
   </head>
   <body>
     {% with locale_code = get_locale()|string, languages=config['SUPPORTED_LANGUAGES'] %}
@@ -27,11 +27,11 @@
         </ul>
       {% endif %}
     {% endwith %}
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">{% block content %}{% endblock content %}</div>
     <div id="footer">
       {% block footer %}
       &copy; Copyright 2018 by <a href="https://github.com/epandurski">Evgeni Pandurski</a>.
-      {% endblock %}
+      {% endblock footer %}
     </div>
   </body>
 </html>

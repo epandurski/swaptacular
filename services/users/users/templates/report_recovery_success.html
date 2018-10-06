@@ -1,11 +1,9 @@
-{% extends "layout.html" %}
-{% block content %}
-  <div id="recovery-success">
-    <p>
-      {% trans email='<strong>{}</strong>'.format(email)|safe %}
-        The password for {{email}} has been successfuly reset.
-      {% endtrans %}
-    </p>
-    <p>{% trans %}You can log in now.{% endtrans %}</p>
-  </div>
-{% endblock %}
+{% extends "message.html" %}
+{% block message %}
+  <p>
+    {% trans email='<strong>{}</strong>'.format(email)|safe %}
+      The password for {{email}} has been successfuly reset.
+    {% endtrans %}
+  </p>
+  <p>{% trans %}You can log in now.{% endtrans %}</p>
+{% endblock message %}

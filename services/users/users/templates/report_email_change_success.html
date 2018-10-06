@@ -1,12 +1,10 @@
-{% extends "layout.html" %}
-{% block content %}
-  <div id="email-change-success">
-    <p>
-      {% trans new_email='<strong>{}</strong>'.format(email)|safe %}
-        The email address on your account has been changed from
-        {{old_email}} to {{new_email}}.
-      {% endtrans %}
-    </p>
-    <p>{% trans %}You can log in now.{% endtrans %}</p>
-  </div>
-{% endblock %}
+{% extends "message.html" %}
+{% block message %}
+  <p>
+    {% trans new_email='<strong>{}</strong>'.format(email)|safe %}
+      The email address on your account has been changed from
+      {{old_email}} to {{new_email}}.
+    {% endtrans %}
+  </p>
+  <p>{% trans %}You can log in now.{% endtrans %}</p>
+{% endblock message %}
