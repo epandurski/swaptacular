@@ -196,7 +196,7 @@ def choose_new_email(secret):
             return redirect(url_for(
                 'report_sent_email',
                 email=email,
-                login_challenge=request.args.get('login_challenge'),
+                login_challenge=verification_request.challenge_id,
             ))
 
     response = make_response(render_template('choose_new_email.html', require_recovery_code=require_recovery_code))
