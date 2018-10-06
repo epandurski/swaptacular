@@ -127,7 +127,7 @@ def report_sent_email():
 def choose_password(secret):
     signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
-        abort(404)
+        return render_template('report_expired_link.html')
     is_password_recovery = signup_request.recover == 'yes'
     require_recovery_code = (is_password_recovery and
                              signup_request.has_rc == 'yes' and
@@ -148,7 +148,7 @@ def choose_password(secret):
             try:
                 signup_request.register_code_failure()
             except signup_request.ExceededMaxAttempts:
-                abort(404)
+                abort(403)
             flash(gettext('Incorrect recovery code.'))
         else:
             new_recovery_code = signup_request.accept(password)
@@ -174,7 +174,7 @@ def choose_password(secret):
 def choose_new_email(secret):
     verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
-        abort(404)
+        return render_template('report_expired_link.html')
     user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
     require_recovery_code = user.recovery_code_hash and app.config['USE_RECOVERY_CODE']
 
@@ -187,7 +187,7 @@ def choose_new_email(secret):
             try:
                 verification_request.register_code_failure()
             except verification_request.ExceededMaxAttempts:
-                abort(404)
+                abort(403)
             flash(gettext('Incorrect recovery code.'))
         else:
             verification_request.accept()
@@ -208,7 +208,7 @@ def choose_new_email(secret):
 def change_email_address(secret):
     change_email_request = ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
-        abort(404)
+        return render_template('report_expired_link.html')
     try:
         old_email = change_email_request.accept()
     except change_email_request.EmailAlredyRegistered:
