@@ -9,7 +9,7 @@ from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsHistory, format_recovery_code,
+    UserLoginsHistory, ChangeEmailRequest, format_recovery_code,
 )
 
 
@@ -31,6 +31,10 @@ def _verify_captcha(captcha_is_required):
 
 def _get_choose_password_link(signup_request):
     return urljoin(request.host_url, url_for('choose_password', secret=signup_request.secret))
+
+
+def _get_change_email_address_link(change_email_request):
+    return urljoin(request.host_url, url_for('change_email_address', secret=change_email_request.secret))
 
 
 def _set_computer_code_cookie(response, computer_code):
@@ -246,7 +250,8 @@ def choose_new_email(secret):
     verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         abort(404)
-    user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
+    user_id = int(verification_request.user_id)
+    user = User.query.filter_by(user_id=user_id).one()
     require_recovery_code = user.recovery_code_hash and app.config['USE_RECOVERY_CODE']
 
     if request.method == 'POST':
@@ -261,11 +266,23 @@ def choose_new_email(secret):
                 abort(404)
             flash(gettext('Incorrect recovery code.'))
         else:
-            # TODO: send email.
+            # TODO: ensure the new email does not exists!
             verification_request.accept()
-            return 'ok'
+            r = ChangeEmailRequest.create(user_id=user_id, email=email)
+            emails.send_change_email_address_email(email, _get_change_email_address_link(r))
+            return redirect(url_for(
+                'report_sent_email',
+                email=email,
+                login_challenge=request.args.get('login_challenge'),
+            ))
 
     return render_template('choose_new_email.html', require_recovery_code=require_recovery_code)
+
+
+@app.route('/signup/change-email/<secret>', methods=['GET'])
+def change_email_address(secret):
+    # TODO: implement the email change.
+    return "/signup/change-email/{}".format(secret)
 
 
 @app.route('/consent', methods=['GET', 'POST'])
