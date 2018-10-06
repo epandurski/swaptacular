@@ -1,40 +1,43 @@
-{% extends "layout.html" %}
-{% block content %}
-  <div id="login-dialog">
-    <h1>{% trans %}Login{% endtrans %}</h1>
-    <div id="login-form">
-      <form action="" method="POST">
-        <p>
-          <label for="email">{% trans %}Email{% endtrans %}</label>
-          <input id="email"
-                 name="email"
-                 type="email"
-                 value="{{request.form.get('email', '')}}"
-                 placeholder="{% trans %}Enter your email{% endtrans %}"
-                 maxlength="254"
-                 required
-                 >
-        </p>
-        <p>
-          <label for="password">{% trans %}Password{% endtrans %}</label>
-          <input id="password"
-                 name="password"
-                 type="password"
-                 placeholder="{% trans %}Enter your password{% endtrans %}"
-                 maxlength="{{config.PASSWORD_MAX_LENGTH}}"
-                 required
-                 >
-        </p>
-        <p>
-          <input type="submit" value="{% trans %}Log In{% endtrans %}">
-        </p>
-        <p>
-          {% with login_challenge=request.args.login_challenge %}
-            <a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot Password?{% endtrans %}</a>
-            <a href="{{url_for('signup', login_challenge=login_challenge)}}">{% trans %}Create a New Account{% endtrans %}</a>
-          {% endwith %}
-        </p>
-      </form>
-    </div>
-  </div>
-{% endblock %}
+{% extends "form.html" %}
+
+{% block form_header %}
+  {% trans %}Login{% endtrans %}
+{% endblock form_header %}
+
+{% block form_body %}
+  <form action="" method="POST">
+    <p>
+      <label for="email">{% trans %}Email{% endtrans %}</label>
+      <input id="email"
+             name="email"
+             type="email"
+             value="{{request.form.get('email', '')}}"
+             placeholder="{% trans %}Enter your email{% endtrans %}"
+             maxlength="254"
+             required
+             >
+    </p>
+    <p>
+      <label for="password">{% trans %}Password{% endtrans %}</label>
+      <input id="password"
+             name="password"
+             type="password"
+             placeholder="{% trans %}Enter your password{% endtrans %}"
+             maxlength="{{config.PASSWORD_MAX_LENGTH}}"
+             required
+             >
+    </p>
+    <p>
+      <input type="submit" value="{% trans %}Log In{% endtrans %}">
+    </p>
+  </form>
+{% endblock form_body %}
+
+{% block form_footer %}
+  {% with login_challenge=request.args.login_challenge %}
+    <ul class="login-footer-links">
+      <li><a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot Password?{% endtrans %}</a></li>
+      <li><a href="{{url_for('signup', login_challenge=login_challenge)}}">{% trans %}Create a New Account{% endtrans %}</a></li>
+    </ul>
+  {% endwith %}
+{% endblock form_footer %}
