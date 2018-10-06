@@ -212,14 +212,16 @@ class ChangeEmailRequest(RedisSecretHashRecord):
     class EmailAlredyRegistered(Exception):
         """The new email is already registered."""
 
-    def accept(self, password):
+    def accept(self):
         self.delete()
         user = User.query.filter_by(user_id=int(self.user_id)).one()
+        old_email = user.email
         user.email = self.email
         try:
             db.session.commit()
         except IntegrityError:
             raise self.EmailAlredyRegistered()
+        return old_email
 
 
 class HydraLoginRequest:

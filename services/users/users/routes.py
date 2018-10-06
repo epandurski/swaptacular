@@ -206,11 +206,29 @@ def change_email_address(secret):
     if not change_email_request:
         abort(404)
     try:
-        change_email_request.accept()
+        old_email = change_email_request.accept()
     except change_email_request.EmailAlredyRegistered:
-        return 'already registered'
+        return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
     else:
-        return 'ok'
+        return redirect(url_for(
+            'report_email_change_success',
+            new_email=change_email_request.email,
+            old_email=old_email,
+        ))
+
+
+@app.route('/signup/change-email-failure')
+def report_email_change_failure():
+    return render_template('report_email_change_failure.html', new_email=request.args['new_email'])
+
+
+@app.route('/signup/change-email-success')
+def report_email_change_success():
+    return render_template(
+        'report_email_change_success.html',
+        old_email=request.args['old_email'],
+        new_email=request.args['new_email'],
+    )
 
 
 @app.route('/signup/success')

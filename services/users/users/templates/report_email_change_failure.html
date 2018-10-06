@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div id="email-change-failure">
+    <p>
+      {% trans new_email='<strong>{}</strong>'.format(email)|safe %}
+        {{new_email}} is already registered.
+      {% endtrans %}
+    </p>
+  </div>
+{% endblock %}
