@@ -9,7 +9,9 @@
   </p>
   {% with login_challenge=request.args.login_challenge %}
     {% if login_challenge %}
-      <p><a href="{{url_for('login', login_challenge=login_challenge)}}">Go to login page</a></p>
+      <p>
+        <a class="login-link" href="{{url_for('login', login_challenge=login_challenge)}}">{% trans %}Go to login page{% endtrans %}</a>
+      </p>
     {% endif %}
   {% endwith %}
 {% endblock message %}

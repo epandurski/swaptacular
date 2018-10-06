@@ -2,10 +2,9 @@
 
 {% block message %}
   <p>
-    {% trans new_email='<strong>{}</strong>'.format(email)|safe %}
-      The email address on your account has been changed from
-      {{old_email}} to {{new_email}}.
+    {% trans old_email='<strong>{}</strong>'.format(old_email)|safe, new_email='<strong>{}</strong>'.format(new_email)|safe %}
+      The email address on your account has been successfully changed
+      from {{old_email}} to {{new_email}}.
     {% endtrans %}
   </p>
-  <p>{% trans %}You can log in now.{% endtrans %}</p>
 {% endblock message %}
