@@ -1,5 +1,5 @@
 from urllib.parse import urljoin
-from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort
+from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort, make_response
 from flask_babel import gettext
 import user_agents
 from users import app, logger
@@ -159,11 +159,13 @@ def choose_password(secret):
                     email=signup_request.email,
                 )
             else:
-                return render_template(
+                response = make_response(render_template(
                     'report_signup_success.html',
                     email=signup_request.email,
                     recovery_code=format_recovery_code(new_recovery_code),
-                )
+                ))
+                response.headers['Cache-Control'] = 'no-store'
+                return response
 
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
@@ -197,7 +199,9 @@ def choose_new_email(secret):
                 login_challenge=request.args.get('login_challenge'),
             ))
 
-    return render_template('choose_new_email.html', require_recovery_code=require_recovery_code)
+    response = make_response(render_template('choose_new_email.html', require_recovery_code=require_recovery_code))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.route('/signup/change-email/<secret>', methods=['GET'])
@@ -229,11 +233,6 @@ def report_email_change_success():
         old_email=request.args['old_email'],
         new_email=request.args['new_email'],
     )
-
-
-@app.route('/signup/success')
-def report_signup_success():
-    return "/signup/success"
 
 
 @app.route('/login', methods=['GET', 'POST'])
