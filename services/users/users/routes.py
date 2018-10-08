@@ -29,6 +29,14 @@ def _verify_captcha(captcha_is_required):
     return captcha_passed, captcha_error_message
 
 
+def _get_user_agent():
+    return str(user_agents.parse(request.headers.get('User-Agent', '')))
+
+
+def _get_change_password_link(email):
+    return urljoin(request.host_url, url_for('signup', email=email, recover='true'))
+
+
 def _get_choose_password_link(signup_request):
     return urljoin(request.host_url, url_for('choose_password', secret=signup_request.secret))
 
@@ -170,6 +178,33 @@ def choose_password(secret):
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
 
+@app.route('/signup/change-email', methods=['GET', 'POST'])
+def change_email_login():
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        password = request.form['password']
+        user = User.query.filter_by(email=email).one_or_none()
+        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+            try:
+                # We create a new login verification request without a
+                # verification code. This request can only be used to
+                # set a new email address for the account.
+                login_verification_request = LoginVerificationRequest.create(
+                    user_id=user.user_id,
+                    challenge_id=request.args.get('login_challenge'),
+                )
+            except LoginVerificationRequest.ExceededMaxAttempts:
+                abort(403)
+            emails.send_change_email_address_request_email(
+                email,
+                _get_change_password_link(email),
+            )
+            return redirect(url_for('choose_new_email', secret=login_verification_request.secret))
+        flash(gettext('Incorrect email or password.'))
+
+    return render_template('change_email_login.html')
+
+
 @app.route('/signup/choose-email/<secret>', methods=['GET', 'POST'])
 def choose_new_email(secret):
     verification_request = LoginVerificationRequest.from_secret(secret)
@@ -272,9 +307,12 @@ def login():
                 )
             except LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
-            user_agent = str(user_agents.parse(request.headers.get('User-Agent', '')))
-            change_password_page = urljoin(request.host_url, url_for('signup', email=email, recover='true'))
-            emails.send_verification_code_email(email, verification_code, user_agent, change_password_page)
+            emails.send_verification_code_email(
+                email,
+                verification_code,
+                _get_user_agent(),
+                _get_change_password_link(email),
+            )
             response = redirect(url_for('enter_verification_code'))
             _set_computer_code_cookie(response, login_verification_request.secret)
             return response

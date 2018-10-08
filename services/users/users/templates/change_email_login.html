@@ -1,18 +1,18 @@
 {% extends "form.html" %}
 
 {% block form_header %}
-  {% trans %}Login{% endtrans %}
+  {% trans %}Change Email Address{% endtrans %}
 {% endblock form_header %}
 
 {% block form_body %}
   <form action="" method="POST">
     <p>
-      <label for="email">{% trans %}Email{% endtrans %}</label>
+      <label for="email">{% trans %}Old email{% endtrans %}</label>
       <input id="email"
              name="email"
              type="email"
              value="{{request.form.get('email', '')}}"
-             placeholder="{% trans %}Enter your email{% endtrans %}"
+             placeholder="{% trans %}Enter your old email{% endtrans %}"
              maxlength="254"
              required
              >
@@ -32,13 +32,3 @@
     </p>
   </form>
 {% endblock form_body %}
-
-{% block form_footer %}
-  {% with login_challenge=request.args.login_challenge %}
-    <ul class="login-footer-links">
-      <li><a href="{{url_for('signup', login_challenge=login_challenge)}}">{% trans %}Create a new account{% endtrans %}</a></li>
-      <li><a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a></li>
-      <li><a href="{{url_for('change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
-    </ul>
-  {% endwith %}
-{% endblock form_footer %}

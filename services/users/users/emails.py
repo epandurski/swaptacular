@@ -57,6 +57,18 @@ def send_verification_code_email(email, verification_code, user_agent, change_pa
     mail.send(msg)
 
 
+def send_change_email_address_request_email(email, change_password_page):
+    msg = Message(
+        subject=gettext('Change Email Address'),
+        recipients=[email],
+        body=render_template(
+            'request_email_change.txt',
+            change_password_page=change_password_page,
+        ),
+    )
+    mail.send(msg)
+
+
 def send_change_email_address_email(email, change_email_address_link):
     msg = Message(
         subject=gettext('Change Email Address'),
