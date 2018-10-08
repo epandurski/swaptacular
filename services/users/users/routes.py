@@ -9,7 +9,8 @@ from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsHistory, ChangeEmailRequest, format_recovery_code, invalidate_hydra_credentials,
+    UserLoginsHistory, ChangeEmailRequest, format_recovery_code, get_hydra_subject,
+    invalidate_hydra_credentials,
 )
 
 
@@ -285,7 +286,7 @@ def login():
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
             user_id = user.user_id
-            subject = 'user:{}'.format(user_id)
+            subject = get_hydra_subject(user_id)
             if not user.two_factor_login:
                 return redirect(login_request.accept(subject))
 
@@ -334,7 +335,7 @@ def enter_verification_code():
         if request.form['verification_code'].strip() == verification_request.code:
             login_request = HydraLoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
-            subject = 'user:{}'.format(user_id)
+            subject = get_hydra_subject(user_id)
             verification_request.accept(clear_failures=True)
             UserLoginsHistory(user_id).add(computer_code)
             return redirect(login_request.accept(subject))
