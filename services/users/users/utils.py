@@ -158,8 +158,9 @@ class LoginVerificationRequest(RedisSecretHashRecord):
             self.delete()
             raise self.ExceededMaxAttempts()
 
-    def accept(self):
-        clear_user_verification_code_failures(self.user_id)
+    def accept(self, clear_failures=False):
+        if clear_failures:
+            clear_user_verification_code_failures(self.user_id)
         self.delete()
 
 

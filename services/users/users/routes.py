@@ -244,10 +244,14 @@ def change_email_address(secret):
     change_email_request = ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
         return render_template('report_expired_link.html')
+
     try:
         old_email = change_email_request.accept()
     except change_email_request.EmailAlredyRegistered:
-        return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
+        return redirect(url_for(
+            'report_email_change_failure',
+            new_email=change_email_request.email,
+        ))
     else:
         return redirect(url_for(
             'report_email_change_success',
@@ -333,7 +337,7 @@ def enter_verification_code():
             login_request = HydraLoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
             subject = 'user:{}'.format(user_id)
-            verification_request.accept()
+            verification_request.accept(clear_failures=True)
             UserLoginsHistory(user_id).add(computer_code)
             return redirect(login_request.accept(subject))
         try:
