@@ -7,7 +7,7 @@
 {% block form_body %}
   <form action="" method="POST">
     {% if require_recovery_code %}
-      <p>
+      <p class="recovery-code">
         <label for="recovery_code">{% trans %}Recovery code{% endtrans %}</label>
         <input id="recovery_code"
                name="recovery_code"
