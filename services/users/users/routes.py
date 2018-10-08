@@ -9,7 +9,7 @@ from users.models import User
 from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsHistory, ChangeEmailRequest, format_recovery_code,
+    UserLoginsHistory, ChangeEmailRequest, format_recovery_code, invalidate_hydra_credentials,
 )
 
 
@@ -162,6 +162,7 @@ def choose_password(secret):
             new_recovery_code = signup_request.accept(password)
             UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             if is_password_recovery:
+                invalidate_hydra_credentials(signup_request.user_id)
                 return render_template(
                     'report_recovery_success.html',
                     email=signup_request.email,
@@ -244,20 +245,17 @@ def change_email_address(secret):
     change_email_request = ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
         return render_template('report_expired_link.html')
-
     try:
         old_email = change_email_request.accept()
     except change_email_request.EmailAlredyRegistered:
-        return redirect(url_for(
-            'report_email_change_failure',
-            new_email=change_email_request.email,
-        ))
-    else:
-        return redirect(url_for(
-            'report_email_change_success',
-            new_email=change_email_request.email,
-            old_email=old_email,
-        ))
+        return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
+
+    invalidate_hydra_credentials(int(change_email_request.user_id))
+    return redirect(url_for(
+        'report_email_change_success',
+        new_email=change_email_request.email,
+        old_email=old_email,
+    ))
 
 
 @app.route('/signup/change-email-failure')

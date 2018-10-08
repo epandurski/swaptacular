@@ -6,7 +6,7 @@ import base64
 import struct
 import time
 import hashlib
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote_plus
 from crypt import crypt
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -17,6 +17,8 @@ from users.models import User
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
 LOGIN_CODE_FAILURE_EXPIRATION_SECONDS = max(app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'], 24 * 60 * 60)
+HYDRA_CONSENTS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent/')
+HYDRA_LOGINS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login/')
 
 
 def generate_random_secret(num_bytes=15):
@@ -286,3 +288,11 @@ class HydraConsentRequest:
         })
         r.raise_for_status()
         return r.json()['redirect_to']
+
+
+def invalidate_hydra_credentials(user_id):
+    # TODO: Use a function that returns the subject, given user_id.
+    subject = quote_plus('user:{}'.format(user_id))
+    timeout = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
+    requests.delete(HYDRA_CONSENTS_BASE_URL + subject, timeout=timeout)
+    requests.delete(HYDRA_LOGINS_BASE_URL + subject, timeout=timeout)
