@@ -5,6 +5,7 @@ import string
 import base64
 import struct
 import time
+import hashlib
 from urllib.parse import urljoin
 from crypt import crypt
 import requests
@@ -83,13 +84,19 @@ class UserLoginsHistory:
     def __init__(self, user_id):
         self.key = self.REDIS_PREFIX + str(user_id)
 
+    @staticmethod
+    def calc_hash(s):
+        return hashlib.sha224(s.encode('ascii')).hexdigest()
+
     def contains(self, element):
-        return element in redis_users.zrevrange(self.key, 0, self.MAX_COUNT - 1)
+        emement_hash = self.calc_hash(element)
+        return emement_hash in redis_users.zrevrange(self.key, 0, self.MAX_COUNT - 1)
 
     def add(self, element):
+        emement_hash = self.calc_hash(element)
         with redis_users.pipeline() as p:
             p.zremrangebyrank(self.key, 0, -self.MAX_COUNT)
-            p.zadd(self.key, time.time(), element)
+            p.zadd(self.key, time.time(), emement_hash)
             p.execute()
 
 
