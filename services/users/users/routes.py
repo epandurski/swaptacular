@@ -307,10 +307,27 @@ def change_recovery_code():
 
 @app.route('/signup/recovery-code/<secret>', methods=['GET', 'POST'])
 def generate_recovery_code(secret):
-    # TODO: add proper implementation.
-    response = make_response('ok')
-    response.headers['Cache-Control'] = 'no-store'
-    return response
+    change_recovery_code_request = ChangeRecoveryCodeRequest.from_secret(secret)
+    if not change_recovery_code_request:
+        return render_template('report_expired_link.html')
+
+    if request.method == 'POST':
+        email = change_recovery_code_request.email
+        password = request.form['password']
+        user = User.query.filter_by(email=email).one_or_none()
+        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+            # TODO: register failures?
+            # TODO: change the template.
+            new_recovery_code = change_recovery_code_request.accept()
+            response = make_response(render_template(
+                'report_signup_success.html',
+                email=email,
+                recovery_code=format_recovery_code(new_recovery_code),
+            ))
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+
+    return render_template('enter_password.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])

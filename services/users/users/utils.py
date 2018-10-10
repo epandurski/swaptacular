@@ -254,6 +254,14 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
     REDIS_PREFIX = 'changerc:'
     ENTRIES = ['email']
 
+    def accept(self):
+        self.delete()
+        recovery_code = generate_recovery_code()
+        user = User.query.filter_by(email=self.email).one()
+        user.recovery_code_hash = calc_crypt_hash(user.salt, recovery_code)
+        db.session.commit()
+        return recovery_code
+
 
 class HydraLoginRequest:
     BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')
