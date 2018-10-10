@@ -10,7 +10,7 @@ from users.utils import (
     is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
     HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
     UserLoginsHistory, ChangeEmailRequest, format_recovery_code, get_hydra_subject,
-    invalidate_hydra_credentials,
+    invalidate_hydra_credentials, ChangeRecoveryCodeRequest
 )
 
 
@@ -44,6 +44,10 @@ def _get_choose_password_link(signup_request):
 
 def _get_change_email_address_link(change_email_request):
     return urljoin(request.host_url, url_for('change_email_address', secret=change_email_request.secret))
+
+
+def _get_change_recovery_code_link(change_recovery_code_request):
+    return urljoin(request.host_url, url_for('generate_recovery_code', secret=change_recovery_code_request.secret))
 
 
 def _set_computer_code_cookie(response, computer_code):
@@ -118,10 +122,11 @@ def signup():
             _set_computer_code_cookie(response, computer_code)
             return response
 
+    title = gettext('Create a New Account') if is_new_user else gettext('Change Account Password')
     return render_template(
         'signup.html',
         email=email,
-        is_new_user=is_new_user,
+        title=title,
         display_captcha=captcha.display_html,
     )
 
@@ -271,6 +276,41 @@ def report_email_change_success():
         old_email=request.args['old_email'],
         new_email=request.args['new_email'],
     )
+
+
+@app.route('/signup/recovery-code', methods=['GET', 'POST'])
+def change_recovery_code():
+    email = request.args.get('email', '')
+    if request.method == 'POST':
+        captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
+        email = request.form['email'].strip()
+        if is_invalid_email(email):
+            flash(gettext('The email address is invalid.'))
+        elif not captcha_passed:
+            flash(captcha_error_message)
+        else:
+            r = ChangeRecoveryCodeRequest.create(email=email)
+            emails.send_change_recovery_code_email(email, _get_change_recovery_code_link(r))
+            return redirect(url_for(
+                'report_sent_email',
+                email=email,
+                login_challenge=request.args.get('login_challenge'),
+            ))
+
+    return render_template(
+        'signup.html',
+        email=email,
+        title=gettext('Change Recovery Code'),
+        display_captcha=captcha.display_html,
+    )
+
+
+@app.route('/signup/recovery-code/<secret>', methods=['GET', 'POST'])
+def generate_recovery_code(secret):
+    # TODO: add proper implementation.
+    response = make_response('ok')
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.route('/login', methods=['GET', 'POST'])

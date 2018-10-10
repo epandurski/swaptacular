@@ -1,12 +1,6 @@
 {% extends "form.html" %}
 
-{% block form_header %}
-  {% if is_new_user %}
-    {% trans %}Create a New Account{% endtrans %}
-  {% else %}
-    {% trans %}Change Account Password{% endtrans %}
-  {% endif %}
-{% endblock form_header %}
+{% block form_header %}{{title}}{% endblock form_header %}
 
 {% block form_body %}
   <form action="" method="POST" id="signup-form">

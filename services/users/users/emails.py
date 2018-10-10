@@ -80,3 +80,16 @@ def send_change_email_address_email(email, change_email_address_link):
         ),
     )
     mail.send(msg)
+
+
+def send_change_recovery_code_email(email, change_recovery_code_link):
+    msg = Message(
+        subject=gettext('Change Recovery Code'),
+        recipients=[email],
+        body=render_template(
+            'change_recovery_code.txt',
+            email=email,
+            change_recovery_code_link=change_recovery_code_link,
+        ),
+    )
+    mail.send(msg)

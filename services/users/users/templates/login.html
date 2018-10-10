@@ -38,6 +38,7 @@
     <ul class="login-footer-links">
       <li><a href="{{url_for('signup', login_challenge=login_challenge)}}">{% trans %}Create a new account{% endtrans %}</a></li>
       <li><a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a></li>
+      <li><a href="{{url_for('change_recovery_code', login_challenge=login_challenge)}}">{% trans %}Lost your recovery code?{% endtrans %}</a></li>
       <li><a href="{{url_for('change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
     </ul>
   {% endwith %}

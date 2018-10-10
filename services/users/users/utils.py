@@ -249,6 +249,12 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         return old_email
 
 
+class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
+    EXPIRATION_SECONDS = app.config['CHANGE_RECOVERY_CODE_REQUEST_EXPIRATION_SECONDS']
+    REDIS_PREFIX = 'changerc:'
+    ENTRIES = ['email']
+
+
 class HydraLoginRequest:
     BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')
     TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
