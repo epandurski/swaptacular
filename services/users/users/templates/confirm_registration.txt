@@ -1,5 +1,5 @@
 {% trans site=config.SITE_TITLE, num=config.SIGNUP_REQUEST_EXPIRATION_SECONDS // 3600 -%}
-Please proceed with your registration by clicking on the following link:
+Proceed with your registration by clicking on the following link:
 
 {{register_link}}
 

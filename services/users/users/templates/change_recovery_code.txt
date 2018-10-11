@@ -1,5 +1,5 @@
 {% trans site=config.SITE_TITLE, num=config.CHANGE_RECOVERY_CODE_REQUEST_EXPIRATION_SECONDS // 3600 -%}
-Please proceed with changing your recovery code by clicking on the following link:
+Proceed with changing your recovery code by clicking on the following link:
 
 {{change_recovery_code_link}}
 
