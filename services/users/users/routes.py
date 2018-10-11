@@ -280,6 +280,8 @@ def report_email_change_success():
 
 @app.route('/signup/recovery-code', methods=['GET', 'POST'])
 def change_recovery_code():
+    if not app.config['USE_RECOVERY_CODE']:
+        abort(404)
     email = request.args.get('email', '')
     if request.method == 'POST':
         captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
@@ -316,7 +318,6 @@ def generate_recovery_code(secret):
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
-            # TODO: register failures?
             # TODO: change the template.
             new_recovery_code = change_recovery_code_request.accept()
             response = make_response(render_template(
@@ -326,6 +327,11 @@ def generate_recovery_code(secret):
             ))
             response.headers['Cache-Control'] = 'no-store'
             return response
+        try:
+            change_recovery_code_request.register_password_failure()
+        except change_recovery_code_request.ExceededMaxAttempts:
+            abort(403)
+        flash(gettext('Incorrect password.'))
 
     return render_template('enter_password.html')
 
