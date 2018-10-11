@@ -272,6 +272,7 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
 class HydraLoginRequest:
     BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')
     TIMEOUT = app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
+    REDIS_PREFIX = 'logins:'
 
     class TooManyLogins(Exception):
         """Too many login attempts."""
@@ -281,10 +282,9 @@ class HydraLoginRequest:
         self.request_url = self.BASE_URL + challenge_id
 
     def register_successful_login(self, subject):
-        key = 'logins:' + subject
+        key = self.REDIS_PREFIX + subject
         if redis_users.ttl(key) < 0:
-            redis_users.set(key, '1', ex=60)
-            # redis_users.set(key, '1', ex=2600000)
+            redis_users.set(key, '1', ex=2600000)
             num_logins = 1
         else:
             num_logins = redis_users.incrby(key)
