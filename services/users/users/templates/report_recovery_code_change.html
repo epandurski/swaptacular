@@ -1,0 +1,13 @@
+{% extends "message.html" %}
+
+{% block message %}
+  <p>
+    {% trans %}Your recovery code has been changed.{% endtrans %}
+  </p>
+  {% if recovery_code %}
+    <p id="recovery-code">
+      <span>{% trans %}Your new recovery code is:{% endtrans %}</span>
+      <strong>{{recovery_code}}</strong>
+    </p>
+  {% endif %}
+{% endblock message %}

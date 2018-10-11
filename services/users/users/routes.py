@@ -318,10 +318,9 @@ def generate_recovery_code(secret):
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
-            # TODO: change the template.
             new_recovery_code = change_recovery_code_request.accept()
             response = make_response(render_template(
-                'report_signup_success.html',
+                'report_recovery_code_change.html',
                 email=email,
                 recovery_code=format_recovery_code(new_recovery_code),
             ))
