@@ -262,12 +262,6 @@ class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
         db.session.commit()
         return recovery_code
 
-    def register_password_failure(self):
-        num_failures = int(redis_users.hincrby(self.key, 'fails'))
-        if num_failures >= app.config['SECRET_CODE_MAX_ATTEMPTS']:
-            self.delete()
-            raise self.ExceededMaxAttempts()
-
 
 class HydraLoginRequest:
     BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/requests/login/')

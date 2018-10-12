@@ -278,7 +278,7 @@ def report_email_change_success():
     )
 
 
-@app.route('/signup/recovery-code', methods=['GET', 'POST'])
+@app.route('/signup/change-recovery-code', methods=['GET', 'POST'])
 def change_recovery_code():
     if not app.config['USE_RECOVERY_CODE']:
         abort(404)
@@ -326,10 +326,6 @@ def generate_recovery_code(secret):
             ))
             response.headers['Cache-Control'] = 'no-store'
             return response
-        try:
-            change_recovery_code_request.register_password_failure()
-        except change_recovery_code_request.ExceededMaxAttempts:
-            abort(403)
         flash(gettext('Incorrect password.'))
 
     return render_template('enter_password.html')
