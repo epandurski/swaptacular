@@ -14,10 +14,10 @@ from users.utils import (
 )
 
 
-def _verify_captcha(captcha_is_required):
+def _verify_captcha():
     """Verify captcha if required."""
 
-    if captcha_is_required:
+    if app.config['SHOW_CAPTCHA_ON_SIGNUP']:
         captcha_response = request.form.get(app.config['CAPTCHA_RESPONSE_FIELD_NAME'], '')
         captcha_solution = captcha.verify(captcha_response, request.remote_addr)
         captcha_passed = captcha_solution.is_valid
@@ -86,7 +86,7 @@ def signup():
     email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
+        captcha_passed, captcha_error_message = _verify_captcha()
         email = request.form['email'].strip()
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
@@ -198,6 +198,7 @@ def change_email_login():
                 # set a new email address for the account.
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user.user_id,
+                    email=email,
                     challenge_id=request.args.get('login_challenge'),
                 )
             except LoginVerificationRequest.ExceededMaxAttempts:
@@ -233,7 +234,11 @@ def choose_new_email(secret):
             flash(gettext('Incorrect recovery code.'))
         else:
             verification_request.accept()
-            r = ChangeEmailRequest.create(user_id=user.user_id, email=email)
+            r = ChangeEmailRequest.create(
+                user_id=user.user_id,
+                email=email,
+                old_email=verification_request.email,
+            )
             emails.send_change_email_address_email(email, _get_change_email_address_link(r))
             return redirect(url_for(
                 'report_sent_email',
@@ -252,7 +257,7 @@ def change_email_address(secret):
     if not change_email_request:
         return render_template('report_expired_link.html')
     try:
-        old_email = change_email_request.accept()
+        change_email_request.accept()
     except change_email_request.EmailAlredyRegistered:
         return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
 
@@ -260,7 +265,7 @@ def change_email_address(secret):
     return redirect(url_for(
         'report_email_change_success',
         new_email=change_email_request.email,
-        old_email=old_email,
+        old_email=change_email_request.old_email,
     ))
 
 
@@ -284,7 +289,7 @@ def change_recovery_code():
         abort(404)
     email = request.args.get('email', '')
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = _verify_captcha(app.config['SHOW_CAPTCHA_ON_SIGNUP'])
+        captcha_passed, captcha_error_message = _verify_captcha()
         email = request.form['email'].strip()
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))

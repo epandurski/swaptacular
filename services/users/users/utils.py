@@ -153,7 +153,7 @@ class RedisSecretHashRecord:
 class LoginVerificationRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS']
     REDIS_PREFIX = 'vcode:'
-    ENTRIES = ['user_id', 'code', 'challenge_id']
+    ENTRIES = ['user_id', 'code', 'challenge_id', 'email']
 
     @classmethod
     def create(cls, **data):
@@ -232,21 +232,19 @@ class SignUpRequest(RedisSecretHashRecord):
 class ChangeEmailRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['CHANGE_EMAIL_REQUEST_EXPIRATION_SECONDS']
     REDIS_PREFIX = 'setemail:'
-    ENTRIES = ['email', 'user_id']
+    ENTRIES = ['email', 'old_email', 'user_id']
 
     class EmailAlredyRegistered(Exception):
         """The new email is already registered."""
 
     def accept(self):
         self.delete()
-        user = User.query.filter_by(user_id=int(self.user_id)).one()
-        old_email = user.email
+        user = User.query.filter_by(user_id=int(self.user_id), email=self.old_email).one()
         user.email = self.email
         try:
             db.session.commit()
         except IntegrityError:
             raise self.EmailAlredyRegistered()
-        return old_email
 
 
 class ChangeRecoveryCodeRequest(RedisSecretHashRecord):
