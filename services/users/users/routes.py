@@ -46,7 +46,7 @@ def _get_change_email_address_link(change_email_request):
     return urljoin(request.host_url, url_for('change_email_address', secret=change_email_request.secret))
 
 
-def _get_change_recovery_code_link(change_recovery_code_request):
+def _get_generate_recovery_code_link(change_recovery_code_request):
     return urljoin(request.host_url, url_for('generate_recovery_code', secret=change_recovery_code_request.secret))
 
 
@@ -297,7 +297,7 @@ def change_recovery_code():
             flash(captcha_error_message)
         else:
             r = ChangeRecoveryCodeRequest.create(email=email)
-            emails.send_change_recovery_code_email(email, _get_change_recovery_code_link(r))
+            emails.send_change_recovery_code_email(email, _get_generate_recovery_code_link(r))
             return redirect(url_for(
                 'report_sent_email',
                 email=email,
