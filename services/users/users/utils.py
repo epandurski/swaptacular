@@ -153,7 +153,7 @@ class RedisSecretHashRecord:
 class LoginVerificationRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS = app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS']
     REDIS_PREFIX = 'vcode:'
-    ENTRIES = ['user_id', 'code', 'challenge_id', 'email']
+    ENTRIES = ['user_id', 'code', 'challenge_id', 'email', 'remember_me']
 
     @classmethod
     def create(cls, **data):
@@ -291,7 +291,7 @@ class HydraLoginRequest:
         fetched_data = r.json()
         return fetched_data['subject'] if fetched_data['skip'] else None
 
-    def accept(self, subject, remember=False, remember_for=0):
+    def accept(self, subject, remember=False, remember_for=1000000000):
         """Accept the request unless the limit is reached, return an URL to redirect to."""
 
         try:

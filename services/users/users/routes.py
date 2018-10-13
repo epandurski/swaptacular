@@ -355,12 +355,13 @@ def login():
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password']
+        remember_me = 'remember_me' in request.form
         user = User.query.filter_by(email=email).one_or_none()
         if user and user.password_hash == calc_crypt_hash(user.salt, password):
             user_id = user.user_id
             subject = get_hydra_subject(user_id)
             if not user.two_factor_login:
-                return redirect(login_request.accept(subject))
+                return redirect(login_request.accept(subject, remember_me))
 
             # Two factor login: require a cookie containing a secret
             # "computer code" as well. The cookie proves that there
@@ -370,7 +371,7 @@ def login():
                 user_logins_history = UserLoginsHistory(user_id)
                 if user_logins_history.contains(computer_code):
                     user_logins_history.add(computer_code)
-                    return redirect(login_request.accept(subject))
+                    return redirect(login_request.accept(subject, remember_me))
 
             # A two factor login verification code is required.
             verification_code = generate_verification_code()
@@ -379,6 +380,7 @@ def login():
                     user_id=user_id,
                     email=email,
                     code=verification_code,
+                    remember_me='yes' if remember_me else 'no',
                     challenge_id=login_request.challenge_id,
                 )
             except LoginVerificationRequest.ExceededMaxAttempts:
@@ -409,9 +411,10 @@ def enter_verification_code():
             login_request = HydraLoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
             subject = get_hydra_subject(user_id)
+            remember_me = verification_request.remember_me == 'yes'
             verification_request.accept(clear_failures=True)
             UserLoginsHistory(user_id).add(computer_code)
-            return redirect(login_request.accept(subject))
+            return redirect(login_request.accept(subject, remember_me))
         try:
             verification_request.register_code_failure()
         except verification_request.ExceededMaxAttempts:
