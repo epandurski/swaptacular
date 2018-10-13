@@ -78,7 +78,7 @@ def register_user_verification_code_failure(user_id):
 
 
 def get_hydra_subject(user_id):
-    return 'user:{}'.format(user_id)
+    return str(user_id)
 
 
 def invalidate_hydra_credentials(user_id):
