@@ -117,6 +117,7 @@ def signup():
             response = redirect(url_for(
                 'report_sent_email',
                 email=email,
+                login_url=request.args.get('login_url'),
                 login_challenge=request.args.get('login_challenge'),
             ))
             _set_computer_code_cookie(response, computer_code)
