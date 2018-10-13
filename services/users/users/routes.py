@@ -252,22 +252,30 @@ def choose_new_email(secret):
     return response
 
 
-@app.route('/signup/change-email/<secret>', methods=['GET'])
+@app.route('/signup/change-email/<secret>', methods=['GET', 'POST'])
 def change_email_address(secret):
     change_email_request = ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
         return render_template('report_expired_link.html')
-    try:
-        change_email_request.accept()
-    except change_email_request.EmailAlredyRegistered:
-        return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
 
-    invalidate_hydra_credentials(int(change_email_request.user_id))
-    return redirect(url_for(
-        'report_email_change_success',
-        new_email=change_email_request.email,
-        old_email=change_email_request.old_email,
-    ))
+    if request.method == 'POST':
+        email = change_email_request.old_email
+        password = request.form['password']
+        user = User.query.filter_by(email=email).one_or_none()
+        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+            try:
+                change_email_request.accept()
+            except change_email_request.EmailAlredyRegistered:
+                return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
+            invalidate_hydra_credentials(int(change_email_request.user_id))
+            return redirect(url_for(
+                'report_email_change_success',
+                new_email=change_email_request.email,
+                old_email=change_email_request.old_email,
+            ))
+        flash(gettext('Incorrect password.'))
+
+    return render_template('enter_password.html', title=gettext('Change Email Address'))
 
 
 @app.route('/signup/change-email-failure')
@@ -334,7 +342,7 @@ def generate_recovery_code(secret):
             return response
         flash(gettext('Incorrect password.'))
 
-    return render_template('enter_password.html')
+    return render_template('enter_password.html', title=gettext('Change Recovery Code'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -369,6 +377,7 @@ def login():
             try:
                 login_verification_request = LoginVerificationRequest.create(
                     user_id=user_id,
+                    email=email,
                     code=verification_code,
                     challenge_id=login_request.challenge_id,
                 )
