@@ -2,12 +2,9 @@
 
 {% block message %}
   <p>
-    {% trans %}Your recovery code has been changed.{% endtrans %}
+    {% trans %}
+      Your account recovery code has been changed. Your new recovery code is:
+    {% endtrans %}
   </p>
-  {% if recovery_code %}
-    <p id="recovery-code">
-      <span>{% trans %}Your new recovery code is:{% endtrans %}</span>
-      <strong>{{recovery_code}}</strong>
-    </p>
-  {% endif %}
+  {% include '_recovery_code.html' %}
 {% endblock message %}

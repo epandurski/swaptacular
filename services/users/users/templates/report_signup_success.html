@@ -2,15 +2,14 @@
 
 {% block message %}
   <p>
-    {% trans email='<strong>{}</strong>'.format(email)|safe %}
-      A new account for {{email}} has been created.
+    {% trans email='<em class="email">{}</em>'.format(email)|safe %}
+      A new account has been created for {{email}}.
     {% endtrans %}
   </p>
   {% if recovery_code %}
-    <p id="recovery-code">
-      <span>{% trans %}Your recovery code is:{% endtrans %}</span>
-      <strong>{{recovery_code}}</strong>
+    <p>
+      {% trans %}Your account recovery code is:{% endtrans %}
     </p>
+    {% include '_recovery_code.html' %}
   {% endif %}
-  <p>{% trans %}You can log in now.{% endtrans %}</p>
 {% endblock message %}
