@@ -2,5 +2,10 @@
 
 {% block message %}
   <p class="failure-message-icon"></p>
-  <p>{% trans %}This link has expired.{% endtrans %}</p>
+  <p>
+    {% trans %}
+      There is nothing here. You either don't have permission to
+      access this page or the link has expired.
+    {% endtrans %}
+  </p>
 {% endblock message %}
