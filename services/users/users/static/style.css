@@ -1,8 +1,5 @@
 @import url("normalize.css");
 
-html {
-  overflow-y: scroll;
-}
 body {
     font  : 16px sans-serif;
     background-color: #3464e0;
