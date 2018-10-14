@@ -1,6 +1,6 @@
 body {
     font  : 16px sans-serif;
-    background-color: #f4f4f4;
+    background-color: #3464e0;
     margin: 0;
 }
 a {
@@ -34,6 +34,8 @@ a:hover {
     padding: 8px 3px;
 }
 .languages a {
+    color: white;
+    font-weight: bold;
     text-decoration: none;
 }
 .flashes {
