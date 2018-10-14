@@ -1,7 +1,7 @@
 @import url("normalize.css");
 
 body {
-    font  : 16px sans-serif;
+    font: 16px Arial, Helvetica, sans-serif;
     background-color: #3464e0;
     margin: 0 5px;
 }
@@ -113,7 +113,7 @@ a:hover {
     margin:10px auto;
     max-width: 400px;
     padding: 20px 12px 10px 12px;
-    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-size: 13px;
 }
 .primary-form-body p {
     padding: 0;
@@ -190,7 +190,7 @@ input[type=password]:focus,
 input[type=submit], form input[type=button], .login-link {
     display: inline-block;
     margin-top: 5px;
-    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-size: 13px;
     font-weight: bold;
     background: #3469d7;
     padding: 8px 15px 8px 15px;
