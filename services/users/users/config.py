@@ -7,6 +7,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     HYDRA_ADMIN_URL = 'http://hydra:4445'
     SITE_TITLE = 'Swaptacular'
     USE_RECOVERY_CODE = True
+    ABOUT_URL = 'https://github.com/epandurski'
 
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'

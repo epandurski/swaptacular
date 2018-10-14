@@ -11,7 +11,8 @@ body {
     padding: 1em;
 }
 #footer {
-    display:none;
+    padding: 20px;
+    text-align:center;
 }
 .languages {
     font-size: 12px;
