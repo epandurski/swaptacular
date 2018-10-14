@@ -1,6 +1,9 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <p class="message-icon">
+    <img src="{{url_for('serve_static', filename='sent-email.gif')}}">
+  </p>
   <p>
     {% trans email='<strong class="email">{}</strong>'.format(email)|safe %}
       An email has been sent to {{email}}. Please check your inbox,

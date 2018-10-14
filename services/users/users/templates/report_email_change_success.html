@@ -1,6 +1,9 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <p class="message-icon">
+    <img src="{{url_for('serve_static', filename='success.png')}}">
+  </p>
   <p>
     {% trans old_email='<em class="email">{}</em>'.format(old_email)|safe, new_email='<em class="email">{}</em>'.format(new_email)|safe %}
       The email address on your account has been successfully changed

@@ -4,14 +4,15 @@ body {
     margin: 0;
 }
 a {
-    color: #4B99AD;
+    color: #3469d7;
 }
 a:hover {
-    color: #3d7d8e;
+    color: #234396;
 }
 #content {
     background-color: white;
     box-shadow: 0 0 35px black;
+    border-radius: 5px;
     max-width: 400px;
     margin: auto;
     padding: 1em;
@@ -72,6 +73,18 @@ a:hover {
 .login-footer-links a {
     text-decoration: none;
 }
+.message-icon {
+    text-align: center;
+}
+.message-icon img {
+    max-width: 200px;
+    max-height: 130px;
+}
+.email {
+    font-weight: bold;
+    font-style: normal;
+    color: #a0a0a0;
+}
 
 @keyframes slideDown {
     0%, 100% { transform: translateY(-80px); }
@@ -93,6 +106,9 @@ a:hover {
 .primary-form-body p {
     padding: 0;
     margin: 15px 0 0 0;
+}
+.form-comment {
+    font-size: 16px;
 }
 label{
     margin:0 0 3px 0;
@@ -130,7 +146,7 @@ input[type=checkbox]{
     padding: 9px;
     display: inline-block;
     position: relative;
-    left: -4px;
+    left: 0;
 }
 input[type=checkbox]:active, input[type=checkbox]:checked:active {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);
@@ -159,8 +175,12 @@ input[type=password]:focus,
     box-shadow: 0 0 8px #88D5E9;
     border: 1px solid #88D5E9;
 }
-input[type=submit], form input[type=button], .login-link{
-    background: #4B99AD;
+input[type=submit], form input[type=button], .login-link {
+    display: inline-block;
+    margin-top: 5px;
+    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-weight: bold;
+    background: #3469d7;
     padding: 8px 15px 8px 15px;
     border: none;
     color: #fff;
@@ -168,7 +188,8 @@ input[type=submit], form input[type=button], .login-link{
     border-radius: 3px;
 }
 input[type=submit]:hover, form input[type=button]:hover, .login-link:hover{
-    background:#3d7d8e;
+    color: #fff;
+    background:#2a55c5;
     box-shadow:none;
     -moz-box-shadow:none;
     -webkit-box-shadow:none;

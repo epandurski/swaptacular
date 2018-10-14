@@ -1,5 +1,8 @@
 {% extends "message.html" %}
 
 {% block message %}
+  <p class="message-icon">
+    <img src="{{url_for('serve_static', filename='failure.png')}}">
+  </p>
   <p>{% trans %}This link has expired.{% endtrans %}</p>
 {% endblock message %}
