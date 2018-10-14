@@ -1,9 +1,7 @@
 {% extends "message.html" %}
 
 {% block message %}
-  <p class="message-icon">
-    <img src="{{url_for('serve_static', filename='success.png')}}">
-  </p>
+  <p class="success-message-icon"></p>
   <p>
     {% trans %}
       Your password has been successfuly reset.

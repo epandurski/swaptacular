@@ -69,7 +69,7 @@ def hello_world():
     return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
-@app.route('/users/static/<path:filename>')
+@app.route('/signup/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
 
