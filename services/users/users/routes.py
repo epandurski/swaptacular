@@ -164,7 +164,7 @@ def choose_password(secret):
                 signup_request.register_code_failure()
             except signup_request.ExceededMaxAttempts:
                 abort(403)
-            flash(gettext('Incorrect recovery code.'))
+            flash(gettext('Incorrect recovery code'))
         else:
             new_recovery_code = signup_request.accept(password)
             UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
@@ -209,7 +209,7 @@ def change_email_login():
                 _get_change_password_link(email),
             )
             return redirect(url_for('choose_new_email', secret=login_verification_request.secret))
-        flash(gettext('Incorrect email or password.'))
+        flash(gettext('Incorrect email or password'))
 
     return render_template('change_email_login.html')
 
@@ -232,7 +232,7 @@ def choose_new_email(secret):
                 verification_request.register_code_failure()
             except verification_request.ExceededMaxAttempts:
                 abort(403)
-            flash(gettext('Incorrect recovery code.'))
+            flash(gettext('Incorrect recovery code'))
         else:
             verification_request.accept()
             r = ChangeEmailRequest.create(
@@ -273,7 +273,7 @@ def change_email_address(secret):
                 new_email=change_email_request.email,
                 old_email=change_email_request.old_email,
             ))
-        flash(gettext('Incorrect password.'))
+        flash(gettext('Incorrect password'))
 
     return render_template('enter_password.html', title=gettext('Change Email Address'))
 
@@ -340,7 +340,7 @@ def generate_recovery_code(secret):
             ))
             response.headers['Cache-Control'] = 'no-store'
             return response
-        flash(gettext('Incorrect password.'))
+        flash(gettext('Incorrect password'))
 
     return render_template('enter_password.html', title=gettext('Change Recovery Code'))
 
@@ -394,7 +394,7 @@ def login():
             response = redirect(url_for('enter_verification_code'))
             _set_computer_code_cookie(response, login_verification_request.secret)
             return response
-        flash(gettext('Incorrect email or password.'))
+        flash(gettext('Incorrect email or password'))
 
     return render_template('login.html')
 
@@ -419,7 +419,7 @@ def enter_verification_code():
             verification_request.register_code_failure()
         except verification_request.ExceededMaxAttempts:
             abort(403)
-        flash(gettext('Invalid verification code.'))
+        flash(gettext('Invalid verification code'))
 
     return render_template('enter_verification_code.html', computer_code=computer_code)
 
