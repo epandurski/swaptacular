@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-10-15 17:29+0300\n"
+"POT-Creation-Date: 2018-10-15 17:49+0300\n"
 "PO-Revision-Date: 2018-10-15 17:30+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
@@ -214,7 +214,7 @@ msgstr "Нов емайл"
 msgid "Enter your new email"
 msgstr "Въведете вашия нов имейл"
 
-#: templates/choose_new_email.html:34 templates/choose_password.html:52
+#: templates/choose_new_email.html:34 templates/choose_password.html:50
 #: templates/enter_password.html:17
 msgid "Submit"
 msgstr "Изпрати"
@@ -236,17 +236,16 @@ msgstr "Паролата отново"
 msgid "Enter the password again"
 msgstr "Напишете паролата отново"
 
-#: templates/choose_password.html:44
+#: templates/choose_password.html:43
 msgid ""
 "\n"
-"          It is highly recommended that the password you choose\n"
-"          here is different from the password on your email\n"
-"          account!\n"
-"        "
+"        It is highly recommended that the password you choose\n"
+"        here is different from the password on your email\n"
+"        account!\n"
+"      "
 msgstr ""
-"За препоръчване е паролата, която избирате тук, да е различна от паролата"
-"\n"
-"на вашия имейл акаунт!"
+"За препоръчване е паролата, която избирате тук, да е различна от паролата\n"
+"на вашия имейл акаунт!\n"
 
 #: templates/confirm_registration.txt:1
 #, python-format
@@ -481,4 +480,3 @@ msgstr ""
 "по-долу:\n"
 "\n"
 "%(change_password_page)s\n"
-
