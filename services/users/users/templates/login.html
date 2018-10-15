@@ -47,8 +47,8 @@
       <li><a href="{{url_for('signup', login_challenge=login_challenge, recover='true')}}">{% trans %}Forgot password?{% endtrans %}</a></li>
       {% if config.USE_RECOVERY_CODE %}
         <li><a href="{{url_for('change_recovery_code', login_challenge=login_challenge)}}">{% trans %}Lost your recovery code?{% endtrans %}</a></li>
+        <li><a href="{{url_for('change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
       {% endif %}
-      <li><a href="{{url_for('change_email_login', login_challenge=login_challenge)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
     </ul>
   {% endwith %}
 {% endblock form_footer %}

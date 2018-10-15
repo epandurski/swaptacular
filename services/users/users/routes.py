@@ -221,13 +221,19 @@ def choose_new_email(secret):
         return render_template('report_expired_link.html')
     user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
     require_recovery_code = user.recovery_code_hash and app.config['USE_RECOVERY_CODE']
+    if not require_recovery_code:
+        # Allowing the user to change her account email address
+        # without supplying a recovery code is a bad idea, because in
+        # this case her account could be hijacked when her password is
+        # known. (Instead of only when her email is being read.)
+        return render_template('report_missing_recovery_code.html')
 
     if request.method == 'POST':
         email = request.form['email'].strip()
         recovery_code = request.form.get('recovery_code', '')
         if is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
-        elif require_recovery_code and not verification_request.is_correct_recovery_code(recovery_code):
+        elif not verification_request.is_correct_recovery_code(recovery_code):
             try:
                 verification_request.register_code_failure()
             except verification_request.ExceededMaxAttempts:
@@ -247,7 +253,7 @@ def choose_new_email(secret):
                 login_challenge=verification_request.challenge_id,
             ))
 
-    response = make_response(render_template('choose_new_email.html', require_recovery_code=require_recovery_code))
+    response = make_response(render_template('choose_new_email.html', require_recovery_code=True))
     response.headers['Cache-Control'] = 'no-store'
     return response
 
