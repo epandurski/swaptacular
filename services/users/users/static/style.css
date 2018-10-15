@@ -96,6 +96,13 @@ a:hover {
     font-weight: bold;
     font-style: normal;
     color: #a0a0a0;
+    word-break: break-word;
+}
+.recovery-code {
+    font: larger serif;
+    letter-spacing: 1px;
+    text-align: center;
+    color: #e40222;
 }
 
 @keyframes slideDown {
@@ -111,7 +118,7 @@ a:hover {
 }
 .primary-form-body {
     margin:10px auto;
-    max-width: 400px;
+    max-width: 100%;
     padding: 20px 12px 10px 12px;
     font-size: 13px;
 }

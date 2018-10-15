@@ -5,11 +5,11 @@
     {% trans email='<em class="email">{}</em>'.format(email)|safe %}
       A new account has been created for {{email}}.
     {% endtrans %}
+    {% if recovery_code %}
+      {% trans %}Your account recovery code is:{% endtrans %}
+    {% endif %}
   </p>
   {% if recovery_code %}
-    <p>
-      {% trans %}Your account recovery code is:{% endtrans %}
-    </p>
     {% include '_recovery_code.html' %}
   {% endif %}
 {% endblock message %}
