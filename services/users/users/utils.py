@@ -221,7 +221,7 @@ class SignUpRequest(RedisSecretHashRecord):
                 salt=salt,
                 password_hash=calc_crypt_hash(salt, password),
                 recovery_code_hash=recovery_code_hash,
-                two_factor_login=bool(recovery_code_hash),
+                two_factor_login=True,
             )
             db.session.add(user)
         db.session.commit()

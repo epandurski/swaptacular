@@ -1,4 +1,9 @@
 from flask_env import MetaFlaskEnv
+from os import environ
+
+
+def _get_default_password_min_length(fallback):
+    return 10 if environ.get('USE_RECOVERY_CODE', str(bool(fallback))).lower() == 'true' else 6
 
 
 class Configuration(metaclass=MetaFlaskEnv):
@@ -8,6 +13,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     SITE_TITLE = 'Swaptacular'
     USE_RECOVERY_CODE = True
     ABOUT_URL = 'https://github.com/epandurski'
+    STYLE_URL = ''
 
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
@@ -46,8 +52,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
     LANGUAGE_COOKE_NAME = 'users_lang'
     COMPUTER_CODE_COOKE_NAME = 'users_cc'
-    STYLE_URL = ''
     PASSWORD_HASHING_METHOD = '6'
-    PASSWORD_MIN_LENGTH = 10
+    PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
     PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'
