@@ -12,7 +12,7 @@ a {
 a:hover {
     color: #234396;
 }
-#content {
+main {
     background-color: white;
     box-shadow: 0 0 35px black;
     border-radius: 5px;
@@ -20,7 +20,7 @@ a:hover {
     margin: auto;
     padding: 1em;
 }
-#footer {
+footer {
     padding: 20px;
     text-align:center;
 }
