@@ -56,7 +56,7 @@ footer {
     overflow: hidden;
     box-shadow: 0 0 5px black;
 
-    transform: translateY(-80px);
+    transform: translateY(-130px);
     animation: slideDown 5s 0.5s 1 ease forwards;
 }
 .flashes li {
@@ -106,7 +106,7 @@ footer {
 }
 
 @keyframes slideDown {
-    0%, 100% { transform: translateY(-80px); }
+    0%, 100% { transform: translateY(-130px); }
     10%, 90% { transform: translateY(0px); }
 }
 
