@@ -50,6 +50,10 @@ def _get_generate_recovery_code_link(change_recovery_code_request):
     return urljoin(request.host_url, url_for('generate_recovery_code', secret=change_recovery_code_request.secret))
 
 
+def _get_computer_code():
+    return request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME']) or generate_random_secret()
+
+
 def _set_computer_code_cookie(response, computer_code):
     response.set_cookie(
         app.config['COMPUTER_CODE_COOKE_NAME'],
@@ -93,7 +97,7 @@ def signup():
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            computer_code = generate_random_secret()  # will be sent to the user as a login cookie
+            computer_code = _get_computer_code()
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
@@ -372,12 +376,11 @@ def login():
             # Two factor login: require a cookie containing a secret
             # "computer code" as well. The cookie proves that there
             # was a previous successful login attempt from this computer.
-            computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'])
-            if computer_code:
-                user_logins_history = UserLoginsHistory(user_id)
-                if user_logins_history.contains(computer_code):
-                    user_logins_history.add(computer_code)
-                    return redirect(login_request.accept(subject, remember_me))
+            computer_code = _get_computer_code()
+            user_logins_history = UserLoginsHistory(user_id)
+            if user_logins_history.contains(computer_code):
+                user_logins_history.add(computer_code)
+                return redirect(login_request.accept(subject, remember_me))
 
             # A two factor login verification code is required.
             verification_code = generate_verification_code()
@@ -398,7 +401,13 @@ def login():
                 _get_change_password_link(email),
             )
             response = redirect(url_for('enter_verification_code'))
-            _set_computer_code_cookie(response, login_verification_request.secret)
+            response.set_cookie(
+                app.config['LOGIN_VERIFICATION_COOKE_NAME'],
+                login_verification_request.secret,
+                httponly=True,
+                secure=not app.config['DEBUG'],
+            )
+            _set_computer_code_cookie(response, computer_code)
             return response
         flash(gettext('Incorrect email or password'))
 
@@ -407,8 +416,8 @@ def login():
 
 @app.route('/login/verify', methods=['GET', 'POST'])
 def enter_verification_code():
-    computer_code = request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME'], '*')
-    verification_request = LoginVerificationRequest.from_secret(computer_code)
+    secret = request.cookies.get(app.config['LOGIN_VERIFICATION_COOKE_NAME'], '*')
+    verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         abort(403)
 
@@ -419,7 +428,7 @@ def enter_verification_code():
             subject = get_hydra_subject(user_id)
             remember_me = verification_request.remember_me == 'yes'
             verification_request.accept(clear_failures=True)
-            UserLoginsHistory(user_id).add(computer_code)
+            UserLoginsHistory(user_id).add(_get_computer_code())
             return redirect(login_request.accept(subject, remember_me))
         try:
             verification_request.register_code_failure()
@@ -427,7 +436,7 @@ def enter_verification_code():
             abort(403)
         flash(gettext('Invalid verification code'))
 
-    return render_template('enter_verification_code.html', computer_code=computer_code)
+    return render_template('enter_verification_code.html', secret=secret)
 
 
 @app.route('/consent', methods=['GET', 'POST'])
