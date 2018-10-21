@@ -32,7 +32,7 @@
 {% block form_footer %}
   {% if config.USE_RECOVERY_CODE %}
     <ul class="login-footer-links">
-      <li><a href="{{url_for('choose_new_email', secret=secret)}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
+      <li><a href="{{url_for('choose_new_email', secret=secret)|safe}}">{% trans %}Lost access to your email?{% endtrans %}</a></li>
     </ul>
   {% endif %}
 {% endblock form_footer %}

@@ -2,36 +2,40 @@
 <html>
   <head>
     {% block head %}
-      <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-      <meta name="HandheldFriendly" content="True">
-      <meta name="viewport" content="initial-scale=1.0">
-      <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css', version=config.VERSION)}}">
-      <title>{% block title %}{{config['SITE_TITLE']}}{% endblock %}</title>
+      {% autoescape false %}
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="viewport" content="initial-scale=1.0">
+        <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css', version=config.VERSION)}}">
+        <title>{% block title %}{{config['SITE_TITLE']}}{% endblock %}</title>
+      {% endautoescape %}
     {% endblock head %}
   </head>
   <body>
     <header>
-      {% with locale_code = get_locale()|string, languages=config['SUPPORTED_LANGUAGES'] %}
-        <nav>
-          <ul class="languages">
-            <li><a href="{{config.ABOUT_URL}}">{% trans %}About{% endtrans %}</a></li>
-            {% for code, language in languages.items() %}
-              {% if code != locale_code %}
-                <li><a href="{{url_for('set_language', lang=code, to=request.url)}}">{{language}}</a></li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        </nav>
-      {% endwith %}
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <ul class="flashes">
-            {% for message in messages %}
-              <li>{{message}}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
+      {% autoescape false %}
+        {% with locale_code = get_locale()|string, languages=config['SUPPORTED_LANGUAGES'] %}
+          <nav>
+            <ul class="languages">
+              <li><a href="{{config.ABOUT_URL}}">{% trans %}About{% endtrans %}</a></li>
+              {% for code, language in languages.items() %}
+                {% if code != locale_code %}
+                  <li><a href="{{url_for('set_language', lang=code, to=request.url)}}">{{language}}</a></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </nav>
+        {% endwith %}
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for message in messages %}
+                <li>{{message}}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+      {% endautoescape %}
     </header>
     <main>{% block content %}{% endblock content %}</main>
     <footer>{% block footer %}{% endblock footer %}</footer>

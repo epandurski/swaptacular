@@ -1,6 +1,6 @@
 {% extends "form.html" %}
 
-{% block form_header %}{{title}}{% endblock form_header %}
+{% block form_header %}{{title|safe}}{% endblock form_header %}
 
 {% block form_body %}
   <form action="" method="POST" id="signup-form">
