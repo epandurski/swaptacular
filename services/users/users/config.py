@@ -7,6 +7,7 @@ def _get_default_password_min_length(fallback):
 
 
 class Configuration(metaclass=MetaFlaskEnv):
+    VERSION = '0.98.1'
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
     HYDRA_ADMIN_URL = 'http://hydra:4445'
@@ -57,3 +58,5 @@ class Configuration(metaclass=MetaFlaskEnv):
     PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
     PASSWORD_MAX_LENGTH = 64
     MESSAGE = 'Hello, World!'
+
+    SEND_FILE_MAX_AGE_DEFAULT = 12096000

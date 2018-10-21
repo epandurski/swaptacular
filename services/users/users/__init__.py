@@ -16,6 +16,13 @@ app = Flask(__name__)
 app.config.from_object(Configuration)
 
 
+@app.after_request
+def set_response_headers(response):
+    if 'Cache-Control' not in response.headers:
+        response.headers['Cache-Control'] = 'no-cache'
+    return response
+
+
 @app.context_processor
 def inject_get_locale():
     return dict(get_locale=get_locale)
