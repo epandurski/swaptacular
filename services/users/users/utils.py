@@ -59,6 +59,8 @@ def calc_crypt_hash(salt, message):
 
 
 def is_invalid_email(email):
+    if len(email) >= 255:
+        return True
     return not EMAIL_REGEX.match(email)
 
 
