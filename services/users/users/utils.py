@@ -6,12 +6,14 @@ import base64
 import struct
 import time
 import hashlib
+from functools import wraps, partial
 from urllib.parse import urljoin, quote_plus
 from crypt import crypt
 import requests
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import event
+from sqlalchemy.exc import IntegrityError, DBAPIError
 from users import app, db, redis_users
-from users.models import User
+from users.models import User, UserUpdateSignal
 
 
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
@@ -19,6 +21,42 @@ PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
 LOGIN_CODE_FAILURE_EXPIRATION_SECONDS = max(app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'], 24 * 60 * 60)
 HYDRA_CONSENTS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent/')
 HYDRA_LOGINS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login/')
+PG_DEADLOCK_ERROR_CODES = ['40001', '40P01']
+
+
+def retry_on_deadlock(action):
+    """Function decorator that retries 'action' in case of a deadlock."""
+
+    @wraps(action)
+    def f(*args, **kwargs):
+        num_failures = 0
+        while True:
+            try:
+                return action(*args, **kwargs)
+            except DBAPIError as e:
+                num_failures += 1
+                if num_failures > 5 or getattr(e, 'pgcode', '') not in PG_DEADLOCK_ERROR_CODES:
+                    raise
+            db.session.rollback()
+            time.sleep(0.1 * 2 ** num_failures)
+
+    return f
+
+
+@retry_on_deadlock
+def process_signals(model, session):
+    session = db.create_scoped_session({'expire_on_commit': False})
+    for record in session.query(model).all():
+        session.delete(record)
+        session.flush()
+        record.send_message()
+        session.commit()
+
+
+def send_signal(__model__, **kwargs):
+    record = __model__(**kwargs)
+    db.session.add(record)
+    event.listen(db.session, 'after_commit', partial(process_signals, __model__), once=True)
 
 
 def generate_random_secret(num_bytes=15):
@@ -243,7 +281,9 @@ class ChangeEmailRequest(RedisSecretHashRecord):
 
     def accept(self):
         self.delete()
-        user = User.query.filter_by(user_id=int(self.user_id), email=self.old_email).one()
+        user_id = int(self.user_id)
+        user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
+        send_signal(UserUpdateSignal, user_id=user_id, old_email=user.email, new_email=self.email)
         user.email = self.email
         try:
             db.session.commit()
