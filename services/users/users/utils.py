@@ -248,6 +248,7 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         try:
             db.session.commit()
         except IntegrityError:
+            db.session.rollback()
             raise self.EmailAlredyRegistered()
 
 
