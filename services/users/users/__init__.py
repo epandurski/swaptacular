@@ -5,7 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
 from flask_mail import Mail
+from sqlalchemy import event
 from users.config import Configuration
+from users.flask_signalbus import SignalBus
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -53,6 +55,8 @@ class CustomAlchemy(SQLAlchemy):
 
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
+signalbus = SignalBus(app, db)
+event.listen(db.session, 'transient_to_pending', signalbus.transient_to_pending_handler)
 
 
 mail = Mail(app)

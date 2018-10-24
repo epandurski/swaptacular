@@ -6,13 +6,10 @@ import base64
 import struct
 import time
 import hashlib
-import threading
-from functools import wraps, partial
 from urllib.parse import urljoin, quote_plus
 from crypt import crypt
 import requests
-from sqlalchemy import event
-from sqlalchemy.exc import IntegrityError, DBAPIError
+from sqlalchemy.exc import IntegrityError
 from users import app, db, redis_users
 from users.models import User, UserUpdateSignal
 
@@ -22,61 +19,6 @@ PASSWORD_SALT_CHARS = string.digits + string.ascii_letters + './'
 LOGIN_CODE_FAILURE_EXPIRATION_SECONDS = max(app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'], 24 * 60 * 60)
 HYDRA_CONSENTS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent/')
 HYDRA_LOGINS_BASE_URL = urljoin(app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/login/')
-PG_DEADLOCK_ERROR_CODES = ['40001', '40P01']
-
-
-def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, rollback=False):
-    """Return a function decorator."""
-
-    def decorator(action):
-        """Function decorator that retries 'action' in case of a deadlock."""
-
-        @wraps(action)
-        def f(*args, **kwargs):
-            num_failures = 0
-            while True:
-                try:
-                    return action(*args, **kwargs)
-                except DBAPIError as e:
-                    num_failures += 1
-                    if num_failures > retries or getattr(e.orig, 'pgcode', '') not in PG_DEADLOCK_ERROR_CODES:
-                        if rollback:
-                            session.rollback()
-                        raise
-                session.rollback()
-                wait_seconds = min(max_wait, min_wait * 2 ** (num_failures - 1))
-                time.sleep(wait_seconds)
-
-        return f
-
-    return decorator
-
-
-signals_session = db.create_scoped_session({'expire_on_commit': False})
-signal_handlers = {}
-signal_handlers_lock = threading.Lock()
-
-
-@retry_on_deadlock(signals_session, rollback=True)
-def process_signals(model, session=None):
-    for record in signals_session.query(model).all():
-        signals_session.delete(record)
-        signals_session.flush()
-        record.send_message()
-        signals_session.commit()
-    signals_session.expire_all()
-
-
-def send_signal(_model, **kwargs):
-    assert hasattr(_model, 'send_message'), '{} does not have method "send_message". '.format(_model.__name__)
-    db.session.add(_model(**kwargs))
-    with signal_handlers_lock:
-        if _model not in signal_handlers:
-            signal_handlers[_model] = partial(process_signals, _model)
-        signal_handler = signal_handlers[_model]
-        if event.contains(db.session, 'after_commit', signal_handler):
-            event.remove(db.session, 'after_commit', signal_handler)
-        event.listen(db.session, 'after_commit', signal_handler, once=True)
 
 
 def generate_random_secret(num_bytes=15):
@@ -303,7 +245,7 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         self.delete()
         user_id = int(self.user_id)
         user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
-        send_signal(UserUpdateSignal, user_id=user_id, old_email=user.email, new_email=self.email)
+        db.session.add(UserUpdateSignal(user_id=user_id, old_email=user.email, new_email=self.email))
         user.email = self.email
         try:
             db.session.commit()
