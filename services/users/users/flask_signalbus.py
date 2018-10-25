@@ -1,7 +1,6 @@
 import time
 import logging
-import threading
-from functools import wraps, partial
+from functools import wraps
 from sqlalchemy import event
 from sqlalchemy.exc import DBAPIError
 
@@ -14,6 +13,8 @@ DEADLOCK_ERROR_CODES = ['40001', '40P01']
 
 
 def get_db_error_code(exception):
+    """Return 5-character SQLSTATE code, or '' if not available."""
+
     for attr in ERROR_CODE_ATTRS:
         error_code = getattr(exception, attr, '')
         if error_code:
@@ -53,43 +54,35 @@ class SignalBus:
         self.app = app
         self.db = db
         self.signal_session = db.create_scoped_session({'expire_on_commit': False})
-        self.event_handlers = {}
-        self.event_handlers_lock = threading.Lock()
         self.retry_on_deadlock = retry_on_deadlock(self.signal_session, rollback=True)
+        event.listen(db.session, 'transient_to_pending', self._transient_to_pending_handler)
+        event.listen(db.session, 'after_commit', self._process_models)
 
-    def send(self, instance, session=None):
-        model = type(instance)
-        assert hasattr(model, 'send_message'), '{} does not have method "send_message". '.format(model.__name__)
-        if session is None:
-            session = self.db.session
-        if event.contains(session, 'transient_to_pending', self.transient_to_pending_handler):
-            logger.warning('Use of SignalBus.send while "transient_to_pending" handler is configured.')
-        session.add(instance)
-        self._attach_commit_handler(model, session)
+    @staticmethod
+    def get_set_of_models_to_process(session):
+        return session.info.setdefault('flask_signalbus__models_to_process', set())
 
-    def process_signals(self, model, session=None):
+    def process_signals(self, model):
         return self.retry_on_deadlock(self._process_signals)(model)
 
-    def transient_to_pending_handler(self, session, instance):
+    def _transient_to_pending_handler(self, session, instance):
         model = type(instance)
-        if hasattr(model, 'send_message'):
-            self._attach_commit_handler(model, session)
-            logger.debug('A commit handler for %s has been added to session.', model.__name__)
+        if hasattr(model, 'send_signalbus_message'):
+            models_to_process = self.get_set_of_models_to_process(session)
+            models_to_process.add(model)
 
-    def _attach_commit_handler(self, model, session):
-        with self.event_handlers_lock:
-            if model not in self.event_handlers:
-                self.event_handlers[model] = partial(self.process_signals, model)
-            event_handler = self.event_handlers[model]
-            if event.contains(session, 'after_commit', event_handler):
-                event.remove(session, 'after_commit', event_handler)
-            event.listen(session, 'after_commit', event_handler, once=True)
+    def _process_models(self, session):
+        models_to_process = self.get_set_of_models_to_process(session)
+        for model in models_to_process:
+            self.process_signals(model)
+        models_to_process.clear()
 
     def _process_signals(self, model):
+        logger.debug('Processing %s records.', model.__name__)
         for record in self.signal_session.query(model).all():
             self.signal_session.delete(record)
             self.signal_session.flush()
-            record.send_message()
+            record.send_signalbus_message()
             self.signal_session.commit()
         self.signal_session.expire_all()
         self.signal_session.commit()

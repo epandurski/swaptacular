@@ -16,7 +16,7 @@ class UserUpdateSignal(db.Model):
     old_email = db.Column(db.Text, nullable=True)
     new_email = db.Column(db.Text, nullable=True)
 
-    def send_message(self):
+    def send_signalbus_message(self):
         """Inform the other services that user's email has changed."""
 
         logger.debug('Sent user update signal: %i, %s, %s', self.user_id, self.old_email, self.new_email)
