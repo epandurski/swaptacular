@@ -9,16 +9,16 @@ from sqlalchemy.exc import DBAPIError
 logger = logging.getLogger(__name__)
 
 
-SQLSTATE_ATTRS = ['pgcode', 'sqlstate']  # psycopg2/psycopg2cffi, MySQL Connector
+ERROR_CODE_ATTRS = ['pgcode', 'sqlstate']  # psycopg2/psycopg2cffi, MySQL Connector
 DEADLOCK_ERROR_CODES = ['40001', '40P01']
 
 
-def get_sqlstate(exception):
-    for attr in SQLSTATE_ATTRS:
-        sqlstate = getattr(exception, attr, '')
-        if sqlstate:
+def get_db_error_code(exception):
+    for attr in ERROR_CODE_ATTRS:
+        error_code = getattr(exception, attr, '')
+        if error_code:
             break
-    return sqlstate
+    return error_code
 
 
 def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, rollback=False):
@@ -35,7 +35,7 @@ def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, rollback=
                     return action(*args, **kwargs)
                 except DBAPIError as e:
                     num_failures += 1
-                    if num_failures > retries or get_sqlstate(e.orig) not in DEADLOCK_ERROR_CODES:
+                    if num_failures > retries or get_db_error_code(e.orig) not in DEADLOCK_ERROR_CODES:
                         if rollback:
                             session.rollback()
                         raise
