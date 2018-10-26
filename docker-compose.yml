@@ -72,7 +72,6 @@ services:
       - HYDRA_ADMIN_URL=http://hydra:4445
     depends_on:
       - pg
-      - users
 
 
   keto-migrate:
@@ -246,7 +245,7 @@ services:
       - pg
       - redis-users
       - mail
-
+      - hydra
 
 volumes:
   pg-data-volume:
