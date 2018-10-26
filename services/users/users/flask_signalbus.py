@@ -22,7 +22,7 @@ def get_db_error_code(exception):
     return error_code
 
 
-def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, rollback=False):
+def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, catch_all_errors=False):
     """Return a function decorator."""
 
     def decorator(action):
@@ -37,8 +37,10 @@ def retry_on_deadlock(session, retries=6, min_wait=0.1, max_wait=10.0, rollback=
                 except DBAPIError as e:
                     num_failures += 1
                     if num_failures > retries or get_db_error_code(e.orig) not in DEADLOCK_ERROR_CODES:
-                        if rollback:
+                        if catch_all_errors:
                             session.rollback()
+                            logger.exception('Caught database error while executing "retry_on_deadlock"')
+                            break
                         raise
                 session.rollback()
                 wait_seconds = min(max_wait, min_wait * 2 ** (num_failures - 1))
@@ -54,7 +56,7 @@ class SignalBus:
         self.app = app
         self.db = db
         self.signal_session = db.create_scoped_session({'expire_on_commit': False})
-        self.retry_on_deadlock = retry_on_deadlock(self.signal_session, rollback=True)
+        self.retry_on_deadlock = retry_on_deadlock(self.signal_session, catch_all_errors=True)
         event.listen(db.session, 'transient_to_pending', self._transient_to_pending_handler)
         event.listen(db.session, 'after_commit', self._process_models)
 
