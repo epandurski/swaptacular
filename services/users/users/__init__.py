@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
 from flask_mail import Mail
+from flask_signalbus import SignalBus
 from users.config import Configuration
 
 
@@ -53,6 +54,7 @@ class CustomAlchemy(SQLAlchemy):
 
 db = CustomAlchemy(app)
 migrate = Migrate(app, db)
+signalbus = SignalBus(app, db)
 
 
 mail = Mail(app)

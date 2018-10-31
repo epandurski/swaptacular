@@ -61,3 +61,4 @@ class Configuration(metaclass=MetaFlaskEnv):
 
     SEND_FILE_MAX_AGE_DEFAULT = 12096000
     MAX_CONTENT_LENGTH = 1024
+    SQLALCHEMY_ECHO = False

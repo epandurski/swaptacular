@@ -15,6 +15,7 @@ redis = "*"
 flask-mail = "*"
 requests = "*"
 user-agents = "*"
+flask-sibnalbus = {git = "https://github.com/epandurski/flask_signalbus.git", ref = "master"}
 
 [requires]
 python_version = "3.5"

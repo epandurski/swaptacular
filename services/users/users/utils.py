@@ -11,7 +11,7 @@ from crypt import crypt
 import requests
 from sqlalchemy.exc import IntegrityError
 from users import app, db, redis_users
-from users.models import User
+from users.models import User, UserUpdateSignal
 
 
 EMAIL_REGEX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
@@ -228,6 +228,8 @@ class SignUpRequest(RedisSecretHashRecord):
                 two_factor_login=True,
             )
             db.session.add(user)
+            db.session.flush()
+            db.session.add(UserUpdateSignal(user_id=user.user_id, old_email=None, new_email=user.email))
         db.session.commit()
         self.user_id = user.user_id
         return recovery_code
@@ -243,7 +245,9 @@ class ChangeEmailRequest(RedisSecretHashRecord):
 
     def accept(self):
         self.delete()
-        user = User.query.filter_by(user_id=int(self.user_id), email=self.old_email).one()
+        user_id = int(self.user_id)
+        user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
+        db.session.add(UserUpdateSignal(user_id=user_id, old_email=user.email, new_email=self.email))
         user.email = self.email
         try:
             db.session.commit()
