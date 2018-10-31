@@ -7,6 +7,7 @@ RUN apk add --no-cache \
     musl-dev \
     python3-dev \
     postgresql-dev \
+    git \
   && pip install --upgrade pip \
   && pip install pipenv gunicorn json-logging-py pudb
 

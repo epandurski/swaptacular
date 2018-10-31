@@ -5,8 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
 from flask_mail import Mail
+from flask_signalbus import SignalBus
 from users.config import Configuration
-from users.flask_signalbus import SignalBus
 
 
 logging.basicConfig(level=logging.DEBUG)
