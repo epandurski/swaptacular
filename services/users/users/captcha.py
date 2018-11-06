@@ -50,7 +50,7 @@ def verify(captcha_response, remote_ip):
             "User-agent": "reCAPTCHA Python"
         },
     )
-    with urlopen(http_request, timeout=10) as http_response:
+    with urlopen(http_request, timeout=5) as http_response:
         response_object = json.loads(http_response.read().decode())
     if (response_object["success"]):
         return CaptchaResponse(is_valid=True)
