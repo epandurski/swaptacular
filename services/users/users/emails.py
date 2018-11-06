@@ -17,14 +17,27 @@ def send_duplicate_registration_email(email):
     mail.send(msg)
 
 
-def send_change_password_email(email, change_password_link):
+def send_change_password_email(email, choose_password_link):
     msg = Message(
         subject=gettext('Change Account Password'),
         recipients=[email],
         body=render_template(
             'change_password.txt',
             email=email,
-            change_password_link=change_password_link,
+            choose_password_link=choose_password_link,
+        ),
+    )
+    mail.send(msg)
+
+
+def send_change_password_success_email(email, change_password_page):
+    msg = Message(
+        subject=gettext('Changed Account Password'),
+        recipients=[email],
+        body=render_template(
+            'change_password_success.txt',
+            email=email,
+            change_password_page=change_password_page,
         ),
     )
     mail.send(msg)

@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-10-16 14:26+0300\n"
-"PO-Revision-Date: 2018-10-16 14:26+0300\n"
+"POT-Creation-Date: 2018-11-06 17:16+0200\n"
+"PO-Revision-Date: 2018-11-06 17:05+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
 "Language-Team: bg <LL@li.org>\n"
@@ -26,21 +26,25 @@ msgstr "Съществуваща регистрация"
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
-#: emails.py:35 routes.py:130
+#: emails.py:35
+msgid "Changed Account Password"
+msgstr "Променена потребителска парола"
+
+#: emails.py:48 routes.py:130
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
-#: emails.py:48
+#: emails.py:61
 #, python-format
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:62 emails.py:74 routes.py:288 templates/change_email_login.html:4
+#: emails.py:75 emails.py:87 routes.py:292 templates/change_email_login.html:4
 #: templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:87 routes.py:329 routes.py:355
+#: emails.py:100 routes.py:333 routes.py:359
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
@@ -48,7 +52,7 @@ msgstr "Промяна на кода за възстановяване"
 msgid "Incorrect captcha solution."
 msgstr "Неправилно решение на captcha-та"
 
-#: routes.py:96 routes.py:239 routes.py:314
+#: routes.py:96 routes.py:243 routes.py:318
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
@@ -66,19 +70,19 @@ msgstr "Паролата не трябва да съдържа повече от
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: routes.py:171 routes.py:245
+#: routes.py:171 routes.py:249
 msgid "Incorrect recovery code"
 msgstr "Грешен код за възстановяване"
 
-#: routes.py:216 routes.py:412
+#: routes.py:220 routes.py:416
 msgid "Incorrect email or password"
 msgstr "Грешен имейл или парола"
 
-#: routes.py:286 routes.py:353
+#: routes.py:290 routes.py:357
 msgid "Incorrect password"
 msgstr "Грешна парола"
 
-#: routes.py:437
+#: routes.py:441
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
 
@@ -155,7 +159,7 @@ msgstr "Вход"
 msgid ""
 "Proceed with changing your password by clicking on the following link:\n"
 "\n"
-"%(change_password_link)s\n"
+"%(choose_password_link)s\n"
 "\n"
 "This link will expire in %(num)s hours.\n"
 "\n"
@@ -165,13 +169,42 @@ msgstr ""
 "Продължете процедурата по промяна на паролата, като кликнете върху "
 "долната връзка:\n"
 "\n"
-"%(change_password_link)s\n"
+"%(choose_password_link)s\n"
 "\n"
 "Тази връзка ще престане да бъде активна след %(num)s часа.\n"
 "\n"
 "Ако сте получили този имейл погрешка, просто го изтрийте. Вашата парола "
 "няма\n"
 "да бъде променена, ако не кликнете върху горната връзка.\n"
+
+#: templates/change_password_success.txt:1
+#, python-format
+msgid ""
+"Your password on %(site)s has been changed.\n"
+"\n"
+"If you do not remember changing your password on %(site)s recently,\n"
+"chances are that someone have hijacked your account. If you suspect that\n"
+"this is the case, you should immediately try to restore your account\n"
+"password by clicking on the following link:\n"
+"\n"
+"%(change_password_page)s\n"
+"\n"
+"Also, make sure hackers and other malicious persons can not read your "
+"email!\n"
+msgstr ""
+"Паролата ви в %(site)s е променена.\n"
+"\n"
+"Ако не помните да сте се променяли наскоро паролата си в %(site)s,\n"
+"вероятно някой е \"откраднал\" акаунта ви. Ако подозирате че случаят е "
+"такъв,\n"
+"трябва незабавно да се опитате да възстановите паролата на акаунта си, "
+"като\n"
+"кликнете на връзката по-долу:\n"
+"\n"
+"%(change_password_page)s\n"
+"\n"
+"Освен това, уверете се че хакери или други злонамерени хора не четат "
+"имейла ви!\n"
 
 #: templates/change_recovery_code.txt:1
 #, python-format
@@ -303,11 +336,11 @@ msgstr "Код за потвърждение"
 msgid "Enter the verification code"
 msgstr "Въведете кода за потвърждение"
 
-#: templates/enter_verification_code.html:35 templates/login.html:50
+#: templates/enter_verification_code.html:35 templates/login.html:51
 msgid "Lost access to your email?"
 msgstr "Загубен достъп до имeйл?"
 
-#: templates/layout.html:17
+#: templates/layout.html:20
 msgid "About"
 msgstr "За нас"
 
@@ -327,15 +360,15 @@ msgstr "Въведете своя имейл адрес"
 msgid "Remember me on this computer"
 msgstr "Запомни ме на този компютър"
 
-#: templates/login.html:46
+#: templates/login.html:47
 msgid "Create a new account"
 msgstr "Регистрация на нов потребител"
 
-#: templates/login.html:47
+#: templates/login.html:48
 msgid "Forgot password?"
 msgstr "Забравена парола?"
 
-#: templates/login.html:49
+#: templates/login.html:50
 msgid "Lost your recovery code?"
 msgstr "Загубен код за възстановяване?"
 

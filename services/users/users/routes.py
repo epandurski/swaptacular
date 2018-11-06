@@ -174,6 +174,10 @@ def choose_password(secret):
             UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             if is_password_recovery:
                 invalidate_hydra_credentials(signup_request.user_id)
+                emails.send_change_password_success_email(
+                    signup_request.email,
+                    _get_change_password_link(signup_request.email),
+                )
                 return render_template(
                     'report_recovery_success.html',
                     email=signup_request.email,
