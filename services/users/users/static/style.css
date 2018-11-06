@@ -80,7 +80,7 @@ footer {
 .email-message-icon {
     width: 100%;
     height: 130px;
-    background: white url("/signup/static/sent-email.gif") center center/160px 130px no-repeat;
+    background: white url("/signup/static/sent-email.png") center center/160px 130px no-repeat;
 }
 .success-message-icon {
     width: 100%;
