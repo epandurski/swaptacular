@@ -1,4 +1,17 @@
-from users import db, logger
+import logging
+import flask_sqlalchemy
+
+logger = logging.getLogger(__name__)
+
+
+class CustomAlchemy(flask_sqlalchemy.SQLAlchemy):
+    def apply_driver_hacks(self, app, info, options):
+        if "isolation_level" not in options:
+            options["isolation_level"] = "REPEATABLE_READ"
+        return super().apply_driver_hacks(app, info, options)
+
+
+db = CustomAlchemy()
 
 
 class User(db.Model):

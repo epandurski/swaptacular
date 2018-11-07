@@ -1,12 +1,12 @@
 import logging
 import redis
 from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_babel import Babel, get_locale
 from flask_mail import Mail
 from flask_signalbus import SignalBus
 from users.config import Configuration
+from users.models import db
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -45,14 +45,7 @@ def select_timezone():
     return None
 
 
-class CustomAlchemy(SQLAlchemy):
-    def apply_driver_hacks(self, app, info, options):
-        if "isolation_level" not in options:
-            options["isolation_level"] = "REPEATABLE_READ"
-        return super().apply_driver_hacks(app, info, options)
-
-
-db = CustomAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 signalbus = SignalBus(app, db)
 
@@ -68,5 +61,4 @@ redis_users = redis.StrictRedis.from_url(
 )
 
 
-import users.models  # noqa: F401,E402
 import users.routes  # noqa: F401,E402
