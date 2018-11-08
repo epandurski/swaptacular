@@ -16,8 +16,8 @@ consent = Blueprint('consent', __name__, template_folder='templates', static_fol
 
 def init_app(app):
     babel.init_app(app)
-    app.register_blueprint(login, url_prefix='/login')
-    app.register_blueprint(consent, url_prefix='/consent')
+    app.register_blueprint(login, url_prefix=app.config['LOGIN_URL_PREFIX'])
+    app.register_blueprint(consent, url_prefix=app.config['CONSENT_URL_PREFIX'])
 
 
 @babel.localeselector

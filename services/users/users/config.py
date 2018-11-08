@@ -15,6 +15,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     USE_RECOVERY_CODE = True
     ABOUT_URL = 'https://github.com/epandurski'
     STYLE_URL = ''
+    LOGIN_URL_PREFIX = '/login'
+    CONSENT_URL_PREFIX = '/consent'
 
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
