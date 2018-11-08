@@ -1,7 +1,12 @@
-from flask import render_template
+from flask import render_template, current_app
 from flask_babel import gettext
-from flask_mail import Message
-from users import app, mail
+from flask_mail import Mail, Message
+
+mail = Mail()
+
+
+def init_app(app):
+    mail.init_app(app)
 
 
 def send_duplicate_registration_email(email):
@@ -11,7 +16,7 @@ def send_duplicate_registration_email(email):
         body=render_template(
             'duplicate_registration.txt',
             email=email,
-            site=app.config['SITE_TITLE'],
+            site=current_app.config['SITE_TITLE'],
         ),
     )
     mail.send(msg)

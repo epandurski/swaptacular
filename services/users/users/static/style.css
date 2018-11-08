@@ -68,7 +68,6 @@ footer {
 }
 .login-footer-links li::before {
   content: "\25AA";
-  /* color: #4B99AD; */
   font-weight: bold;
   display: inline-block;
   width: 1.2em;
@@ -80,17 +79,17 @@ footer {
 .email-message-icon {
     width: 100%;
     height: 130px;
-    background: white url("/signup/static/sent-email.png") center center/160px 130px no-repeat;
+    background: white url("sent-email.png") center center/160px 130px no-repeat;
 }
 .success-message-icon {
     width: 100%;
     height: 130px;
-    background: white url("/signup/static/success.png") center center/130px 130px no-repeat;
+    background: white url("success.png") center center/130px 130px no-repeat;
 }
 .failure-message-icon {
     width: 100%;
     height: 130px;
-    background: white url("/signup/static/failure.png") center center/130px 130px no-repeat;
+    background: white url("failure.png") center center/130px 130px no-repeat;
 }
 .email {
     font-weight: bold;

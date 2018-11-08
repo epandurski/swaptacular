@@ -16,6 +16,7 @@ requests = "*"
 user-agents = "*"
 flask-sibnalbus = {git = "https://github.com/epandurski/flask_signalbus.git", ref = "master"}
 "psycopg2-binary" = "*"
+flask-redis = "*"
 
 [requires]
 python_version = "3.5"

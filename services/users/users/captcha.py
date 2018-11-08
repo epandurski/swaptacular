@@ -2,7 +2,7 @@ import json
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 from flask_babel import lazy_gettext
-from users import app
+from flask import current_app
 
 
 ERROR_MESSAGE = lazy_gettext('You did not solve the "reCAPTCHA" challenge.')
@@ -21,8 +21,8 @@ def display_html(lang='en'):
     <script src="{challenge_url}?hl={lang}" async defer></script>
     <div class="g-recaptcha" data-sitekey="{public_key}"></div>
     """.format(
-        challenge_url=app.config['RECAPTCHA_CHALLENGE_URL'],
-        public_key=app.config['RECAPTCHA_PUBLIC_KEY'],
+        challenge_url=current_app.config['RECAPTCHA_CHALLENGE_URL'],
+        public_key=current_app.config['RECAPTCHA_PUBLIC_KEY'],
         lang=lang,
     )
 
@@ -39,9 +39,9 @@ def verify(captcha_response, remote_ip):
         return CaptchaResponse(is_valid=False, error_message=ERROR_MESSAGE)
 
     http_request = Request(
-        url=app.config['RECAPTCHA_VERIFY_URL'],
+        url=current_app.config['RECAPTCHA_VERIFY_URL'],
         data=urlencode({
-            'secret': app.config['RECAPTCHA_PIVATE_KEY'],
+            'secret': current_app.config['RECAPTCHA_PIVATE_KEY'],
             'response': captcha_response,
             'remoteip': remote_ip,
         }).encode('ascii'),

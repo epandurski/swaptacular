@@ -1,10 +1,12 @@
 import logging
-import flask_sqlalchemy
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_signalbus import SignalBus
 
 logger = logging.getLogger(__name__)
 
 
-class CustomAlchemy(flask_sqlalchemy.SQLAlchemy):
+class CustomAlchemy(SQLAlchemy):
     def apply_driver_hacks(self, app, info, options):
         if "isolation_level" not in options:
             options["isolation_level"] = "REPEATABLE_READ"
@@ -12,6 +14,14 @@ class CustomAlchemy(flask_sqlalchemy.SQLAlchemy):
 
 
 db = CustomAlchemy()
+migrate = Migrate(None, db)
+signalbus = SignalBus(None, db)
+
+
+def init_app(app):
+    db.init_app(app)
+    migrate.init_app(app)
+    signalbus.init_app(app)
 
 
 class User(db.Model):

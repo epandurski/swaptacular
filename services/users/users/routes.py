@@ -1,24 +1,55 @@
+import logging
 from urllib.parse import urljoin
-from flask import request, redirect, url_for, flash, send_from_directory, render_template, abort, make_response
-from flask_babel import gettext
+from flask import (request, redirect, url_for, flash, render_template,
+                   abort, make_response, current_app, Blueprint)
+from flask_babel import Babel, gettext, get_locale
 import user_agents
-from users import app, logger
-from users import captcha
-from users import emails
-from users.models import User
-from users.utils import (
-    is_invalid_email, calc_crypt_hash, generate_random_secret, generate_verification_code,
-    HydraLoginRequest, HydraConsentRequest, SignUpRequest, LoginVerificationRequest,
-    UserLoginsHistory, ChangeEmailRequest, format_recovery_code, get_hydra_subject,
-    invalidate_hydra_credentials, ChangeRecoveryCodeRequest
-)
+from . import utils, captcha, redis, emails, hydra
+from .models import User
+
+logger = logging.getLogger(__name__)
+
+babel = Babel()
+login = Blueprint('login', __name__, template_folder='templates', static_folder='static')
+consent = Blueprint('consent', __name__, template_folder='templates', static_folder='static')
 
 
-def _verify_captcha():
+def init_app(app):
+    babel.init_app(app)
+    app.register_blueprint(login, url_prefix='/login')
+    app.register_blueprint(consent, url_prefix='/consent')
+
+
+@babel.localeselector
+def select_locale():
+    # Try to guess the language from the language cookie and the
+    # accept header the browser transmits.
+    lang = request.cookies.get(current_app.config['LANGUAGE_COOKE_NAME'])
+    return lang or request.accept_languages.best_match(current_app.config['SUPPORTED_LANGUAGES'].keys())
+
+
+@babel.timezoneselector
+def select_timezone():
+    return None
+
+
+@login.after_app_request
+def set_cache_control_header(response):
+    if 'Cache-Control' not in response.headers:
+        response.headers['Cache-Control'] = 'no-cache'
+    return response
+
+
+@login.app_context_processor
+def inject_get_locale():
+    return dict(get_locale=get_locale)
+
+
+def verify_captcha():
     """Verify captcha if required."""
 
-    if app.config['SHOW_CAPTCHA_ON_SIGNUP']:
-        captcha_response = request.form.get(app.config['CAPTCHA_RESPONSE_FIELD_NAME'], '')
+    if current_app.config['SHOW_CAPTCHA_ON_SIGNUP']:
+        captcha_response = request.form.get(current_app.config['CAPTCHA_RESPONSE_FIELD_NAME'], '')
         captcha_solution = captcha.verify(captcha_response, request.remote_addr)
         captcha_passed = captcha_solution.is_valid
         captcha_error_message = captcha_solution.error_message
@@ -30,101 +61,87 @@ def _verify_captcha():
     return captcha_passed, captcha_error_message
 
 
-def _get_user_agent():
+def get_user_agent():
     return str(user_agents.parse(request.headers.get('User-Agent', '')))
 
 
-def _get_change_password_link(email):
-    return urljoin(request.host_url, url_for('signup', email=email, recover='true'))
+def get_change_password_link(email):
+    return urljoin(request.host_url, url_for('.signup', email=email, recover='true'))
 
 
-def _get_choose_password_link(signup_request):
-    return urljoin(request.host_url, url_for('choose_password', secret=signup_request.secret))
+def get_choose_password_link(signup_request):
+    return urljoin(request.host_url, url_for('.choose_password', secret=signup_request.secret))
 
 
-def _get_change_email_address_link(change_email_request):
-    return urljoin(request.host_url, url_for('change_email_address', secret=change_email_request.secret))
+def get_change_email_address_link(change_email_request):
+    return urljoin(request.host_url, url_for('.change_email_address', secret=change_email_request.secret))
 
 
-def _get_generate_recovery_code_link(change_recovery_code_request):
-    return urljoin(request.host_url, url_for('generate_recovery_code', secret=change_recovery_code_request.secret))
+def get_generate_recovery_code_link(change_recovery_code_request):
+    return urljoin(request.host_url, url_for('.generate_recovery_code', secret=change_recovery_code_request.secret))
 
 
-def _get_computer_code():
-    return request.cookies.get(app.config['COMPUTER_CODE_COOKE_NAME']) or generate_random_secret()
+def get_computer_code():
+    return request.cookies.get(current_app.config['COMPUTER_CODE_COOKE_NAME']) or utils.generate_random_secret()
 
 
-def _set_computer_code_cookie(response, computer_code):
+def set_computer_code_cookie(response, computer_code):
     response.set_cookie(
-        app.config['COMPUTER_CODE_COOKE_NAME'],
+        current_app.config['COMPUTER_CODE_COOKE_NAME'],
         computer_code,
         max_age=1000000000,
         httponly=True,
-        secure=not app.config['DEBUG'],
+        secure=not current_app.config['DEBUG'],
     )
 
 
-@app.route('/users/hello_world')
-def hello_world():
-    logger.debug('A debug message')
-    logger.info('An info message')
-    logger.warning('A warning message')
-    body = app.config['MESSAGE'] + '\n\n' + '\n'.join('{}: {}'.format(*h) for h in request.headers)
-    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
-
-
-@app.route('/signup/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
-
-
-@app.route('/signup/language/<lang>')
+@login.route('/language/<lang>')
 def set_language(lang):
     response = redirect(request.args['to'])
-    response.set_cookie(app.config['LANGUAGE_COOKE_NAME'], lang, max_age=1000000000)
+    response.set_cookie(current_app.config['LANGUAGE_COOKE_NAME'], lang, max_age=1000000000)
     return response
 
 
-@app.route('/signup', methods=['GET', 'POST'])
+@login.route('/signup', methods=['GET', 'POST'])
 def signup():
     email = request.args.get('email', '')
     is_new_user = 'recover' not in request.args
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = _verify_captcha()
+        captcha_passed, captcha_error_message = verify_captcha()
         email = request.form['email'].strip()
-        if is_invalid_email(email):
+        if utils.is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            computer_code = _get_computer_code()
+            computer_code = get_computer_code()
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    r = SignUpRequest.create(
+                    r = redis.SignUpRequest.create(
                         email=email,
                         cc=computer_code,
                         recover='yes',
                         has_rc='yes' if user.recovery_code_hash else 'no',
                     )
-                    emails.send_change_password_email(email, _get_choose_password_link(r))
+                    emails.send_change_password_email(email, get_choose_password_link(r))
             else:
                 if is_new_user:
-                    r = SignUpRequest.create(email=email, cc=computer_code)
-                    emails.send_confirm_registration_email(email, _get_choose_password_link(r))
+                    r = redis.SignUpRequest.create(email=email, cc=computer_code)
+                    emails.send_confirm_registration_email(email, get_choose_password_link(r))
                 else:
                     # We are asked to change the password of a non-existing user. In this case
                     # we fail silently, so as not to reveal if the email is registered or not.
                     pass
             response = redirect(url_for(
-                'report_sent_email',
+                '.report_sent_email',
                 email=email,
                 login_url=request.args.get('login_url'),
                 login_challenge=request.args.get('login_challenge'),
             ))
-            _set_computer_code_cookie(response, computer_code)
+            set_computer_code_cookie(response, computer_code)
             return response
 
     title = gettext('Create a New Account') if is_new_user else gettext('Change Account Password')
@@ -136,27 +153,27 @@ def signup():
     )
 
 
-@app.route('/signup/email')
+@login.route('/email')
 def report_sent_email():
     email = request.args['email']
     return render_template('report_sent_email.html', email=email)
 
 
-@app.route('/signup/password/<secret>', methods=['GET', 'POST'])
+@login.route('/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
-    signup_request = SignUpRequest.from_secret(secret)
+    signup_request = redis.SignUpRequest.from_secret(secret)
     if not signup_request:
         return render_template('report_expired_link.html')
     is_password_recovery = signup_request.recover == 'yes'
     require_recovery_code = (is_password_recovery and
                              signup_request.has_rc == 'yes' and
-                             app.config['USE_RECOVERY_CODE'])
+                             current_app.config['USE_RECOVERY_CODE'])
 
     if request.method == 'POST':
         recovery_code = request.form.get('recovery_code', '')
         password = request.form['password']
-        min_length = app.config['PASSWORD_MIN_LENGTH']
-        max_length = app.config['PASSWORD_MAX_LENGTH']
+        min_length = current_app.config['PASSWORD_MIN_LENGTH']
+        max_length = current_app.config['PASSWORD_MAX_LENGTH']
         if len(password) < min_length:
             flash(gettext('The password should have least %(num)s characters.', num=min_length))
         elif len(password) > max_length:
@@ -171,12 +188,12 @@ def choose_password(secret):
             flash(gettext('Incorrect recovery code'))
         else:
             new_recovery_code = signup_request.accept(password)
-            UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
+            redis.UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             if is_password_recovery:
-                invalidate_hydra_credentials(signup_request.user_id)
+                hydra.invalidate_credentials(signup_request.user_id)
                 emails.send_change_password_success_email(
                     signup_request.email,
-                    _get_change_password_link(signup_request.email),
+                    get_change_password_link(signup_request.email),
                 )
                 return render_template(
                     'report_recovery_success.html',
@@ -186,7 +203,7 @@ def choose_password(secret):
                 response = make_response(render_template(
                     'report_signup_success.html',
                     email=signup_request.email,
-                    recovery_code=format_recovery_code(new_recovery_code),
+                    recovery_code=utils.split_recovery_code_in_blocks(new_recovery_code),
                 ))
                 response.headers['Cache-Control'] = 'no-store'
                 return response
@@ -194,41 +211,41 @@ def choose_password(secret):
     return render_template('choose_password.html', require_recovery_code=require_recovery_code)
 
 
-@app.route('/signup/change-email', methods=['GET', 'POST'])
+@login.route('/change-email', methods=['GET', 'POST'])
 def change_email_login():
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
-        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             try:
                 # We create a new login verification request without a
                 # verification code. This request can only be used to
                 # set a new email address for the account.
-                login_verification_request = LoginVerificationRequest.create(
+                login_verification_request = redis.LoginVerificationRequest.create(
                     user_id=user.user_id,
                     email=email,
                     challenge_id=request.args.get('login_challenge'),
                 )
-            except LoginVerificationRequest.ExceededMaxAttempts:
+            except redis.LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
             emails.send_change_email_address_request_email(
                 email,
-                _get_change_password_link(email),
+                get_change_password_link(email),
             )
-            return redirect(url_for('choose_new_email', secret=login_verification_request.secret))
+            return redirect(url_for('.choose_new_email', secret=login_verification_request.secret))
         flash(gettext('Incorrect email or password'))
 
     return render_template('change_email_login.html')
 
 
-@app.route('/signup/choose-email/<secret>', methods=['GET', 'POST'])
+@login.route('/choose-email/<secret>', methods=['GET', 'POST'])
 def choose_new_email(secret):
-    verification_request = LoginVerificationRequest.from_secret(secret)
+    verification_request = redis.LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         return render_template('report_expired_link.html')
     user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
-    require_recovery_code = user.recovery_code_hash and app.config['USE_RECOVERY_CODE']
+    require_recovery_code = user.recovery_code_hash and current_app.config['USE_RECOVERY_CODE']
     if not require_recovery_code:
         # Allowing the user to change her account email address
         # without supplying a recovery code is a bad idea, because in
@@ -239,7 +256,7 @@ def choose_new_email(secret):
     if request.method == 'POST':
         email = request.form['email'].strip()
         recovery_code = request.form.get('recovery_code', '')
-        if is_invalid_email(email):
+        if utils.is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif not verification_request.is_correct_recovery_code(recovery_code):
             try:
@@ -249,14 +266,14 @@ def choose_new_email(secret):
             flash(gettext('Incorrect recovery code'))
         else:
             verification_request.accept()
-            r = ChangeEmailRequest.create(
+            r = redis.ChangeEmailRequest.create(
                 user_id=user.user_id,
                 email=email,
                 old_email=verification_request.email,
             )
-            emails.send_change_email_address_email(email, _get_change_email_address_link(r))
+            emails.send_change_email_address_email(email, get_change_email_address_link(r))
             return redirect(url_for(
-                'report_sent_email',
+                '.report_sent_email',
                 email=email,
                 login_challenge=verification_request.challenge_id,
             ))
@@ -266,9 +283,9 @@ def choose_new_email(secret):
     return response
 
 
-@app.route('/signup/change-email/<secret>', methods=['GET', 'POST'])
+@login.route('/change-email/<secret>', methods=['GET', 'POST'])
 def change_email_address(secret):
-    change_email_request = ChangeEmailRequest.from_secret(secret)
+    change_email_request = redis.ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
         return render_template('report_expired_link.html')
 
@@ -276,14 +293,14 @@ def change_email_address(secret):
         email = change_email_request.old_email
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
-        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             try:
                 change_email_request.accept()
             except change_email_request.EmailAlredyRegistered:
-                return redirect(url_for('report_email_change_failure', new_email=change_email_request.email))
-            invalidate_hydra_credentials(int(change_email_request.user_id))
+                return redirect(url_for('.report_email_change_failure', new_email=change_email_request.email))
+            hydra.invalidate_credentials(int(change_email_request.user_id))
             return redirect(url_for(
-                'report_email_change_success',
+                '.report_email_change_success',
                 new_email=change_email_request.email,
                 old_email=change_email_request.old_email,
             ))
@@ -292,12 +309,12 @@ def change_email_address(secret):
     return render_template('enter_password.html', title=gettext('Change Email Address'))
 
 
-@app.route('/signup/change-email-failure')
+@login.route('/change-email-failure')
 def report_email_change_failure():
     return render_template('report_email_change_failure.html', new_email=request.args['new_email'])
 
 
-@app.route('/signup/change-email-success')
+@login.route('/change-email-success')
 def report_email_change_success():
     return render_template(
         'report_email_change_success.html',
@@ -306,23 +323,23 @@ def report_email_change_success():
     )
 
 
-@app.route('/signup/change-recovery-code', methods=['GET', 'POST'])
+@login.route('/change-recovery-code', methods=['GET', 'POST'])
 def change_recovery_code():
-    if not app.config['USE_RECOVERY_CODE']:
+    if not current_app.config['USE_RECOVERY_CODE']:
         abort(404)
     email = request.args.get('email', '')
     if request.method == 'POST':
-        captcha_passed, captcha_error_message = _verify_captcha()
+        captcha_passed, captcha_error_message = verify_captcha()
         email = request.form['email'].strip()
-        if is_invalid_email(email):
+        if utils.is_invalid_email(email):
             flash(gettext('The email address is invalid.'))
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            r = ChangeRecoveryCodeRequest.create(email=email)
-            emails.send_change_recovery_code_email(email, _get_generate_recovery_code_link(r))
+            r = redis.ChangeRecoveryCodeRequest.create(email=email)
+            emails.send_change_recovery_code_email(email, get_generate_recovery_code_link(r))
             return redirect(url_for(
-                'report_sent_email',
+                '.report_sent_email',
                 email=email,
                 login_challenge=request.args.get('login_challenge'),
             ))
@@ -335,9 +352,9 @@ def change_recovery_code():
     )
 
 
-@app.route('/signup/recovery-code/<secret>', methods=['GET', 'POST'])
+@login.route('/recovery-code/<secret>', methods=['GET', 'POST'])
 def generate_recovery_code(secret):
-    change_recovery_code_request = ChangeRecoveryCodeRequest.from_secret(secret)
+    change_recovery_code_request = redis.ChangeRecoveryCodeRequest.from_secret(secret)
     if not change_recovery_code_request:
         return render_template('report_expired_link.html')
 
@@ -345,12 +362,12 @@ def generate_recovery_code(secret):
         email = change_recovery_code_request.email
         password = request.form['password']
         user = User.query.filter_by(email=email).one_or_none()
-        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             new_recovery_code = change_recovery_code_request.accept()
             response = make_response(render_template(
                 'report_recovery_code_change.html',
                 email=email,
-                recovery_code=format_recovery_code(new_recovery_code),
+                recovery_code=utils.split_recovery_code_in_blocks(new_recovery_code),
             ))
             response.headers['Cache-Control'] = 'no-store'
             return response
@@ -359,9 +376,9 @@ def generate_recovery_code(secret):
     return render_template('enter_password.html', title=gettext('Change Recovery Code'))
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    login_request = HydraLoginRequest(request.args['login_challenge'])
+@login.route('/', methods=['GET', 'POST'])
+def login_form():
+    login_request = hydra.LoginRequest(request.args['login_challenge'])
     subject = login_request.fetch()
     if subject:
         return redirect(login_request.accept(subject))
@@ -371,68 +388,68 @@ def login():
         password = request.form['password']
         remember_me = 'remember_me' in request.form
         user = User.query.filter_by(email=email).one_or_none()
-        if user and user.password_hash == calc_crypt_hash(user.salt, password):
+        if user and user.password_hash == utils.calc_crypt_hash(user.salt, password):
             user_id = user.user_id
-            subject = get_hydra_subject(user_id)
+            subject = hydra.get_subject(user_id)
             if not user.two_factor_login:
                 return redirect(login_request.accept(subject, remember_me))
 
             # Two factor login: require a cookie containing a secret
             # "computer code" as well. The cookie proves that there
             # was a previous successful login attempt from this computer.
-            computer_code = _get_computer_code()
-            user_logins_history = UserLoginsHistory(user_id)
+            computer_code = get_computer_code()
+            user_logins_history = redis.UserLoginsHistory(user_id)
             if user_logins_history.contains(computer_code):
                 user_logins_history.add(computer_code)
                 return redirect(login_request.accept(subject, remember_me))
 
             # A two factor login verification code is required.
-            verification_code = generate_verification_code()
+            verification_code = utils.generate_verification_code()
             try:
-                login_verification_request = LoginVerificationRequest.create(
+                login_verification_request = redis.LoginVerificationRequest.create(
                     user_id=user_id,
                     email=email,
                     code=verification_code,
                     remember_me='yes' if remember_me else 'no',
                     challenge_id=login_request.challenge_id,
                 )
-            except LoginVerificationRequest.ExceededMaxAttempts:
+            except redis.LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
             emails.send_verification_code_email(
                 email,
                 verification_code,
-                _get_user_agent(),
-                _get_change_password_link(email),
+                get_user_agent(),
+                get_change_password_link(email),
             )
-            response = redirect(url_for('enter_verification_code'))
+            response = redirect(url_for('.enter_verification_code'))
             response.set_cookie(
-                app.config['LOGIN_VERIFICATION_COOKE_NAME'],
+                current_app.config['LOGIN_VERIFICATION_COOKE_NAME'],
                 login_verification_request.secret,
                 httponly=True,
-                secure=not app.config['DEBUG'],
+                secure=not current_app.config['DEBUG'],
             )
-            _set_computer_code_cookie(response, computer_code)
+            set_computer_code_cookie(response, computer_code)
             return response
         flash(gettext('Incorrect email or password'))
 
     return render_template('login.html')
 
 
-@app.route('/login/verify', methods=['GET', 'POST'])
+@login.route('/verify', methods=['GET', 'POST'])
 def enter_verification_code():
-    secret = request.cookies.get(app.config['LOGIN_VERIFICATION_COOKE_NAME'], '*')
-    verification_request = LoginVerificationRequest.from_secret(secret)
+    secret = request.cookies.get(current_app.config['LOGIN_VERIFICATION_COOKE_NAME'], '*')
+    verification_request = redis.LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         abort(403)
 
     if request.method == 'POST':
         if request.form['verification_code'].strip() == verification_request.code:
-            login_request = HydraLoginRequest(verification_request.challenge_id)
+            login_request = hydra.LoginRequest(verification_request.challenge_id)
             user_id = int(verification_request.user_id)
-            subject = get_hydra_subject(user_id)
+            subject = hydra.get_subject(user_id)
             remember_me = verification_request.remember_me == 'yes'
             verification_request.accept(clear_failures=True)
-            UserLoginsHistory(user_id).add(_get_computer_code())
+            redis.UserLoginsHistory(user_id).add(get_computer_code())
             return redirect(login_request.accept(subject, remember_me))
         try:
             verification_request.register_code_failure()
@@ -443,12 +460,10 @@ def enter_verification_code():
     return render_template('enter_verification_code.html', secret=secret)
 
 
-@app.route('/consent', methods=['GET', 'POST'])
-def consent():
-    consent_request = HydraConsentRequest(request.args['consent_challenge'])
-    requested_scope = consent_request.fetch()
-    if not requested_scope:
-        return redirect(consent_request.accept(requested_scope))
+@consent.route('/', methods=['GET', 'POST'])
+def dummy_consent():
+    """Always grant consent."""
 
-    # TODO: show UI.
+    consent_request = hydra.ConsentRequest(request.args['consent_challenge'])
+    requested_scope = consent_request.fetch()
     return redirect(consent_request.accept(requested_scope))

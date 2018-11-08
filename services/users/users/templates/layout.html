@@ -6,7 +6,7 @@
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
         <meta name="HandheldFriendly" content="True">
         <meta name="viewport" content="initial-scale=1.0">
-        <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('serve_static', filename='style.css', version=config.VERSION)}}">
+        <link rel="stylesheet" href="{{config['STYLE_URL'] or url_for('.static', filename='style.css', version=config.VERSION)}}">
         <title>{% block title %}{{config['SITE_TITLE']}}{% endblock %}</title>
       {% endautoescape %}
     {% endblock head %}
@@ -20,7 +20,7 @@
               <li><a href="{{config.ABOUT_URL}}">{% trans %}About{% endtrans %}</a></li>
               {% for code, language in languages.items() %}
                 {% if code != locale_code %}
-                  <li><a href="{{url_for('set_language', lang=code, to=request.url)}}">{{language}}</a></li>
+                  <li><a href="{{url_for('.set_language', lang=code, to=request.url)}}">{{language}}</a></li>
                 {% endif %}
               {% endfor %}
             </ul>

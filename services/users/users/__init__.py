@@ -1,64 +1,15 @@
 import logging
-import redis
-from flask import Flask, request
-from flask_migrate import Migrate
-from flask_babel import Babel, get_locale
-from flask_mail import Mail
-from flask_signalbus import SignalBus
-from users.config import Configuration
-from users.models import db
+from flask import Flask
+from .config import Configuration
+from . import models, emails, redis, routes
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
 app = Flask(__name__)
 app.config.from_object(Configuration)
 
-
-@app.after_request
-def set_response_headers(response):
-    if 'Cache-Control' not in response.headers:
-        response.headers['Cache-Control'] = 'no-cache'
-    return response
-
-
-@app.context_processor
-def inject_get_locale():
-    return dict(get_locale=get_locale)
-
-
-babel = Babel(app)
-
-
-@babel.localeselector
-def select_locale():
-    # Try to guess the language from the language cookie and the
-    # accept header the browser transmits.
-    lang = request.cookies.get(app.config['LANGUAGE_COOKE_NAME'])
-    return lang or request.accept_languages.best_match(app.config['SUPPORTED_LANGUAGES'].keys())
-
-
-@babel.timezoneselector
-def select_timezone():
-    return None
-
-
-db.init_app(app)
-migrate = Migrate(app, db)
-signalbus = SignalBus(app, db)
-
-
-mail = Mail(app)
-
-
-redis_users = redis.StrictRedis.from_url(
-    app.config['REDIS_URL'],
-    socket_timeout=5,
-    charset="utf-8",
-    decode_responses=True,
-)
-
-
-import users.routes  # noqa: F401,E402
+models.init_app(app)
+emails.init_app(app)
+redis.init_app(app)
+routes.init_app(app)
