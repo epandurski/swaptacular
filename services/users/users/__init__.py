@@ -1,7 +1,7 @@
 import logging
 from flask import Flask
 from .config import Configuration
-from . import models, emails, redis, routes
+from . import models, mail, redis, routes
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,7 +12,7 @@ def create_app(config_object=None):
     app = Flask(__name__)
     app.config.from_object(config_object or Configuration)
     models.init_app(app)
-    emails.init_app(app)
+    mail.init_app(app)
     redis.init_app(app)
     routes.init_app(app)
     return app

@@ -4,7 +4,7 @@ from flask import (request, redirect, url_for, flash, render_template,
                    abort, make_response, current_app, Blueprint)
 from flask_babel import Babel, gettext, get_locale
 import user_agents
-from . import utils, captcha, redis, emails, hydra
+from . import utils, captcha, redis, mail, hydra
 from .models import User
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,7 @@ def signup():
             user = User.query.filter_by(email=email).one_or_none()
             if user:
                 if is_new_user:
-                    emails.send_duplicate_registration_email(email)
+                    mail.send_duplicate_registration_email(email)
                 else:
                     r = redis.SignUpRequest.create(
                         email=email,
@@ -126,11 +126,11 @@ def signup():
                         recover='yes',
                         has_rc='yes' if user.recovery_code_hash else 'no',
                     )
-                    emails.send_change_password_email(email, get_choose_password_link(r))
+                    mail.send_change_password_email(email, get_choose_password_link(r))
             else:
                 if is_new_user:
                     r = redis.SignUpRequest.create(email=email, cc=computer_code)
-                    emails.send_confirm_registration_email(email, get_choose_password_link(r))
+                    mail.send_confirm_registration_email(email, get_choose_password_link(r))
                 else:
                     # We are asked to change the password of a non-existing user. In this case
                     # we fail silently, so as not to reveal if the email is registered or not.
@@ -191,7 +191,7 @@ def choose_password(secret):
             redis.UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             if is_password_recovery:
                 hydra.invalidate_credentials(signup_request.user_id)
-                emails.send_change_password_success_email(
+                mail.send_change_password_success_email(
                     signup_request.email,
                     get_change_password_link(signup_request.email),
                 )
@@ -229,7 +229,7 @@ def change_email_login():
                 )
             except redis.LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
-            emails.send_change_email_address_request_email(
+            mail.send_change_email_address_request_email(
                 email,
                 get_change_password_link(email),
             )
@@ -271,7 +271,7 @@ def choose_new_email(secret):
                 email=email,
                 old_email=verification_request.email,
             )
-            emails.send_change_email_address_email(email, get_change_email_address_link(r))
+            mail.send_change_email_address_email(email, get_change_email_address_link(r))
             return redirect(url_for(
                 '.report_sent_email',
                 email=email,
@@ -337,7 +337,7 @@ def change_recovery_code():
             flash(captcha_error_message)
         else:
             r = redis.ChangeRecoveryCodeRequest.create(email=email)
-            emails.send_change_recovery_code_email(email, get_generate_recovery_code_link(r))
+            mail.send_change_recovery_code_email(email, get_generate_recovery_code_link(r))
             return redirect(url_for(
                 '.report_sent_email',
                 email=email,
@@ -415,7 +415,7 @@ def login_form():
                 )
             except redis.LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
-            emails.send_verification_code_email(
+            mail.send_verification_code_email(
                 email,
                 verification_code,
                 get_user_agent(),

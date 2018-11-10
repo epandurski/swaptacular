@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-08 16:19+0200\n"
+"POT-Creation-Date: 2018-11-10 21:01+0200\n"
 "PO-Revision-Date: 2018-11-06 17:05+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
@@ -18,33 +18,33 @@ msgstr ""
 msgid "You did not solve the \"reCAPTCHA\" challenge."
 msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 
-#: emails.py:14
+#: mail.py:14
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: emails.py:27 routes.py:147
+#: mail.py:27 routes.py:147
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
-#: emails.py:40
+#: mail.py:40
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: emails.py:53 routes.py:147
+#: mail.py:53 routes.py:147
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
-#: emails.py:66
+#: mail.py:66
 #, python-format
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:80 emails.py:92 routes.py:309 templates/change_email_login.html:4
+#: mail.py:80 mail.py:92 routes.py:309 templates/change_email_login.html:4
 #: templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:105 routes.py:350 routes.py:376
+#: mail.py:105 routes.py:350 routes.py:376
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
