@@ -103,7 +103,7 @@
         },
         "flask-sibnalbus": {
             "git": "https://github.com/epandurski/flask_signalbus.git",
-            "ref": "0690ddd31c8d53ec40a5ab6c103a11bc3cc22d5a"
+            "ref": "1249bcb97c465573025b76a86eeb656490bca431"
         },
         "flask-sqlalchemy": {
             "hashes": [
