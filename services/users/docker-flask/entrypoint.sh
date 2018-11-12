@@ -140,12 +140,12 @@ case $1 in
     perform-db-upgrade)
         perform_db_upgrade
         ;;
-    '')
+    serve|'')
         export -n PYTHONDONTWRITEBYTECODE
         ([[ $DO_NOT_UPGRADE_DB ]] || perform_db_upgrade) && gunicorn \
                 --config "$gunicorn_conf" \
                 --log-config "$logging_conf" \
-                -b :$PORT $FLASK_APP:app
+                -b :$PORT run:app
         ;;
     *)
         "$@"

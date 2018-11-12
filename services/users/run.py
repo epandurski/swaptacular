@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
-if __name__ == '__main__':
-    ###############################################################
-    # Change the following line to import your flask application! #
-    ###############################################################
-    from users import app
+#######################################################################
+# Change the following lines to import/create your flask application! #
+#######################################################################
+from users import create_app
 
+app = create_app()
+
+
+if __name__ == '__main__':
     try:
         from pudb import set_trace
     except ImportError:
