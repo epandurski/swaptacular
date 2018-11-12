@@ -88,6 +88,21 @@ class RedisSecretHashRecord:
         return self._data[name]
 
 
+def increment_key_with_limit(key, limit=None, period_seconds=1):
+    if redis_store.ttl(key) < 0:
+        redis_store.set(key, '1', ex=period_seconds)
+        value = 1
+    else:
+        value = redis_store.incrby(key)
+    if limit is not None and int(value) > limit:
+        raise ExceededValueLimitError()
+    return value
+
+
+class ExceededValueLimitError(Exception):
+    """The maximum value of a key has been exceeded."""
+
+
 class LoginVerificationRequest(RedisSecretHashRecord):
     EXPIRATION_SECONDS_CONFIG_FIELD = 'LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'
     REDIS_PREFIX = 'vcode:'

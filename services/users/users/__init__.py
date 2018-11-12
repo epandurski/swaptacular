@@ -33,10 +33,10 @@ def create_app(config_object=None):
     app = Flask(__name__)
     app.config.from_object(config_object or Configuration)
     db.init_app(app)
+    babel.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     redis_store.init_app(app)
-    babel.init_app(app)
     app.register_blueprint(routes.login, url_prefix=app.config['LOGIN_URL'])
     app.register_blueprint(routes.consent, url_prefix=app.config['CONSENT_URL'])
     return app

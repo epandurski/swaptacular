@@ -1,7 +1,7 @@
 from urllib.parse import urljoin, quote_plus
 import requests
 from flask import current_app
-from .redis import redis_store, UserLoginsHistory
+from .redis import increment_key_with_limit, UserLoginsHistory, ExceededValueLimitError
 
 
 def get_subject(user_id):
@@ -19,7 +19,7 @@ def invalidate_credentials(user_id):
 
 
 class LoginRequest:
-    REDIS_PREFIX = 'logins:'
+    LOGIN_COUNT_SUBJECT_PREFIX = 'logins:'
 
     class TooManyLogins(Exception):
         """Too many login attempts."""
@@ -31,13 +31,10 @@ class LoginRequest:
         self.request_url = base_url + challenge_id
 
     def register_successful_login(self, subject):
-        key = self.REDIS_PREFIX + subject
-        if redis_store.ttl(key) < 0:
-            redis_store.set(key, '1', ex=2600000)
-            num_logins = 1
-        else:
-            num_logins = redis_store.incrby(key)
-        if num_logins > current_app.config['MAX_LOGINS_PER_MONTH']:
+        key = self.LOGIN_COUNT_SUBJECT_PREFIX + subject
+        try:
+            increment_key_with_limit(key, limit=current_app.config['MAX_LOGINS_PER_MONTH'], period_seconds=2600000)
+        except ExceededValueLimitError:
             raise self.TooManyLogins()
 
     def fetch(self):
