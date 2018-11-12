@@ -34,10 +34,14 @@ class User(db.Model):
 class UserUpdateSignal(db.Model):
     user_update_signal_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.user_id'), nullable=False)
-    old_email = db.Column(db.Text, nullable=True)
-    new_email = db.Column(db.Text, nullable=True)
+    email = db.Column(db.Text, nullable=True)
 
     def send_signalbus_message(self):
         """Inform the other services that user's email has changed."""
 
-        logger.debug('Sent user update signal: %i, %s, %s', self.user_id, self.old_email, self.new_email)
+        logger.debug(
+            'Triggered sending of user update signal: %i, %i, %s',
+            self.user_update_signal_id,
+            self.user_id,
+            self.email
+        )
