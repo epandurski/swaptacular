@@ -1,10 +1,12 @@
 import logging
 from urllib.parse import urljoin
-from flask import (request, redirect, url_for, flash, render_template,
-                   abort, make_response, current_app, Blueprint)
+from flask import request, redirect, url_for, flash, render_template, abort,\
+    make_response, current_app, Blueprint
 from flask_babel import gettext, get_locale
 import user_agents
-from . import utils, captcha, redis, emails, hydra
+from . import utils, captcha, emails, hydra
+from .redis import SignUpRequest, LoginVerificationRequest, ChangeEmailRequest,\
+    ChangeRecoveryCodeRequest, UserLoginsHistory
 from .models import User
 
 logger = logging.getLogger(__name__)
@@ -100,7 +102,7 @@ def signup():
                 if is_new_user:
                     emails.send_duplicate_registration_email(email)
                 else:
-                    r = redis.SignUpRequest.create(
+                    r = SignUpRequest.create(
                         email=email,
                         cc=computer_code,
                         recover='yes',
@@ -109,7 +111,7 @@ def signup():
                     emails.send_change_password_email(email, get_choose_password_link(r))
             else:
                 if is_new_user:
-                    r = redis.SignUpRequest.create(email=email, cc=computer_code)
+                    r = SignUpRequest.create(email=email, cc=computer_code)
                     emails.send_confirm_registration_email(email, get_choose_password_link(r))
                 else:
                     # We are asked to change the password of a non-existing user. In this case
@@ -141,7 +143,7 @@ def report_sent_email():
 
 @login.route('/password/<secret>', methods=['GET', 'POST'])
 def choose_password(secret):
-    signup_request = redis.SignUpRequest.from_secret(secret)
+    signup_request = SignUpRequest.from_secret(secret)
     if not signup_request:
         return render_template('report_expired_link.html')
     is_password_recovery = signup_request.recover == 'yes'
@@ -168,7 +170,7 @@ def choose_password(secret):
             flash(gettext('Incorrect recovery code'))
         else:
             new_recovery_code = signup_request.accept(password)
-            redis.UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
+            UserLoginsHistory(signup_request.user_id).add(signup_request.cc)
             if is_password_recovery:
                 hydra.invalidate_credentials(signup_request.user_id)
                 emails.send_change_password_success_email(
@@ -202,12 +204,12 @@ def change_email_login():
                 # We create a new login verification request without a
                 # verification code. This request can only be used to
                 # set a new email address for the account.
-                login_verification_request = redis.LoginVerificationRequest.create(
+                login_verification_request = LoginVerificationRequest.create(
                     user_id=user.user_id,
                     email=email,
                     challenge_id=request.args.get('login_challenge'),
                 )
-            except redis.LoginVerificationRequest.ExceededMaxAttempts:
+            except LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
             emails.send_change_email_address_request_email(
                 email,
@@ -221,7 +223,7 @@ def change_email_login():
 
 @login.route('/choose-email/<secret>', methods=['GET', 'POST'])
 def choose_new_email(secret):
-    verification_request = redis.LoginVerificationRequest.from_secret(secret)
+    verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         return render_template('report_expired_link.html')
     user = User.query.filter_by(user_id=int(verification_request.user_id)).one()
@@ -246,7 +248,7 @@ def choose_new_email(secret):
             flash(gettext('Incorrect recovery code'))
         else:
             verification_request.accept()
-            r = redis.ChangeEmailRequest.create(
+            r = ChangeEmailRequest.create(
                 user_id=user.user_id,
                 email=email,
                 old_email=verification_request.email,
@@ -265,7 +267,7 @@ def choose_new_email(secret):
 
 @login.route('/change-email/<secret>', methods=['GET', 'POST'])
 def change_email_address(secret):
-    change_email_request = redis.ChangeEmailRequest.from_secret(secret)
+    change_email_request = ChangeEmailRequest.from_secret(secret)
     if not change_email_request:
         return render_template('report_expired_link.html')
 
@@ -316,7 +318,7 @@ def change_recovery_code():
         elif not captcha_passed:
             flash(captcha_error_message)
         else:
-            r = redis.ChangeRecoveryCodeRequest.create(email=email)
+            r = ChangeRecoveryCodeRequest.create(email=email)
             emails.send_change_recovery_code_email(email, get_generate_recovery_code_link(r))
             return redirect(url_for(
                 '.report_sent_email',
@@ -334,7 +336,7 @@ def change_recovery_code():
 
 @login.route('/recovery-code/<secret>', methods=['GET', 'POST'])
 def generate_recovery_code(secret):
-    change_recovery_code_request = redis.ChangeRecoveryCodeRequest.from_secret(secret)
+    change_recovery_code_request = ChangeRecoveryCodeRequest.from_secret(secret)
     if not change_recovery_code_request:
         return render_template('report_expired_link.html')
 
@@ -378,7 +380,7 @@ def login_form():
             # "computer code" as well. The cookie proves that there
             # was a previous successful login attempt from this computer.
             computer_code = get_computer_code()
-            user_logins_history = redis.UserLoginsHistory(user_id)
+            user_logins_history = UserLoginsHistory(user_id)
             if user_logins_history.contains(computer_code):
                 user_logins_history.add(computer_code)
                 return redirect(login_request.accept(subject, remember_me))
@@ -386,14 +388,14 @@ def login_form():
             # A two factor login verification code is required.
             verification_code = utils.generate_verification_code()
             try:
-                login_verification_request = redis.LoginVerificationRequest.create(
+                login_verification_request = LoginVerificationRequest.create(
                     user_id=user_id,
                     email=email,
                     code=verification_code,
                     remember_me='yes' if remember_me else 'no',
                     challenge_id=login_request.challenge_id,
                 )
-            except redis.LoginVerificationRequest.ExceededMaxAttempts:
+            except LoginVerificationRequest.ExceededMaxAttempts:
                 abort(403)
             emails.send_verification_code_email(
                 email,
@@ -418,7 +420,7 @@ def login_form():
 @login.route('/verify', methods=['GET', 'POST'])
 def enter_verification_code():
     secret = request.cookies.get(current_app.config['LOGIN_VERIFICATION_COOKE_NAME'], '*')
-    verification_request = redis.LoginVerificationRequest.from_secret(secret)
+    verification_request = LoginVerificationRequest.from_secret(secret)
     if not verification_request:
         abort(403)
 
@@ -429,7 +431,7 @@ def enter_verification_code():
             subject = hydra.get_subject(user_id)
             remember_me = verification_request.remember_me == 'yes'
             verification_request.accept(clear_failures=True)
-            redis.UserLoginsHistory(user_id).add(get_computer_code())
+            UserLoginsHistory(user_id).add(get_computer_code())
             return redirect(login_request.accept(subject, remember_me))
         try:
             verification_request.register_code_failure()

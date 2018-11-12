@@ -6,7 +6,7 @@ from flask_redis import FlaskRedis
 from . import utils
 from .models import db, User, UserUpdateSignal
 
-store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
+redis_store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
 
 
 def _get_user_verification_code_failures_redis_key(user_id):
@@ -16,7 +16,7 @@ def _get_user_verification_code_failures_redis_key(user_id):
 def _register_user_verification_code_failure(user_id):
     expiration_seconds = max(current_app.config['LOGIN_VERIFICATION_CODE_EXPIRATION_SECONDS'], 24 * 60 * 60)
     key = _get_user_verification_code_failures_redis_key(user_id)
-    with store.pipeline() as p:
+    with redis_store.pipeline() as p:
         p.incrby(key)
         p.expire(key, expiration_seconds)
         num_failures = int(p.execute()[0] or '0')
@@ -24,7 +24,7 @@ def _register_user_verification_code_failure(user_id):
 
 
 def _clear_user_verification_code_failures(user_id):
-    store.delete(_get_user_verification_code_failures_redis_key(user_id))
+    redis_store.delete(_get_user_verification_code_failures_redis_key(user_id))
 
 
 class UserLoginsHistory:
@@ -42,17 +42,17 @@ class UserLoginsHistory:
 
     def contains(self, element):
         emement_hash = self.calc_hash(element)
-        return emement_hash in store.zrevrange(self.key, 0, self.max_count - 1)
+        return emement_hash in redis_store.zrevrange(self.key, 0, self.max_count - 1)
 
     def add(self, element):
         emement_hash = self.calc_hash(element)
-        with store.pipeline() as p:
+        with redis_store.pipeline() as p:
             p.zremrangebyrank(self.key, 0, -self.max_count)
             p.zadd(self.key, time.time(), emement_hash)
             p.execute()
 
     def clear(self):
-        store.delete(self.key)
+        redis_store.delete(self.key)
 
 
 class RedisSecretHashRecord:
@@ -68,7 +68,7 @@ class RedisSecretHashRecord:
         instance = cls()
         instance.secret = utils.generate_random_secret()
         instance._data = data
-        with store.pipeline() as p:
+        with redis_store.pipeline() as p:
             p.hmset(instance.key, data)
             p.expire(instance.key, current_app.config[cls.EXPIRATION_SECONDS_CONFIG_FIELD])
             p.execute()
@@ -78,11 +78,11 @@ class RedisSecretHashRecord:
     def from_secret(cls, secret):
         instance = cls()
         instance.secret = secret
-        instance._data = dict(zip(cls.ENTRIES, store.hmget(instance.key, cls.ENTRIES)))
+        instance._data = dict(zip(cls.ENTRIES, redis_store.hmget(instance.key, cls.ENTRIES)))
         return instance if instance._data.get(cls.ENTRIES[0]) is not None else None
 
     def delete(self):
-        store.delete(self.key)
+        redis_store.delete(self.key)
 
     def __getattr__(self, name):
         return self._data[name]
@@ -130,7 +130,7 @@ class SignUpRequest(RedisSecretHashRecord):
         return user.recovery_code_hash == utils.calc_crypt_hash(user.salt, normalized_recovery_code)
 
     def register_code_failure(self):
-        num_failures = int(store.hincrby(self.key, 'fails'))
+        num_failures = int(redis_store.hincrby(self.key, 'fails'))
         if num_failures >= current_app.config['SECRET_CODE_MAX_ATTEMPTS']:
             self.delete()
             raise self.ExceededMaxAttempts()

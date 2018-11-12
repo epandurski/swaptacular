@@ -1,7 +1,7 @@
 from urllib.parse import urljoin, quote_plus
 import requests
 from flask import current_app
-from . import redis
+from .redis import redis_store, UserLoginsHistory
 
 
 def get_subject(user_id):
@@ -9,7 +9,7 @@ def get_subject(user_id):
 
 
 def invalidate_credentials(user_id):
-    redis.UserLoginsHistory(user_id).clear()
+    UserLoginsHistory(user_id).clear()
     subject = quote_plus(get_subject(user_id))
     timeout = current_app.config['HYDRA_REQUEST_TIMEOUT_SECONDS']
     hydra_consents_base_url = urljoin(current_app.config['HYDRA_ADMIN_URL'], '/oauth2/auth/sessions/consent/')
@@ -32,11 +32,11 @@ class LoginRequest:
 
     def register_successful_login(self, subject):
         key = self.REDIS_PREFIX + subject
-        if redis.store.ttl(key) < 0:
-            redis.store.set(key, '1', ex=2600000)
+        if redis_store.ttl(key) < 0:
+            redis_store.set(key, '1', ex=2600000)
             num_logins = 1
         else:
-            num_logins = redis.store.incrby(key)
+            num_logins = redis_store.incrby(key)
         if num_logins > current_app.config['MAX_LOGINS_PER_MONTH']:
             raise self.TooManyLogins()
 
