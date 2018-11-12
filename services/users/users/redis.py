@@ -9,10 +9,6 @@ from .models import db, User, UserUpdateSignal
 store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
 
 
-def init_app(app):
-    store.init_app(app)
-
-
 def _get_user_verification_code_failures_redis_key(user_id):
     return 'vcfails:' + str(user_id)
 

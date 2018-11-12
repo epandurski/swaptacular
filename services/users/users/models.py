@@ -1,6 +1,5 @@
 import logging
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_signalbus import SignalBusMixin
 
 logger = logging.getLogger(__name__)
@@ -14,12 +13,6 @@ class CustomAlchemy(SignalBusMixin, SQLAlchemy):
 
 
 db = CustomAlchemy()
-migrate = Migrate(None, db)
-
-
-def init_app(app):
-    db.init_app(app)
-    migrate.init_app(app)
 
 
 class User(db.Model):

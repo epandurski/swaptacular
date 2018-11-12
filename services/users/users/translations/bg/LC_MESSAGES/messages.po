@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-10 21:01+0200\n"
+"POT-Creation-Date: 2018-11-12 15:28+0200\n"
 "PO-Revision-Date: 2018-11-06 17:05+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
@@ -18,71 +18,71 @@ msgstr ""
 msgid "You did not solve the \"reCAPTCHA\" challenge."
 msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 
-#: mail.py:14
+#: emails.py:10
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: mail.py:27 routes.py:147
+#: emails.py:23 routes.py:127
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
-#: mail.py:40
+#: emails.py:36
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: mail.py:53 routes.py:147
+#: emails.py:49 routes.py:127
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
-#: mail.py:66
+#: emails.py:62
 #, python-format
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: mail.py:80 mail.py:92 routes.py:309 templates/change_email_login.html:4
+#: emails.py:76 emails.py:88 routes.py:289 templates/change_email_login.html:4
 #: templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: mail.py:105 routes.py:350 routes.py:376
+#: emails.py:101 routes.py:330 routes.py:356
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
-#: routes.py:57
+#: routes.py:37
 msgid "Incorrect captcha solution."
 msgstr "Неправилно решение на captcha-та"
 
-#: routes.py:113 routes.py:260 routes.py:335
+#: routes.py:93 routes.py:240 routes.py:315
 msgid "The email address is invalid."
 msgstr "Имейл адреса е невалиден."
 
-#: routes.py:178
+#: routes.py:158
 #, python-format
 msgid "The password should have least %(num)s characters."
 msgstr "Паролата трябва да съдръжа поне %(num)s символа."
 
-#: routes.py:180
+#: routes.py:160
 #, python-format
 msgid "The password should have at most %(num)s characters."
 msgstr "Паролата не трябва да съдържа повече от %(num)s символа."
 
-#: routes.py:182
+#: routes.py:162
 msgid "Passwords do not match."
 msgstr "Паролите не съвпадат."
 
-#: routes.py:188 routes.py:266
+#: routes.py:168 routes.py:246
 msgid "Incorrect recovery code"
 msgstr "Грешен код за възстановяване"
 
-#: routes.py:237 routes.py:433
+#: routes.py:217 routes.py:413
 msgid "Incorrect email or password"
 msgstr "Грешен имейл или парола"
 
-#: routes.py:307 routes.py:374
+#: routes.py:287 routes.py:354
 msgid "Incorrect password"
 msgstr "Грешна парола"
 
-#: routes.py:458
+#: routes.py:438
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
 

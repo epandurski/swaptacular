@@ -5,10 +5,6 @@ from flask_mail import Mail, Message
 mail = Mail()
 
 
-def init_app(app):
-    mail.init_app(app)
-
-
 def send_duplicate_registration_email(email):
     msg = Message(
         subject=gettext('Duplicate Registration'),
