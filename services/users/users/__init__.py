@@ -6,7 +6,7 @@ from .config import Configuration
 from .models import db
 from .emails import mail
 from .redis import redis_store
-from . import routes
+from .routes import login, consent
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -37,6 +37,6 @@ def create_app(config_object=None):
     migrate.init_app(app, db)
     mail.init_app(app)
     redis_store.init_app(app)
-    app.register_blueprint(routes.login, url_prefix=app.config['LOGIN_URL'])
-    app.register_blueprint(routes.consent, url_prefix=app.config['CONSENT_URL'])
+    app.register_blueprint(login, url_prefix=app.config['LOGIN_URL'])
+    app.register_blueprint(consent, url_prefix=app.config['CONSENT_URL'])
     return app
