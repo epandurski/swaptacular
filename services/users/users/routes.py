@@ -73,7 +73,7 @@ def set_computer_code_cookie(response, computer_code):
         computer_code,
         max_age=1000000000,
         httponly=True,
-        secure=request.is_secure,
+        secure=not current_app.config['DEBUG'],
     )
 
 
@@ -408,7 +408,7 @@ def login_form():
                 current_app.config['LOGIN_VERIFICATION_COOKE_NAME'],
                 login_verification_request.secret,
                 httponly=True,
-                secure=request.is_secure,
+                secure=not current_app.config['DEBUG'],
             )
             set_computer_code_cookie(response, computer_code)
             return response
