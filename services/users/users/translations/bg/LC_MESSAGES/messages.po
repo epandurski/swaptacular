@@ -310,7 +310,7 @@ msgid ""
 "\n"
 "If you received this email by mistake, simply ignore it.\n"
 msgstr ""
-"Вашият имейл адрес \\\"%(email)s\\\" е вече регистриран в %(site)s.\n"
+"Вашият имейл адрес \"%(email)s\" е вече регистриран в %(site)s.\n"
 "\n"
 "Ако сте получили този имейл погрешка, просто не му обръщайте внимание.\n"
 
