@@ -60,7 +60,6 @@ class Configuration(metaclass=MetaFlaskEnv):
     PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
     PASSWORD_MAX_LENGTH = 64
-    MESSAGE = 'Hello, World!'
 
     SEND_FILE_MAX_AGE_DEFAULT = 12096000
     MAX_CONTENT_LENGTH = 1024

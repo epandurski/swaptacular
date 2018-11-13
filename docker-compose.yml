@@ -239,9 +239,6 @@ services:
       - MAIL_PORT=1025
       - MAIL_DEFAULT_SENDER=Swaptacular <no-reply@swaptacular.com>
       - HYDRA_ADMIN_URL=http://hydra:4445
-      - MESSAGE=Hello, Developer
-      - GUNICORN_WORKERS=4
-      - GUNICORN_THREADS=10
     command: develop
     depends_on:
       - pg

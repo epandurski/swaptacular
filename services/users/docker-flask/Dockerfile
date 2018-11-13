@@ -48,7 +48,7 @@ ENV GUNICORN_WORKER_CLASS=sync
 # a positive integer generally in the 2-4 * $NUM_CORES range. You may
 # want to vary this a bit to find the best for your particular
 # workload.
-ENV GUNICORN_WORKERS=1
+ENV GUNICORN_WORKERS=2
 
 # Set this to the number of worker threads for handling
 # requests. (Runs each worker with the specified number of threads.)
