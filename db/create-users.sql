@@ -17,7 +17,7 @@ BEGIN
   --------------------------
   -- Add your users here! --
   --------------------------
-  PERFORM create_user_with_own_schema('users_service');
+  PERFORM create_user_with_own_schema('hydra_login2f_service');
   PERFORM create_user_with_own_schema('hydra_service');
   PERFORM create_user_with_own_schema('oathkeeper_service');
   PERFORM create_user_with_own_schema('keto_service');

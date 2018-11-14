@@ -168,7 +168,7 @@ services:
 
   oauth2-config:
     build:
-      context: ./services/oauth2-config
+      context: ./services/oauth2_config
       dockerfile: Dockerfile
       args:
         - HYDRA_VERSION=$HYDRA_VERSION
@@ -220,20 +220,20 @@ services:
       - 8025:8025
 
 
-  users:
+  hydra-login2f:
     build:
-      context: ./services/users
+      context: ./services/hydra_login2f
       dockerfile: docker-flask/Dockerfile
       args:
-        - FLASK_APP=users
+        - FLASK_APP=hydra_login2f
     volumes:
-      - './services/users:/usr/src/app'
+      - './services/hydra_login2f:/usr/src/app'
     ports:
       # This is the public endpoint for login and consent pages.
       - 4488:4488
     environment:
       - PORT=4488
-      - SQLALCHEMY_DATABASE_URI=postgresql://users_service:users_service@pg/${POSTGRES_DB}
+      - SQLALCHEMY_DATABASE_URI=postgresql://hydra_login2f_service:hydra_login2f_service@pg/${POSTGRES_DB}
       - REDIS_URL=redis://redis-users:6379/0
       - MAIL_SERVER=mail
       - MAIL_PORT=1025

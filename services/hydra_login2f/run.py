@@ -3,7 +3,7 @@
 #######################################################################
 # Change the following lines to import/create your flask application! #
 #######################################################################
-from users import create_app
+from hydra_login2f import create_app
 
 app = create_app()
 

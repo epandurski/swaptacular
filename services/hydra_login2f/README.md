@@ -1,4 +1,4 @@
-# users
+# hydra-login2f
 
 Handles sign up, sing in, and password recovery, manages user profile
 info.
@@ -7,20 +7,20 @@ info.
 ## How run a development server
 
 ```
-$ docker-compose run -p 10001:10001 users develop
+$ docker-compose run -p 10001:10001 hydra-login2f develop
 ```
 
 
 ## How to debug
 
 ```
-$ docker-compose run -p 10001:10001 users debug
+$ docker-compose run -p 10001:10001 hydra-login2f debug
 ```
 
 
 ## Hot to handle I18N messages
 
-Change the current directory to `users/users/`, then:
+Change the current directory to `hydra_login2f/hydra_login2f/`, then:
 
 ### Extract all messages to `messages.pot`:
 

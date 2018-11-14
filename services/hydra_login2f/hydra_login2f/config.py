@@ -54,9 +54,9 @@ class Configuration(metaclass=MetaFlaskEnv):
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
-    LANGUAGE_COOKE_NAME = 'users_lang'
-    COMPUTER_CODE_COOKE_NAME = 'users_cc'
-    LOGIN_VERIFICATION_COOKE_NAME = 'users_lv'
+    LANGUAGE_COOKE_NAME = 'user_lang'
+    COMPUTER_CODE_COOKE_NAME = 'user_cc'
+    LOGIN_VERIFICATION_COOKE_NAME = 'user_lv'
     PASSWORD_HASHING_METHOD = '6'
     PASSWORD_MIN_LENGTH = _get_default_password_min_length(USE_RECOVERY_CODE)
     PASSWORD_MAX_LENGTH = 64
