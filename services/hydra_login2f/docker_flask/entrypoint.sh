@@ -14,7 +14,7 @@ case $1 in
     debug)
         shift;
         export FLASK_ENV=development
-        exec python -u run.py "$@"
+        exec python -u wsgi.py "$@"
         ;;
     db)
         shift;
@@ -22,7 +22,7 @@ case $1 in
         ;;
     serve)
         export -n PYTHONDONTWRITEBYTECODE
-        exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT run:app
+        exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT wsgi:app
         ;;
     *)
         exec "$@"
