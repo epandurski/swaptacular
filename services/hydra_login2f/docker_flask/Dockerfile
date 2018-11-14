@@ -20,6 +20,7 @@ COPY Pipfile ./
 COPY Pipfile.lock ./
 RUN pipenv install --deploy --system
 COPY . .
+RUN python -m compileall .
 
 # Ensure flask is not bugged by an .env file.
 RUN rm .env

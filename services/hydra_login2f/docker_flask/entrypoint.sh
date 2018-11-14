@@ -21,7 +21,6 @@ case $1 in
         exec flask db "$@"
         ;;
     serve)
-        export -n PYTHONDONTWRITEBYTECODE
         exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT wsgi:app
         ;;
     *)
