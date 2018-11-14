@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# This file is used by "Dockerfile-flask".
+# This file is used by "Dockerfile".
 
-logging_conf='/logging.conf'
-gunicorn_conf='/gunicorn.conf'
+logging_conf='/usr/src/app/docker_flask/logging.conf'
+gunicorn_conf='/usr/src/app/docker_flask/gunicorn.conf'
 alembic_conf='migrations/alembic.ini'
 
 
