@@ -21,6 +21,12 @@ COPY Pipfile.lock ./
 RUN pipenv install --deploy --system
 COPY . .
 
+# Ensure flask is not bugged by an .env file.
+RUN rm .env
+
+# Configure alembic to use JSON logging.
+RUN docker_flask/set_json_log_handler.py migrations/alembic.ini
+
 # Compile translation (.po) files if necessary.
 RUN ! which pybabel || pybabel compile -d $FLASK_APP/translations
 
