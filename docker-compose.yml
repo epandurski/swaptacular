@@ -223,7 +223,7 @@ services:
   hydra-login2f:
     build:
       context: ./services/hydra_login2f
-      dockerfile: docker-flask/Dockerfile
+      dockerfile: docker_flask/Dockerfile
       args:
         - FLASK_APP=hydra_login2f
     volumes:

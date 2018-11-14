@@ -26,9 +26,9 @@ COPY migrations/ migrations/
 RUN pip install -e .
 
 # copy configuration files
-COPY docker-flask/gunicorn.conf /gunicorn.conf
-COPY docker-flask/logging.conf /logging.conf
-COPY docker-flask/entrypoint.sh /usr/local/bin/
+COPY docker_flask/gunicorn.conf /gunicorn.conf
+COPY docker_flask/logging.conf /logging.conf
+COPY docker_flask/entrypoint.sh /usr/local/bin/
 
 # compile .po files
 RUN ! which pybabel || pybabel compile -d $FLASK_APP/translations
