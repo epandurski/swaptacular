@@ -8,3 +8,4 @@ This link will expire in {{num}} hours.
 If you received this email by mistake, simply delete it. You won't be
 registered if you don't click the link above.
 {% endtrans %}
+{% include '_email_signature.txt' %}

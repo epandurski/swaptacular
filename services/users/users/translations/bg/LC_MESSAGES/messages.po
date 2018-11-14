@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-12 15:56+0200\n"
-"PO-Revision-Date: 2018-11-06 17:05+0200\n"
+"POT-Creation-Date: 2018-11-14 14:35+0200\n"
+"PO-Revision-Date: 2018-11-14 14:36+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: bg\n"
 "Language-Team: bg <LL@li.org>\n"
@@ -85,6 +85,11 @@ msgstr "Грешна парола"
 #: routes.py:440
 msgid "Invalid verification code"
 msgstr "Грешен код за потвърждение"
+
+#: templates/_email_signature.txt:2
+#, python-format
+msgid "The %(site)s Team\n"
+msgstr "Екипът на %(site)s\n"
 
 #: templates/_recovery_code.html:5
 msgid ""

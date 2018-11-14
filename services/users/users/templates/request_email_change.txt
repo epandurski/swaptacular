@@ -9,3 +9,4 @@ following link:
 
 {{change_password_page}}
 {% endtrans %}
+{% include '_email_signature.txt' %}
