@@ -126,28 +126,26 @@ case $1 in
     develop)
         shift;
         export FLASK_ENV=development
-        flask run --host=0.0.0.0 --port $PORT "$@"
+        exec flask run --host=0.0.0.0 --port $PORT "$@"
         ;;
     debug)
         shift;
         export FLASK_ENV=development
-        python -u run.py "$@"
+        exec python -u run.py "$@"
         ;;
     db)
         shift;
-        flask db "$@"
+        exec flask db "$@"
         ;;
     perform-db-upgrade)
         perform_db_upgrade
         ;;
-    serve|'')
+    serve)
         export -n PYTHONDONTWRITEBYTECODE
-        ([[ $DO_NOT_UPGRADE_DB ]] || perform_db_upgrade) && gunicorn \
-                --config "$gunicorn_conf" \
-                --log-config "$logging_conf" \
-                -b :$PORT run:app
+        ([[ $DO_NOT_UPGRADE_DB ]] || perform_db_upgrade) && \
+            exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT run:app
         ;;
     *)
-        "$@"
+        exec "$@"
         ;;
 esac

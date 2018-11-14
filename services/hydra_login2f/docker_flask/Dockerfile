@@ -25,6 +25,7 @@ COPY . .
 RUN ! which pybabel || pybabel compile -d $FLASK_APP/translations
 
 ENTRYPOINT ["/usr/src/app/docker_flask/entrypoint.sh"]
+CMD ["serve"]
 
 ################################################################################
 
