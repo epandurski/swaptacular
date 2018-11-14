@@ -205,7 +205,7 @@ services:
       - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
 
 
-  redis-users:
+  hydra-login2f-redis:
     image: redis
     ports:
       # This may be useful during development to access the DB.
@@ -234,7 +234,7 @@ services:
     environment:
       - PORT=4488
       - SQLALCHEMY_DATABASE_URI=postgresql://hydra_login2f_service:hydra_login2f_service@pg/${POSTGRES_DB}
-      - REDIS_URL=redis://redis-users:6379/0
+      - REDIS_URL=redis://hydra-login2f-redis:6379/0
       - MAIL_SERVER=mail
       - MAIL_PORT=1025
       - MAIL_DEFAULT_SENDER=Swaptacular <no-reply@swaptacular.com>
@@ -242,7 +242,7 @@ services:
     command: develop
     depends_on:
       - pg
-      - redis-users
+      - hydra-login2f-redis
       - mail
       - hydra
 
