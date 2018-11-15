@@ -12,7 +12,6 @@ def send_duplicate_registration_email(email):
         body=render_template(
             'duplicate_registration.txt',
             email=email,
-            site=current_app.config['SITE_TITLE'],
         ),
     )
     mail.send(msg)
