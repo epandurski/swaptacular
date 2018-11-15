@@ -7,6 +7,7 @@ def _get_default_password_min_length(fallback):
 
 
 class Configuration(metaclass=MetaFlaskEnv):
+    VERSION = '0.98.1'
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
     SITE_TITLE = 'Swaptacular'
@@ -29,11 +30,11 @@ class Configuration(metaclass=MetaFlaskEnv):
     MAIL_ASCII_ATTACHMENTS = False
     RECAPTCHA_PUBLIC_KEY = '6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37'
     RECAPTCHA_PIVATE_KEY = '6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q'
-
     RECAPTCHA_REQUEST_TIMEOUT_SECONDS = 5
-    HYDRA_REQUEST_TIMEOUT_SECONDS = 5
+
     RECAPTCHA_CHALLENGE_URL = 'https://www.google.com/recaptcha/api.js'
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+    HYDRA_REQUEST_TIMEOUT_SECONDS = 5
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
     LOGIN_VERIFIED_DEVICES_MAX_COUNT = 10
@@ -57,4 +58,3 @@ class Configuration(metaclass=MetaFlaskEnv):
     BABEL_DEFAULT_TIMEZONE = 'UTC'
 
     SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
-    VERSION = '0.98.1'
