@@ -37,6 +37,6 @@ def create_app(config_object=None):
     migrate.init_app(app, db)
     mail.init_app(app)
     redis_store.init_app(app)
-    app.register_blueprint(login, url_prefix=app.config['LOGIN_URL'])
-    app.register_blueprint(consent, url_prefix=app.config['CONSENT_URL'])
+    app.register_blueprint(login, url_prefix=app.config['LOGIN_PATH'])
+    app.register_blueprint(consent, url_prefix=app.config['CONSENT_PATH'])
     return app
