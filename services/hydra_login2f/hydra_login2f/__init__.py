@@ -20,8 +20,11 @@ migrate = Migrate()
 def select_locale():
     # Try to guess the language from the language cookie and the
     # accept header the browser transmits.
-    lang = request.cookies.get(current_app.config['LANGUAGE_COOKE_NAME'])
-    return lang or request.accept_languages.best_match(current_app.config['SUPPORTED_LANGUAGES'].keys())
+    language = request.cookies.get(current_app.config['LANGUAGE_COOKE_NAME'])
+    language_choices = [l[0] for l in current_app.config['LANGUAGE_CHOICES']]
+    if language in language_choices:
+        return language
+    return request.accept_languages.best_match(language_choices)
 
 
 @babel.timezoneselector

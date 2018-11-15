@@ -1,6 +1,14 @@
 from flask_env import MetaFlaskEnv
 from os import environ
 
+SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
+
+
+def _get_language_choices(fallback):
+    languages = environ.get('LANGUAGES', fallback)
+    languages = [l.strip() for l in languages.split(',')]
+    return [(l, SUPPORTED_LANGUAGES[l]) for l in languages if l in SUPPORTED_LANGUAGES]
+
 
 def _get_default_password_min_length(fallback):
     return 10 if environ.get('USE_RECOVERY_CODE', str(bool(fallback))).lower() == 'true' else 6
@@ -11,6 +19,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     PORT = 8000
     SECRET_KEY = 'dummy-secret'
     SITE_TITLE = 'Swaptacular'
+    LANGUAGES = 'en'  # separated by a comma, for example 'en,bg'
     USE_RECOVERY_CODE = True
     ABOUT_URL = 'https://github.com/epandurski'
     STYLE_URL = ''
@@ -56,5 +65,4 @@ class Configuration(metaclass=MetaFlaskEnv):
     SQLALCHEMY_ECHO = False
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
-
-    SUPPORTED_LANGUAGES = {'en': 'English', 'bg': 'Български'}
+    LANGUAGE_CHOICES = _get_language_choices(LANGUAGES)
