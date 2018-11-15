@@ -48,7 +48,7 @@ class UserLoginsHistory:
         emement_hash = self.calc_hash(element)
         with redis_store.pipeline() as p:
             p.zremrangebyrank(self.key, 0, -self.max_count)
-            p.zadd(self.key, time.time(), emement_hash)
+            p.zadd(self.key, {emement_hash: time.time()})
             p.execute()
 
     def clear(self):
