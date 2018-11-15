@@ -32,9 +32,6 @@ class UserUpdateSignal(db.Model):
     def send_signalbus_message(self):
         """Inform the other services that user's email has changed."""
 
-        logger.debug(
-            'Triggered sending of user update signal: %i, %i, %s',
-            self.user_update_signal_id,
-            self.user_id,
-            self.email
-        )
+        ##############################################
+        # Send a message over your message bus here! #
+        ##############################################
