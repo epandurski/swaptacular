@@ -22,29 +22,29 @@ msgstr "Не сте решили \"reCAPTCHA\" пъзела."
 msgid "Duplicate Registration"
 msgstr "Съществуваща регистрация"
 
-#: emails.py:23 routes.py:129
+#: emails.py:22 routes.py:129
 msgid "Change Account Password"
 msgstr "Смяна на потребителска парола"
 
-#: emails.py:36
+#: emails.py:35
 msgid "Changed Account Password"
 msgstr "Променена потребителска парола"
 
-#: emails.py:49 routes.py:129
+#: emails.py:48 routes.py:129
 msgid "Create a New Account"
 msgstr "Регистрация на нов потребител"
 
-#: emails.py:62
+#: emails.py:61
 #, python-format
 msgid "New login from %(user_agent)s"
 msgstr "Ново влизане от %(user_agent)s"
 
-#: emails.py:76 emails.py:88 routes.py:291 templates/change_email_login.html:4
+#: emails.py:75 emails.py:87 routes.py:291 templates/change_email_login.html:4
 #: templates/choose_new_email.html:4
 msgid "Change Email Address"
 msgstr "Промяна на имейл адрес"
 
-#: emails.py:101 routes.py:332 routes.py:358
+#: emails.py:100 routes.py:332 routes.py:358
 msgid "Change Recovery Code"
 msgstr "Промяна на кода за възстановяване"
 
