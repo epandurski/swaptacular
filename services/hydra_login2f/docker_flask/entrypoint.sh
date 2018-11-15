@@ -16,12 +16,20 @@ case $1 in
         export FLASK_ENV=development
         exec python -u wsgi.py "$@"
         ;;
+    serve)
+        exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT wsgi:app
+        ;;
+    upgrade-schema)
+        shift;
+        exec flask db upgrade "$@"
+        ;;
     db)
         shift;
         exec flask db "$@"
         ;;
-    serve)
-        exec gunicorn --config "$gunicorn_conf" --log-config "$logging_conf" -b :$PORT wsgi:app
+    signalbus)
+        shift;
+        exec flask signalbus "$@"
         ;;
     *)
         exec "$@"

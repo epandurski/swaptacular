@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a021329df5eb8a40592109af41b8f6f74eb855c1b4ffa4f63f2a1e3de175b4fa"
+            "sha256": "4a138d4db017bfc696043306390edfa719500773bf1f2a097a7212c0a7c2e0ce"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -103,7 +103,7 @@
         },
         "flask-sibnalbus": {
             "git": "https://github.com/epandurski/flask_signalbus.git",
-            "ref": "1249bcb97c465573025b76a86eeb656490bca431"
+            "ref": "6f69f4fec0113e9afd8614e8e1ea0c8d8b79733c"
         },
         "flask-sqlalchemy": {
             "hashes": [
@@ -230,11 +230,11 @@
         },
         "redis": {
             "hashes": [
-                "sha256:8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb",
-                "sha256:a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f"
+                "sha256:03b1b3d5c360091760666a2865ca60fcfbcfc5b54d0c4df21728e94c96caa7cb",
+                "sha256:abfbc9a18e9388f3de53d2ae90b174669d50e289fef90850177e63af902ea992"
             ],
             "index": "pypi",
-            "version": "==2.10.6"
+            "version": "==3.0.0.post1"
         },
         "requests": {
             "hashes": [
@@ -301,6 +301,14 @@
                 "sha256:dbae1046def0efb574852fab9e90209b23f556367b5a320c0bcb871c77c3e8cc"
             ],
             "version": "==2.2.0"
+        },
+        "python-dotenv": {
+            "hashes": [
+                "sha256:122290a38ece9fe4f162dc7c95cae3357b983505830a154d3c98ef7f6c6cea77",
+                "sha256:4a205787bc829233de2a823aa328e44fd9996fedb954989a21f1fc67c13d7a77"
+            ],
+            "index": "pypi",
+            "version": "==0.9.1"
         },
         "urwid": {
             "hashes": [
