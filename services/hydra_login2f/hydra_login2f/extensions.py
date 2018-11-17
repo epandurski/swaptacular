@@ -14,15 +14,15 @@ class CustomAlchemy(SignalBusMixin, SQLAlchemy):
 
 
 db = CustomAlchemy()
+migrate = Migrate()
 mail = Mail()
 redis_store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
 babel = Babel()
-migrate = Migrate()
 
 
 def init_app(app):
     db.init_app(app)
-    babel.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     redis_store.init_app(app)
+    babel.init_app(app)
