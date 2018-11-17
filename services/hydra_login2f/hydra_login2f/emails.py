@@ -1,4 +1,4 @@
-from flask import render_template, current_app
+from flask import render_template
 from flask_babel import gettext
 from flask_mail import Mail, Message
 
