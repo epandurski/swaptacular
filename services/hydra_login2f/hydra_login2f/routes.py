@@ -8,11 +8,26 @@ from . import utils, captcha, emails, hydra
 from .redis import SignUpRequest, LoginVerificationRequest, ChangeEmailRequest,\
     ChangeRecoveryCodeRequest, UserLoginsHistory
 from .models import User
+from .extensions import babel
 
 logger = logging.getLogger(__name__)
 
 login = Blueprint('login', __name__, template_folder='templates', static_folder='static')
 consent = Blueprint('consent', __name__, template_folder='templates', static_folder='static')
+
+
+@babel.localeselector
+def select_locale():
+    language = request.cookies.get(current_app.config['LANGUAGE_COOKE_NAME'])
+    language_choices = [l[0] for l in current_app.config['LANGUAGE_CHOICES']]
+    if language in language_choices:
+        return language
+    return request.accept_languages.best_match(language_choices)
+
+
+@babel.timezoneselector
+def select_timezone():
+    return None
 
 
 @login.after_app_request
