@@ -1,4 +1,3 @@
-import logging
 from urllib.parse import urljoin
 from flask import request, redirect, url_for, flash, render_template, abort,\
     make_response, current_app, Blueprint
@@ -9,8 +8,6 @@ from .redis import SignUpRequest, LoginVerificationRequest, ChangeEmailRequest,\
     ChangeRecoveryCodeRequest, UserLoginsHistory
 from .models import User
 from .extensions import babel
-
-logger = logging.getLogger(__name__)
 
 login = Blueprint('login', __name__, template_folder='templates', static_folder='static')
 consent = Blueprint('consent', __name__, template_folder='templates', static_folder='static')

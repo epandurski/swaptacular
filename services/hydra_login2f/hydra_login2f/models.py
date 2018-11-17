@@ -1,18 +1,4 @@
-import logging
-from flask_sqlalchemy import SQLAlchemy
-from flask_signalbus import SignalBusMixin
-
-logger = logging.getLogger(__name__)
-
-
-class CustomAlchemy(SignalBusMixin, SQLAlchemy):
-    def apply_driver_hacks(self, app, info, options):
-        if "isolation_level" not in options:
-            options["isolation_level"] = "REPEATABLE_READ"
-        return super().apply_driver_hacks(app, info, options)
-
-
-db = CustomAlchemy()
+from .extensions import db
 
 
 class User(db.Model):

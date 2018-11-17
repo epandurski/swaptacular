@@ -1,15 +1,16 @@
 import logging
-from flask import Flask
-from . import extensions
-
-from .config import Configuration
-from .routes import login, consent
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+from flask import Flask  # noqa: E402
+from . import extensions  # noqa: E402
+
 
 def create_app(config_object=None):
+    from .config import Configuration
+    from .routes import login, consent
+
     app = Flask(__name__)
     app.config.from_object(config_object or Configuration)
     extensions.init_app(app)

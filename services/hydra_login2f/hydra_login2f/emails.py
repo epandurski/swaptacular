@@ -1,8 +1,7 @@
 from flask import render_template
 from flask_babel import gettext
-from flask_mail import Mail, Message
-
-mail = Mail()
+from flask_mail import Message
+from .extensions import mail
 
 
 def send_duplicate_registration_email(email):

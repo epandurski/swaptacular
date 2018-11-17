@@ -2,11 +2,9 @@ import time
 import hashlib
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
-from flask_redis import FlaskRedis
 from . import utils
-from .models import db, User, UserUpdateSignal
-
-redis_store = FlaskRedis(socket_timeout=5, charset="utf-8", decode_responses=True)
+from .models import User, UserUpdateSignal
+from .extensions import db, redis_store
 
 
 def _get_user_verification_code_failures_redis_key(user_id):
