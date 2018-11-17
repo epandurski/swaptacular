@@ -1,8 +1,9 @@
 import logging
 from flask import Flask
+from . import extensions
+
 from .config import Configuration
 from .routes import login, consent
-from . import extensions
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
