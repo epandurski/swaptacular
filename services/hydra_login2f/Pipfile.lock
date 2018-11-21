@@ -103,7 +103,7 @@
         },
         "flask-sibnalbus": {
             "git": "https://github.com/epandurski/flask_signalbus.git",
-            "ref": "6f69f4fec0113e9afd8614e8e1ea0c8d8b79733c"
+            "ref": "4522bdf93d010607042ba07bb1041a1d90d4971d"
         },
         "flask-sqlalchemy": {
             "hashes": [
@@ -230,11 +230,11 @@
         },
         "redis": {
             "hashes": [
-                "sha256:03b1b3d5c360091760666a2865ca60fcfbcfc5b54d0c4df21728e94c96caa7cb",
-                "sha256:abfbc9a18e9388f3de53d2ae90b174669d50e289fef90850177e63af902ea992"
+                "sha256:2100750629beff143b6a200a2ea8e719fcf26420adabb81402895e144c5083cf",
+                "sha256:8e0bdd2de02e829b6225b25646f9fb9daffea99a252610d040409a6738541f0a"
             ],
             "index": "pypi",
-            "version": "==3.0.0.post1"
+            "version": "==3.0.1"
         },
         "requests": {
             "hashes": [
