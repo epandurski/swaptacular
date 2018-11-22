@@ -103,10 +103,10 @@
         },
         "flask-signalbus": {
             "hashes": [
-                "sha256:5635307adf78cf2a4e84f4e4e9fbe13fde17d5d27738fa1e09f6d703509168a2"
+                "sha256:17e37073027cda420e48ffe847d2fc01e00d828f39ffb599fb76afea0dd5d537"
             ],
             "index": "pypi",
-            "version": "==0.3"
+            "version": "==0.3.1"
         },
         "flask-sqlalchemy": {
             "hashes": [
