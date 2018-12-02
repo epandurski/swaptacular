@@ -175,8 +175,8 @@ class SignUpRequest(RedisSecretHashRecord):
                 two_factor_login=True,
             )
             db.session.add(user)
-            db.session.flush()
-            db.session.add(UserUpdateSignal(user_id=user.user_id, email=user.email))
+            if current_app.config['SEND_USER_UPDATE_SIGNAL']:
+                db.session.add(UserUpdateSignal(user=user, email=user.email))
         db.session.commit()
         self.user_id = user.user_id
         return recovery_code
@@ -195,7 +195,8 @@ class ChangeEmailRequest(RedisSecretHashRecord):
         user_id = int(self.user_id)
         user = User.query.filter_by(user_id=user_id, email=self.old_email).one()
         user.email = self.email
-        db.session.add(UserUpdateSignal(user_id=user_id, email=self.email))
+        if current_app.config['SEND_USER_UPDATE_SIGNAL']:
+            db.session.add(UserUpdateSignal(user=user, email=self.email))
         try:
             db.session.commit()
         except IntegrityError:

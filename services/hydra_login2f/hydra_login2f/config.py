@@ -44,6 +44,7 @@ class Configuration(metaclass=MetaFlaskEnv):
     RECAPTCHA_CHALLENGE_URL = 'https://www.google.com/recaptcha/api.js'
     RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
     HYDRA_REQUEST_TIMEOUT_SECONDS = 5
+    SEND_USER_UPDATE_SIGNAL = False
     SHOW_CAPTCHA_ON_SIGNUP = True
     CAPTCHA_RESPONSE_FIELD_NAME = 'g-recaptcha-response'
     LOGIN_VERIFIED_DEVICES_MAX_COUNT = 10

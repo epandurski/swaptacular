@@ -15,6 +15,8 @@ class UserUpdateSignal(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.user_id'), nullable=False)
     email = db.Column(db.Text, nullable=True)
 
+    user = db.relationship('User')
+
     def send_signalbus_message(self):
         """Inform the other services that user's email has changed."""
 
