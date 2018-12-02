@@ -1,0 +1,3 @@
+[submodule "services/hydra_login2f"]
+	path = services/hydra_login2f
+	url = git@github.com:epandurski/hydra_login2f.git
