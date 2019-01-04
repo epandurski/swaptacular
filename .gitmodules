@@ -1,3 +1,6 @@
 [submodule "services/hydra_login2f"]
 	path = services/hydra_login2f
 	url = git@github.com:epandurski/hydra_login2f.git
+[submodule "services/debtor"]
+	path = services/debtor
+	url = git@github.com:epandurski/swaptacular_debtor.git
