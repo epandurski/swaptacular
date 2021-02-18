@@ -12,9 +12,9 @@ Overal architecture
 | Currency  |                                      | Currency  |
 |  Holder   |                                      |  Issuer   |
 +-----------+                                      +-----------+
-  | Payments                                         Issuing |
-  | Web API                                          Web API |
-  |                                                          |
+ Payments |                                          Issuing |
+ Web API  |                                          Web API |
+          |                                                  |
 +-----------+          +----------------+          +-----------+
 | Creditors |          |   Accounting   |          |  Debtors  |
 |   Agent   |==========|   Authority    |==========|   Agent   |
@@ -40,24 +40,25 @@ Overal architecture
                             +----------------------+
                             |      Accounting      |
                             |      Authority       |
-                            +----------------------+
-          +--------+          ||                ||
-          |Currency|          ||  Swaptacular   ||
-          | Holder |          ||   Messaging    ||
-          +--------+          ||   Protocol     ||
-                 |            ||                ||
+          +--------+        +----------------------+
+          |Currency|          ||                ||
+          | Holder |          ||  Swaptacular   ||
+          +--------+          ||   Messaging    ||
+        Payments |            ||   Protocol     ||
+        Web API  |            ||                ||
                  |            ||                ||
 +--------+     +-----------------+            +-----------------+
 |Currency|-----|    Creditors    |            |    Creditors    |
 | Holder |     |      Agent      |            |      Agent      |
 +--------+     +-----------------+            +-----------------+
                  |            ||                ||
-        Payments |            ||                ||
-        Web API  |            ||                ||
-          +--------+        +----------------------+
-          |Currency|        |      Accounting      |
-          | Holder |        |      Authority       |
-          +--------+        +----------------------+
+                 |            ||                ||
+          +--------+          ||                ||
+          |Currency|          ||                ||
+          | Holder |        +----------------------+
+          +--------+        |      Accounting      |
+                            |      Authority       |
+                            +----------------------+
 ```
 
 
