@@ -1,8 +1,12 @@
-# swaptacular
-A place for experiments 
+Swaptacular
+===========
+
+TODO: Explain what it is.
 
 
-## Overal architecture
+Overal architecture
+-------------------
+
 
 ```
 +----------------+ +----------------+ +----------------+
