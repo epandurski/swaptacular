@@ -13,11 +13,11 @@ Overal architecture
 |  Holder   |                                      |  Issuer   |
 +-----------+                                      +-----------+
 
-+-----------+                                      +-----------+
-|  Web API  |                                      |  Web API  |
 +-----------+          +----------------+          +-----------+
-| Creditors |          |   Accounting   |          |  Debtors  |
-|   Agent   |          |   Authority    |          |   Agent   |
+|  Web API  |          |                |          |  Web API  |
++-----------+          |   Accounting   |          +-----------+
+| Creditors |<-------->|   Authorityg   |<-------->|  Debtors  |
+|   Agent   |          |                |          |   Agent   |
 +-----------+          +----------------+          +-----------+
 +--------------------------------------------------------------+
 |                Swaptacular Messaging Protocol                |
