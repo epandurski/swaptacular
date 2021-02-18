@@ -64,6 +64,9 @@ Overal architecture
 Related documents
 -----------------
 
+* [Swaptacular Messaging
+  Protocol](https://github.com/epandurski/swpt_accounts/blob/master/protocol.rst)
+  specification
 * OpenAPI specication for the [Payments Web
   API](https://epandurski.github.io/swaptacular/swpt_creditors/redoc.html)
 * OpenAPI specication for the [Issuing Web
