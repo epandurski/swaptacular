@@ -61,6 +61,14 @@ Overal architecture
                             +----------------------+
 ```
 
+Related documents
+-----------------
+
+* OpenAPI specication for the [Payments Web
+  API](https://epandurski.github.io/swaptacular/swpt_creditors/redoc.html)
+* OpenAPI specication for the [Issuing Web
+  API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html)
+
 
 Sub-projects
 ------------
