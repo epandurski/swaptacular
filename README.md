@@ -12,17 +12,14 @@ Overal architecture
 | Currency  |                                      | Currency  |
 |  Holder   |                                      |  Issuer   |
 +-----------+                                      +-----------+
-(order payments)                                   (create money)
-
-+-----------+          +----------------+          +-----------+
-|  Web API  |          |                |          |  Web API  |
+  | Payments                                         Issuing |
+  | Web API            +----------------+            Web API |
+  |                    |                |                    |
 +-----------+          |   Accounting   |          +-----------+
-| Creditors |<-------->|   Authority    |<-------->|  Debtors  |
-|   Agent   |          |                |          |   Agent   |
+| Creditors |          |   Authority    |          |  Debtors  |
+|   Agent   |==========|                |==========|   Agent   |
 +-----------+          +----------------+          +-----------+
-+--------------------------------------------------------------+
-|                Swaptacular Messaging Protocol                |
-+--------------------------------------------------------------+
+                 Swaptacular Messaging Protocol
 ```
 
 ```
@@ -30,7 +27,7 @@ Overal architecture
              |Currency|    |Currency|
              | Issuer |    | Issuer |
              +--------+    +--------+
-                    |           |
+                    |  Issuing  |
                     |  Web API  |
                     |           |
                   +---------------+          +---------------+
@@ -54,8 +51,8 @@ Overal architecture
 | Holder |     +-----------------+            +-----------------+
 +--------+       |            ||                ||
                  |            ||                ||
-         Web API |            ||                ||
-                 |            ||                ||
+        Payments |            ||                ||
+        Web API  |            ||                ||
           +--------+          ||                ||
           |Currency|        +----------------------+
           | Holder |        |      Accounting      |
