@@ -43,10 +43,10 @@ Overal architecture
                             |     Authority 1      |
                             +----------------------+
           +--------+          ||                ||
-          |Currency|          ||                ||
-          | Holder |          ||  Swaptacular   ||
-          +--------+          ||   Messaging    ||
-                 |            ||   Protocol     ||
+          |Currency|          ||  Swaptacular   ||
+          | Holder |          ||   Messaging    ||
+          +--------+          ||   Protocol     ||
+                 |            ||                ||
                  |            ||                ||
 +--------+     +-------------------+        +-------------------+
 |Currency|-----| Creditors Agent A |        | Creditors Agent B |
@@ -60,7 +60,6 @@ Overal architecture
           | Holder |        |     Accounting       |
           +--------+        |     Authority 2      |
                             +----------------------+
-
 ```
 
 
