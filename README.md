@@ -17,8 +17,8 @@ Overal architecture
 +-----------+          +----------------+          +-----------+
 |  Web API  |          |                |          |  Web API  |
 +-----------+          |   Accounting   |          +-----------+
-| Creditors |<-------->|   Authority    |<-------->|  Debtors  |
-|   Agent   |          |                |          |   Agent   |
+| Creditors |<-------->|   Authorities  |<-------->|  Debtors  |
+|  Agents   |          |                |          |  Agents   |
 +-----------+          +----------------+          +-----------+
 +--------------------------------------------------------------+
 |                Swaptacular Messaging Protocol                |
@@ -26,21 +26,22 @@ Overal architecture
 ```
 
 ```
-             +--------+   +--------+
-             |Currency|   |Currency|
-             | Issuer |   | Issuer |
-             +--------+   +--------+
-                    |          |
-                    | Web API  |
-                +-----------------+          +-----------------+
-                | Debtors Agent X |          | Debtors Agent Y |
-                +-----------------+          +-----------------+
+             +--------+    +--------+
+             |Currency|    |Currency|
+             | Issuer |    | Issuer |
+             +--------+    +--------+
+                    |           |
+                    |  Web API  |
+                    |           |
+                  +---------------+          +---------------+
+                  | Debtors Agent |          | Debtors Agent |
+                  +---------------+          +---------------+
                               ||                ||
                               ||                ||
                               ||                ||
                             +----------------------+
-                            |     Accounting       |
-                            |     Authority 1      |
+                            |      Accounting      |
+                            |      Authority       |
                             +----------------------+
           +--------+          ||                ||
           |Currency|          ||  Swaptacular   ||
@@ -48,17 +49,17 @@ Overal architecture
           +--------+          ||   Protocol     ||
                  |            ||                ||
                  |            ||                ||
-+--------+     +-------------------+        +-------------------+
-|Currency|-----| Creditors Agent A |        | Creditors Agent B |
-| Holder |     +-------------------+        +-------------------+
++--------+     +-----------------+            +-----------------+
+|Currency|-----| Creditors Agent |            | Creditors Agent |
+| Holder |     +-----------------+            +-----------------+
 +--------+       |            ||                ||
                  |            ||                ||
          Web API |            ||                ||
                  |            ||                ||
           +--------+          ||                ||
           |Currency|        +----------------------+
-          | Holder |        |     Accounting       |
-          +--------+        |     Authority 2      |
+          | Holder |        |      Accounting      |
+          +--------+        |      Authority       |
                             +----------------------+
 ```
 
