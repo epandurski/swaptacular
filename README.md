@@ -12,7 +12,8 @@ Overal architecture
 | Currency  |                                      | Currency  |
 | Holders   |                                      | Issuers   |
 +-----------+                                      +-----------+
-order payments                                      create money
+(order payments)                                   (create money)
+
 +-----------+          +----------------+          +-----------+
 |  Web API  |          |                |          |  Web API  |
 +-----------+          |   Accounting   |          +-----------+
