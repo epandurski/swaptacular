@@ -10,15 +10,15 @@ Overal architecture
 ```
 +-----------+                                      +-----------+
 | Currency  |                                      | Currency  |
-|  Holders  |                                      |  Issuers  |
+|  Holder   |                                      |  Issuer   |
 +-----------+                                      +-----------+
 (order payments)                                   (create money)
 
 +-----------+          +----------------+          +-----------+
 |  Web API  |          |                |          |  Web API  |
 +-----------+          |   Accounting   |          +-----------+
-| Creditors |<-------->|  Authorities   |<-------->|  Debtors  |
-|  Agents   |          |                |          |  Agents   |
+| Creditors |<-------->|   Authority    |<-------->|  Debtors  |
+|   Agent   |          |                |          |   Agent   |
 +-----------+          +----------------+          +-----------+
 +--------------------------------------------------------------+
 |                Swaptacular Messaging Protocol                |
