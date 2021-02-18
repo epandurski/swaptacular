@@ -13,26 +13,27 @@ Overal architecture
 |  Holder   |                                      |  Issuer   |
 +-----------+                                      +-----------+
   | Payments                                         Issuing |
-  | Web API            +----------------+            Web API |
-  |                    |                |                    |
-+-----------+          |   Accounting   |          +-----------+
-| Creditors |          |   Authority    |          |  Debtors  |
-|   Agent   |==========|                |==========|   Agent   |
+  | Web API                                          Web API |
+  |                                                          |
++-----------+          +----------------+          +-----------+
+| Creditors |          |   Accounting   |          |  Debtors  |
+|   Agent   |==========|   Authority    |==========|   Agent   |
 +-----------+          +----------------+          +-----------+
                  Swaptacular Messaging Protocol
 ```
 
 ```
-             +--------+    +--------+
-             |Currency|    |Currency|
-             | Issuer |    | Issuer |
-             +--------+    +--------+
-                    |  Issuing  |
-                    |  Web API  |
-                    |           |
-                  +---------------+          +---------------+
-                  | Debtors Agent |          | Debtors Agent |
-                  +---------------+          +---------------+
+                                          +--------+    +--------+
+                                          |Currency|    |Currency|
+                                          | Issuer |    | Issuer |
+                                          +--------+    +--------+
+                                                |  Issuing  |
+                                                |  Web API  |
+                                                |           |
+                 +---------------+            +---------------+
+                 |    Debtors    |            |    Debtors    |
+                 |     Agent     |            |     Agent     |
+                 +---------------+            +---------------+
                               ||                ||
                               ||                ||
                               ||                ||
@@ -47,17 +48,16 @@ Overal architecture
                  |            ||                ||
                  |            ||                ||
 +--------+     +-----------------+            +-----------------+
-|Currency|-----| Creditors Agent |            | Creditors Agent |
-| Holder |     +-----------------+            +-----------------+
-+--------+       |            ||                ||
+|Currency|-----|    Creditors    |            |    Creditors    |
+| Holder |     |      Agent      |            |      Agent      |
++--------+     +-----------------+            +-----------------+
                  |            ||                ||
         Payments |            ||                ||
         Web API  |            ||                ||
-          +--------+          ||                ||
-          |Currency|        +----------------------+
-          | Holder |        |      Accounting      |
-          +--------+        |      Authority       |
-                            +----------------------+
+          +--------+        +----------------------+
+          |Currency|        |      Accounting      |
+          | Holder |        |      Authority       |
+          +--------+        +----------------------+
 ```
 
 
