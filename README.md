@@ -46,7 +46,6 @@ Overal architecture
          |Holder A1|         ||                ||
          +---------+         ||                ||
                  |           ||                ||
-         Web API |           ||                ||
                  |           ||                ||
 +---------+    +-----------------+          +-----------------+
 |Holder A2|----|Creditors Agent A|          |Creditors Agent B|
