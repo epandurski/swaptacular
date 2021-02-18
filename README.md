@@ -31,7 +31,7 @@ Overal architecture
              | Issuer |   | Issuer |
              +--------+   +--------+
                     |          |
-                    |          |
+                    | Web API  |
                 +-----------------+          +-----------------+
                 | Debtors Agent X |          | Debtors Agent Y |
                 +-----------------+          +-----------------+
@@ -44,25 +44,23 @@ Overal architecture
                             +----------------------+
           +--------+          ||                ||
           |Currency|          ||                ||
-          | Holder |          ||                ||
-          +--------+          ||                ||
-                 |            ||                ||
+          | Holder |          ||  Swaptacular   ||
+          +--------+          ||   Messaging    ||
+                 |            ||   Protocol     ||
                  |            ||                ||
 +--------+     +-------------------+        +-------------------+
 |Currency|-----| Creditors Agent A |        | Creditors Agent B |
 | Holder |     +-------------------+        +-------------------+
 +--------+       |            ||                ||
                  |            ||                ||
-         Web API |            ||  Swaptacular   ||
-                 |            ||   Messaging    ||
-          +--------+          ||   Protocol     ||
-          |Currency|          ||                ||
-          | Holder |          ||                ||
+         Web API |            ||                ||
+                 |            ||                ||
           +--------+          ||                ||
+          |Currency|        +----------------------+
+          | Holder |        |     Accounting       |
+          +--------+        |     Authority 2      |
                             +----------------------+
-                            |     Accounting       |
-                            |     Authority 2      |
-                            +----------------------+
+
 ```
 
 
