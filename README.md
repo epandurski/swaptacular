@@ -10,9 +10,9 @@ Overal architecture
 ```
 +-----------+                                      +-----------+
 | Currency  |                                      | Currency  |
-|  Holder   |                                      |  Issuer   |
+| Holders   |                                      | Issuers   |
 +-----------+                                      +-----------+
-
+order payments                                      create money
 +-----------+          +----------------+          +-----------+
 |  Web API  |          |                |          |  Web API  |
 +-----------+          |   Accounting   |          +-----------+
