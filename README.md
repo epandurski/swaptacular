@@ -1,5 +1,5 @@
-Swaptacular
-===========
+Software for managing syndicated digital currencies
+===================================================
 
 TODO: Explain what it is.
 
