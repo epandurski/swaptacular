@@ -46,11 +46,10 @@ In Swaptacular's network architecture, there are five types of nodes:
 The diagram above shows the simplest possible Swaptacular
 network. Real networks can consist of thousands of different
 nodes. One important thing to note is that one *creditors agent* can
-connect currency holders to many different *accounting authorities*
-(this is true for debtors agents as well).
-
-The following diagram tries to illustrate the connections that exist
-between different the types of nodes:
+connect *currency holders* to many different *accounting authorities*
+(the same is true for debtors agents). The following diagram tries to
+illustrate the connections that exist between different the types of
+nodes:
 
 ```
                                           +--------+    +--------+
@@ -91,16 +90,31 @@ between different the types of nodes:
                             +----------------------+
 ```
 
+The diagram above shows a *creditors agent* that connects three
+*currency holders* to two different *accounting authorities*. It also
+shows two *debtors agents* being connected to the same accounting
+authority.
+
+
 Interoperability protocols
 --------------------------
 
-* [Swaptacular Messaging
-  Protocol](https://github.com/epandurski/swpt_accounts/blob/master/protocol.rst)
-  specification
-* OpenAPI specification for the [Payments Web
-  API](https://epandurski.github.io/swaptacular/swpt_creditors/redoc.html)
-* OpenAPI specification for the [Issuing Web
-  API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html)
+At the core of Swaptacular's network architecture is the [Swaptacular
+Messaging
+Protocol](https://github.com/epandurski/swpt_accounts/blob/master/protocol.rst),
+which governs the communication between accounting authorities and
+debtors/creditors agents.
+
+In order to allow currency holders to use a client application of
+their choice, Swaptacular recommends the following OpenAPI
+specification for the [Payments Web
+API](https://epandurski.github.io/swaptacular/swpt_creditors/redoc.html).
+
+Since interchangeability of client applications for currency issuing
+is not of critical importance, Swaptacular does not make
+recommendations about the *Issuing Web API*. The current reference
+implementation uses a [Simple Issuing Web
+API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html)
 
 
 Reference implementations
