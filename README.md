@@ -114,7 +114,7 @@ Since interchangeability of client applications for currency issuing
 is not of critical importance, Swaptacular does not make
 recommendations about the *Issuing Web API*. The current reference
 implementation uses a [Simple Issuing Web
-API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html)
+API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html).
 
 
 Reference implementations
