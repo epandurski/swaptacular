@@ -129,7 +129,7 @@ Reference implementations
 Remaining work
 --------------
 
-- [ ] Add link to a demo server running the reference implementation.
+- [ ] Add link to a demo server, running the reference implementation.
 - [ ] Implement a user friendly UI for currency issuing.
 - [ ] Implement a user friendly UI for making and receiving payments.
 - [ ] Define and implement a standard binary serialization for the
