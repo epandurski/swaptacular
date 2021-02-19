@@ -48,7 +48,7 @@ network. Real networks can consist of thousands of different
 nodes. One important thing to note is that one *creditors agent* can
 connect *currency holders* to many different *accounting authorities*
 (the same is true for debtors agents). The following diagram tries to
-illustrate the connections that exist between different the types of
+illustrate the connections that exist between different types of
 nodes:
 
 ```
@@ -90,7 +90,7 @@ nodes:
                             +----------------------+
 ```
 
-The diagram above shows a *creditors agent* that connects three
+The above diagram shows a *creditors agent* that connects three
 *currency holders* to two different *accounting authorities*. It also
 shows two *debtors agents* being connected to the same accounting
 authority.
@@ -124,3 +124,16 @@ Reference implementations
 * [Debtors Agent](https://github.com/epandurski/swpt_debtors)
 * [Creditors Agent](https://github.com/epandurski/swpt_creditors)
 * [Service that manages OAuth2 login and consent](https://github.com/epandurski/swpt_login)
+
+
+Remaining work
+--------------
+
+- [ ] Add link to a demo server running the reference implementation.
+- [ ] Implement a user friendly UI for currency issuing.
+- [ ] Implement a user friendly UI for making and receiving payments.
+- [ ] Define and implement a standard binary serialization for the
+  messaging protocol (using [Cap'n Proto](https://capnproto.org/)).
+- [ ] Allow creditors/debtors agents to easily connect to multiple
+  accounting authorities, using user friendly UI and/or configuration
+  files.
