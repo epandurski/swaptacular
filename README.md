@@ -95,6 +95,11 @@ The above diagram shows a *creditors agent* that connects three
 shows two *debtors agents* being connected to the same accounting
 authority.
 
+Another important thing to note is that different network nodes
+(accounting authorities, creditors agents, debtors agents) can be
+operated by different organizations or individuals. Thus, very much
+like Internet, Swaptacular's network is decentralized by its nature.
+
 
 Interoperability protocols
 --------------------------
