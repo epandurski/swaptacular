@@ -130,6 +130,13 @@ Reference implementations
 * [Creditors Agent](https://github.com/epandurski/swpt_creditors)
 * [Service that manages OAuth2 login and consent](https://github.com/epandurski/swpt_login)
 
+All the above implementations try to:
+
+1. Be correct
+2. Be as simple as possible
+3. Demonstrate that an implementation that does scale very well
+   horizontally is indeed possible.
+
 
 Remaining work
 --------------
