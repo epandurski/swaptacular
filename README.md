@@ -135,7 +135,7 @@ All the above implementations try to:
 1. Be correct.
 2. Be as simple as possible.
 3. Demonstrate that an implementation that does scale very well
-   horizontally is indeed possible.
+   horizontally, is indeed possible.
 
 
 Remaining work
