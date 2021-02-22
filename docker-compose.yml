@@ -5,9 +5,9 @@ services:
   pg:
     image: postgres:13.0
     environment:
-      - 'POSTGRES_DB=swaptacular'
-      - 'POSTGRES_USER=swaptacular'
-      - 'POSTGRES_PASSWORD=swaptacular'
+      - 'POSTGRES_DB=$POSTGRES_DB'
+      - 'POSTGRES_USER=$POSTGRES_USER'
+      - 'POSTGRES_PASSWORD=$POSTGRES_PASSWORD'
     volumes:
       - 'pg-data-volume:/var/lib/postgresql/data'
       - './docker/pg/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql'
@@ -31,6 +31,10 @@ services:
     env_file: accounts.env
     environment:
       - 'PORT=8080'
+      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
+      - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
+      - 'CHORES_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
+      - 'APP_FETCH_API_URL=http://accounts-cache:80'
 
 
   creditors-server:
@@ -38,6 +42,8 @@ services:
     env_file: creditors.env
     environment:
       - 'PORT=8080'
+      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
+      - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
       - 'OAUTH2_INTROSPECT_URL=http://creditors-login:4445/oauth2/introspect'
 
 
@@ -48,10 +54,17 @@ services:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
+      - 'HYDRA_DSN=postgres://hydra_creditors:hydra_creditors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
+      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors_login:swpt_creditors_login@pg/${POSTGRES_DB}'
+      - 'REDIS_URL=redis://redis:6379/0?health_check_interval=30'
       - 'URLS_SELF_ISSUER=https://$PUBLIC_HOST/creditors-hydra/'
       - 'URLS_LOGIN=https://$PUBLIC_HOST/creditors-login/'
       - 'URLS_CONSENT=https://$PUBLIC_HOST/creditors-consent/'
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/creditors-hydra/oauth2/token'
+      - 'API_RESOURCE_SERVER=http://creditors-server:8080'
+      - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
+      - 'MAIL_SERVER=mail'
+      - 'MAIL_PORT=25'
 
 
   creditors-swagger-ui:
@@ -70,6 +83,8 @@ services:
     env_file: debtors.env
     environment:
       - 'PORT=8080'
+      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors:swpt_debtors@pg:5432/${POSTGRES_DB}'
+      - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
       - 'OAUTH2_INTROSPECT_URL=http://debtors-login:4445/oauth2/introspect'
 
 
@@ -80,12 +95,19 @@ services:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
+      - 'HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
+      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors_login:swpt_debtors_login@pg/${POSTGRES_DB}'
+      - 'REDIS_URL=redis://redis:6379/1?health_check_interval=30'
       - 'URLS_SELF_ISSUER=https://$PUBLIC_HOST/debtors-hydra/'
       - 'URLS_LOGIN=https://$PUBLIC_HOST/debtors-login/'
       - 'URLS_CONSENT=https://$PUBLIC_HOST/debtors-consent/'
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/debtors-hydra/oauth2/token'
+      - 'API_RESOURCE_SERVER=http://debtors-server:8080'
+      - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
+      - 'MAIL_SERVER=mail'
+      - 'MAIL_PORT=25'
 
-      
+
   debtors-swagger-ui:
     image: epandurski/swpt_debtors_swagger_ui:0.2.1
     environment:
@@ -147,6 +169,8 @@ services:
   # procedure sends e-mails to the users.
   mail:
     image: mailhog/mailhog:v1.0.1
+    environment:
+      - 'MH_SMTP_BIND_ADDR=0.0.0.0:25'
     ports:
       - 8025:8025
 
