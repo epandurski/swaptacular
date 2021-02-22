@@ -75,6 +75,7 @@ services:
 
   debtors-login:
     image: epandurski/swpt_login:0.10.1
+    env_file: debtors-login.env
     environment:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
@@ -93,9 +94,9 @@ services:
       - 'OAUTH2_AUTHORIZATION_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/auth'
       - 'OAUTH2_TOKEN_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/token'
       - 'OAUTH2_REFRESH_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/token'
-      - 'OAUTH2_REDIRECT_URL=https://$PUBLIC_HOST/debtors-swagger-ui/oauth2-2-redirect.html'
+      - 'OAUTH2_REDIRECT_URL=https://$PUBLIC_HOST/debtors-swagger-ui/oauth2-redirect.html'
 
-    
+
   # This is the HTTP gateway for all the containers.
   nginx:
     image: nginx:1.19.4
@@ -157,93 +158,7 @@ services:
     volumes:
       - 'redis-data-volume:/data'
 
-      
-      
 
-
-      
-  # The purpose of this container is to create the database schema,
-  # and all the necessary RabbitMQ objects (queues, exchanges,
-  # etc.). It has to be run only once, but running it multiple times
-  # should not do any harm.
-  accounts-server-config:
-    image: epandurski/swpt_accounts:0.2.3
-    env_file: accounts.env
-    command: configure
-
-
-  # The purpose of this container is to create the database schemas
-  # for the `creditors-login` container. It has to be run only once,
-  # but running it multiple times should not do any harm.
-  creditors-login-config:
-    image: epandurski/swpt_login:0.10.1
-    env_file: creditors-login.env
-    command: configure
-
-
-  # The purpose of this container is to create the OAuth2 clients. It
-  # has to be run only once, but running it multiple times should not
-  # do any harm.
-  creditors-hydra-config:
-    image: epandurski/swpt_login:0.10.1
-    environment:
-      - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
-    volumes:
-      - './docker/creditors-hydra:/etc/hydra-config'
-    command:
-      hydra clients import
-      /etc/hydra-config/creditors-supervisor.json
-      /etc/hydra-config/swagger-ui.json
-      --fake-tls-termination
-      --fail-after 5m
-
-
-  # The purpose of this container is to create the database schema for
-  # the `creditors-server` container, and all the necessary RabbitMQ
-  # objects (queues, exchanges, etc.). It has to be run only once, but
-  # running it multiple times should not do any harm.
-  creditors-server-config:
-    image: epandurski/swpt_creditors:0.2.0
-    env_file: creditors.env
-    command: configure
-
-
-  # The purpose of this container is to create the database schemas
-  # for the `debtors-login` container. It has to be run only once,
-  # but running it multiple times should not do any harm.
-  debtors-login-config:
-    image: epandurski/swpt_login:0.10.1
-    env_file: debtors-login.env
-    command: configure
-
-
-  # The purpose of this container is to create the OAuth2 clients. It
-  # has to be run only once, but running it multiple times should not
-  # do any harm.
-  debtors-hydra-config:
-    image: epandurski/swpt_login:0.10.1
-    environment:
-      - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
-    volumes:
-      - './docker/debtors-hydra:/etc/hydra-config'
-    command:
-      hydra clients import
-      /etc/hydra-config/debtors-supervisor.json
-      /etc/hydra-config/swagger-ui.json
-      --fake-tls-termination
-      --fail-after 5m
-
-
-  # The purpose of this container is to create the database schema for
-  # the `debtors-server` container, and all the necessary RabbitMQ
-  # objects (queues, exchanges, etc.). It has to be run only once, but
-  # running it multiple times should not do any harm.
-  debtors-server-config:
-    image: epandurski/swpt_debtors:0.2.1
-    env_file: debtors.env
-    command: configure
-      
-      
 volumes:
   pg-data-volume:
   rabbitmq-data-volume:

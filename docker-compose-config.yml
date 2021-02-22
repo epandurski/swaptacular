@@ -50,12 +50,13 @@ services:
     environment:
       - 'SERVE_ADMIN_PORT=4445'
     command: hydraserver
+    restart: on-failure
 
 
   creditors-hydra-config:
     image: epandurski/swpt_login:0.10.1
     environment:
-      - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
+      - 'HYDRA_ADMIN_URL=http://creditors-hydra:4445'
     volumes:
       - './docker/creditors-hydra:/etc/hydra-config'
     command:
@@ -64,6 +65,7 @@ services:
       /etc/hydra-config/swagger-ui.json
       --fake-tls-termination
       --fail-after 5m
+    restart: on-failure
 
 
   debtors-server-config:
@@ -84,12 +86,13 @@ services:
     environment:
       - 'SERVE_ADMIN_PORT=4445'
     command: hydraserver
+    restart: on-failure
 
 
   debtors-hydra-config:
     image: epandurski/swpt_login:0.10.1
     environment:
-      - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
+      - 'HYDRA_ADMIN_URL=http://debtors-hydra:4445'
     volumes:
       - './docker/debtors-hydra:/etc/hydra-config'
     command:
@@ -98,6 +101,7 @@ services:
       /etc/hydra-config/swagger-ui.json
       --fake-tls-termination
       --fail-after 5m
+    restart: on-failure
 
 
 volumes:
