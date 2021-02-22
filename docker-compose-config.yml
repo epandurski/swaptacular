@@ -28,7 +28,7 @@ services:
 
   accounts-server-config:
     image: epandurski/swpt_accounts:0.2.3
-    env_file: accounts.env
+    env_file: accounts-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
@@ -38,7 +38,7 @@ services:
 
   creditors-server-config:
     image: epandurski/swpt_creditors:0.2.0
-    env_file: creditors.env
+    env_file: creditors-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
@@ -81,7 +81,7 @@ services:
 
   debtors-server-config:
     image: epandurski/swpt_debtors:0.2.1
-    env_file: debtors.env
+    env_file: debtors-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors:swpt_debtors@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
