@@ -1,0 +1,14 @@
+{
+  "client_id": "creditors-supervisor",
+  "client_secret": "creditors-supervisor",
+  "description": "This is the creditors supervisor.",
+  "scope": "access.readonly activate",
+  "grant_types": [
+    "client_credentials",
+    "refresh_token"
+  ],
+  "response_types": [
+    "token"
+  ],
+  "token_endpoint_auth_method": "client_secret_basic"
+}

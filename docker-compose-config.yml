@@ -1,0 +1,107 @@
+version: '3.6'
+
+services:
+
+  pg:
+    image: postgres:13.0
+    environment:
+      - 'POSTGRES_DB=swaptacular'
+      - 'POSTGRES_USER=swaptacular'
+      - 'POSTGRES_PASSWORD=swaptacular'
+    volumes:
+      - 'pg-data-volume:/var/lib/postgresql/data'
+      - './docker/pg/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql'
+    command: -c log_min_messages=FATAL
+
+
+  rabbitmq:
+    image: rabbitmq:3.8.11-management-alpine
+    hostname: rabbitmq
+    volumes:
+      - './docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
+      - 'rabbitmq-data-volume:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq'
+    environment:
+      - 'RABBITMQ_LOGS=-'
+    ports:
+      - $RABBITMQ_MANAGEMENT_LOCAL_PORT:15672
+
+
+  accounts-server-config:
+    image: epandurski/swpt_accounts:0.2.3
+    env_file: accounts.env
+    command: configure
+
+
+  creditors-server-config:
+    image: epandurski/swpt_creditors:0.2.0
+    env_file: creditors.env
+    command: configure
+
+
+  creditors-login-config:
+    image: epandurski/swpt_login:0.10.1
+    env_file: creditors-login.env
+    command: configure
+
+
+  creditors-hydra:
+    image: epandurski/swpt_login:0.10.1
+    env_file: creditors-login.env
+    environment:
+      - 'SERVE_ADMIN_PORT=4445'
+    command: hydraserver
+
+
+  creditors-hydra-config:
+    image: epandurski/swpt_login:0.10.1
+    environment:
+      - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
+    volumes:
+      - './docker/creditors-hydra:/etc/hydra-config'
+    command:
+      hydra clients import
+      /etc/hydra-config/creditors-supervisor.json
+      /etc/hydra-config/swagger-ui.json
+      --fake-tls-termination
+      --fail-after 5m
+
+
+  debtors-server-config:
+    image: epandurski/swpt_debtors:0.2.1
+    env_file: debtors.env
+    command: configure
+      
+      
+  debtors-login-config:
+    image: epandurski/swpt_login:0.10.1
+    env_file: debtors-login.env
+    command: configure
+
+
+  debtors-hydra:
+    image: epandurski/swpt_login:0.10.1
+    env_file: debtors-login.env
+    environment:
+      - 'SERVE_ADMIN_PORT=4445'
+    command: hydraserver
+
+
+  debtors-hydra-config:
+    image: epandurski/swpt_login:0.10.1
+    environment:
+      - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
+    volumes:
+      - './docker/debtors-hydra:/etc/hydra-config'
+    command:
+      hydra clients import
+      /etc/hydra-config/debtors-supervisor.json
+      /etc/hydra-config/swagger-ui.json
+      --fake-tls-termination
+      --fail-after 5m
+
+
+volumes:
+  pg-data-volume:
+  rabbitmq-data-volume:
+  nginx-cache-volume:
+  redis-data-volume:

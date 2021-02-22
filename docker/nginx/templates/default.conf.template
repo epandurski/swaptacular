@@ -1,0 +1,76 @@
+server {
+    listen ${PORT} ssl;
+    server_name $hostname;
+    location /creditors-hydra/oauth2/ {
+        proxy_pass ${CREDITORS_HYDRA_URL}/oauth2/;
+        proxy_redirect default;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /creditors-login/ {
+        proxy_pass ${CREDITORS_LOGIN_URL}/creditors-login/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /creditors-consent/ {
+        proxy_pass ${CREDITORS_LOGIN_URL}/creditors-consent/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /creditors/ {
+        proxy_pass ${CREDITORS_SERVER_URL}/creditors/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /creditors-swagger-ui/ {
+        proxy_pass ${CREDITORS_SWAGGER_UI_URL}/creditors-swagger-ui/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /debtors-hydra/oauth2/ {
+        proxy_pass ${DEBTORS_HYDRA_URL}/oauth2/;
+        proxy_redirect default;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /debtors-login/ {
+        proxy_pass ${DEBTORS_LOGIN_URL}/debtors-login/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /debtors-consent/ {
+        proxy_pass ${DEBTORS_LOGIN_URL}/debtors-consent/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /debtors/ {
+        proxy_pass ${DEBTORS_SERVER_URL}/debtors/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /debtors-swagger-ui/ {
+        proxy_pass ${DEBTORS_SWAGGER_UI_URL}/debtors-swagger-ui/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

@@ -3,250 +3,249 @@ version: '3.6'
 services:
 
   pg:
-    build:
-      context: ./db
-      dockerfile: Dockerfile
+    image: postgres:13.0
+    environment:
+      - 'POSTGRES_DB=swaptacular'
+      - 'POSTGRES_USER=swaptacular'
+      - 'POSTGRES_PASSWORD=swaptacular'
     volumes:
-      - pg-data-volume:/var/lib/postgresql/data
+      - 'pg-data-volume:/var/lib/postgresql/data'
+      - './docker/pg/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql'
+    command: -c log_min_messages=FATAL
+
+
+  rabbitmq:
+    image: rabbitmq:3.8.11-management-alpine
+    hostname: rabbitmq
+    volumes:
+      - './docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
+      - 'rabbitmq-data-volume:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq'
+    environment:
+      - 'RABBITMQ_LOGS=-'
     ports:
-      # This may be useful during development to access the database directly.
-      - 5433:5432
+      - $RABBITMQ_MANAGEMENT_LOCAL_PORT:15672
 
 
-  pg-create-users:
-    build:
-      context: ./db
-      dockerfile: Dockerfile
+  accounts-server:
+    image: epandurski/swpt_accounts:0.2.3
+    env_file: accounts.env
     environment:
-      - PGPASSWORD=$POSTGRES_PASSWORD
-    command:
-      psql -h pg -d "$POSTGRES_DB" -U "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/create-users.sql
-    depends_on:
-      - pg
-    restart: on-failure
+      - 'PORT=8080'
 
 
-  # identity-provider:
-  #   environment:
-  #     - HYDRA_ADMIN_URL=http://hydra:4445
-  #     - NODE_TLS_REJECT_UNAUTHORIZED=0
-  #     - PORT=4488
-  #   image: oryd/hydra-login-consent-node:$HYDRA_VERSION
-  #   ports:
-  #     # This is the public endpoint for login and consent pages.
-  #     - 4488:4488
-
-
-  hydra-migrate:
-    image: oryd/hydra:$HYDRA_VERSION
+  creditors-server:
+    image: epandurski/swpt_creditors:0.2.0
+    env_file: creditors.env
     environment:
-      - LOG_LEVEL=debug
-      - HYDRA_SYSTEM_SECRET=$HYDRA_SYSTEM_SECRET
-    command:
-      migrate sql postgres://hydra_service:hydra_service@pg/${POSTGRES_DB}?sslmode=disable
-    depends_on:
-      - pg
-    restart: on-failure
+      - 'PORT=8080'
+      - 'OAUTH2_INTROSPECT_URL=http://creditors-login:4445/oauth2/introspect'
 
 
-  hydra:
-    image: oryd/hydra:$HYDRA_VERSION
+  creditors-login:
+    image: epandurski/swpt_login:0.10.1
+    env_file: creditors-login.env
+    environment:
+      - 'SERVE_PUBLIC_PORT=4444'
+      - 'SERVE_ADMIN_PORT=4445'
+      - 'WEBSERVER_PORT=8080'
+      - 'URLS_SELF_ISSUER=https://$PUBLIC_HOST/creditors-hydra/'
+      - 'URLS_LOGIN=https://$PUBLIC_HOST/creditors-login/'
+      - 'URLS_CONSENT=https://$PUBLIC_HOST/creditors-consent/'
+      - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/creditors-hydra/oauth2/token'
+
+
+  creditors-swagger-ui:
+    image: epandurski/swpt_creditors_swagger_ui:0.2.0
+    environment:
+      - 'API_ROOT=https://$PUBLIC_HOST/'
+      - 'BASE_URL=/creditors-swagger-ui'
+      - 'OAUTH2_AUTHORIZATION_URL=https://$PUBLIC_HOST/creditors-hydra/oauth2/auth'
+      - 'OAUTH2_TOKEN_URL=https://$PUBLIC_HOST/creditors-hydra/oauth2/token'
+      - 'OAUTH2_REFRESH_URL=https://$PUBLIC_HOST/creditors-hydra/oauth2/token'
+      - 'OAUTH2_REDIRECT_URL=https://$PUBLIC_HOST/creditors-swagger-ui/oauth2-redirect.html'
+
+    
+  debtors-server:
+    image: epandurski/swpt_debtors:0.2.1
+    env_file: debtors.env
+    environment:
+      - 'PORT=8080'
+      - 'OAUTH2_INTROSPECT_URL=http://debtors-login:4445/oauth2/introspect'
+
+
+  debtors-login:
+    image: epandurski/swpt_login:0.10.1
+    environment:
+      - 'SERVE_PUBLIC_PORT=4444'
+      - 'SERVE_ADMIN_PORT=4445'
+      - 'WEBSERVER_PORT=8080'
+      - 'URLS_SELF_ISSUER=https://$PUBLIC_HOST/debtors-hydra/'
+      - 'URLS_LOGIN=https://$PUBLIC_HOST/debtors-login/'
+      - 'URLS_CONSENT=https://$PUBLIC_HOST/debtors-consent/'
+      - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/debtors-hydra/oauth2/token'
+
+      
+  debtors-swagger-ui:
+    image: epandurski/swpt_debtors_swagger_ui:0.2.1
+    environment:
+      - 'API_ROOT=https://$PUBLIC_HOST/'
+      - 'BASE_URL=/debtors-swagger-ui'
+      - 'OAUTH2_AUTHORIZATION_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/auth'
+      - 'OAUTH2_TOKEN_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/token'
+      - 'OAUTH2_REFRESH_URL=https://$PUBLIC_HOST/debtors-hydra/oauth2/token'
+      - 'OAUTH2_REDIRECT_URL=https://$PUBLIC_HOST/debtors-swagger-ui/oauth2-2-redirect.html'
+
+    
+  # This is the HTTP gateway for all the containers.
+  nginx:
+    image: nginx:1.19.4
+    volumes:
+      - './docker/nginx/nginx.conf:/etc/nginx/nginx.conf'
+      - './docker/nginx/templates:/etc/nginx/templates'
+      - './docker/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem'
+      - './docker/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem'
     ports:
-      # This is the public Oauth2 endpoint.
-      - 4444:4444
-      # This may be useful during development to access the admin API.
-      - 4445:4445
-    depends_on:
-      - hydra-migrate
-    command:
-      serve all --dangerous-force-http
+      - $PUBLIC_PORT:$PUBLIC_PORT
     environment:
-      - LOG_LEVEL=debug
-      - DISABLE_TELEMETRY=1
-      - SYSTEM_SECRET=$HYDRA_SYSTEM_SECRET
-      - DATABASE_URL=postgres://hydra_service:hydra_service@pg/${POSTGRES_DB}?sslmode=disable
-      - OAUTH2_CONSENT_URL=http://$BROWSER_IDP_HOST:4488/consent
-      - OAUTH2_LOGIN_URL=http://$BROWSER_IDP_HOST:4488/login
-      - OAUTH2_ISSUER_URL=http://$BROWSER_HYDRA_HOST:4444
-      - OAUTH2_SHARE_ERROR_DEBUG=1
-      - HYDRA_ADMIN_URL=http://hydra:4445
-    depends_on:
-      - pg
+      - 'PORT=$PUBLIC_PORT'
+      - 'CREDITORS_HYDRA_URL=http://creditors-login:4444'
+      - 'CREDITORS_LOGIN_URL=http://creditors-login:8080'
+      - 'CREDITORS_SERVER_URL=http://creditors-server:8080'
+      - 'CREDITORS_SWAGGER_UI_URL=http://creditors-swagger-ui:8080'
+      - 'DEBTORS_HYDRA_URL=http://debtors-login:4444'
+      - 'DEBTORS_LOGIN_URL=http://debtors-login:8080'
+      - 'DEBTORS_SERVER_URL=http://debtors-server:8080'
+      - 'DEBTORS_SWAGGER_UI_URL=http://debtors-swagger-ui:8080'
+      - 'NGINX_ENTRYPOINT_QUIET_LOGS=1'
 
 
-  keto-migrate:
-    image: oryd/keto:$KETO_VERSION
+  # The purpose of this container is to serve as HTTP cache for the
+  # `account-server` container. In complex deployments, it is possible
+  # to run several `account-server` instances, each instance being
+  # responsible for a different range of debtors, and each instance
+  # making HTTP requests to other `account-server` instances
+  # (including itself). A properly configured HTTP cache ensures that
+  # the system scales well. (See the `APP_FETCH_API_URL` configuration
+  # variable.)
+  accounts-cache:
+    image: nginx:1.19.4
+    volumes:
+      - 'nginx-cache-volume:/var/lib/nginx/data'
+      - './docker/accounts-cache/nginx.conf:/etc/nginx/nginx.conf'
+      - './docker/accounts-cache/templates:/etc/nginx/templates'
     environment:
-      - LOG_LEVEL=debug
-    command:
-      migrate sql postgres://keto_service:keto_service@pg/${POSTGRES_DB}?sslmode=disable
-    depends_on:
-      - pg
-    restart: on-failure
+      - 'PORT=80'
+      - 'ACCOUNTS_SERVER_URL=http://accounts-server:8080'
+      - 'CACHE_KEYS_ZONE=10m'
+      - 'CACHE_MAX_SIZE=1g'
+      - 'NGINX_ENTRYPOINT_QUIET_LOGS=1'
 
 
-  keto:
-    image: oryd/keto:$KETO_VERSION
-    ports:
-      # This may be useful during development to access the admin API.
-      - 4466:4466
-    depends_on:
-      - keto-migrate
-      - hydra
-    environment:
-      - LOG_LEVEL=debug
-      - DISABLE_TELEMETRY=1
-      - DATABASE_URL=postgres://keto_service:keto_service@pg/${POSTGRES_DB}?sslmode=disable
-      - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
-
-
-  oathkeeper-migrate:
-    image: oryd/oathkeeper:$OATHKEEPER_VERSION
-    environment:
-      - LOG_LEVEL=debug
-    command:
-      migrate sql postgres://oathkeeper_service:oathkeeper_service@pg/${POSTGRES_DB}?sslmode=disable
-    depends_on:
-      - pg
-    restart: on-failure
-
-
-  oathkeeper-api:
-    image: oryd/oathkeeper:$OATHKEEPER_VERSION
-    ports:
-      # This may be useful during development to access the admin API.
-      - 4456:4456
-    depends_on:
-      - oathkeeper-migrate
-      - hydra
-      - keto
-    command:
-      serve api
-    environment:
-      - LOG_LEVEL=debug
-      - DISABLE_TELEMETRY=1
-      - PORT=4456
-      - DATABASE_URL=postgres://oathkeeper_service:oathkeeper_service@pg/${POSTGRES_DB}?sslmode=disable
-      - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=ory-hydra
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=resources:hydra:jwk:oathkeeper
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=http://hydra:4445
-      - CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN=1h
-      - CREDENTIALS_ISSUER_ID_TOKEN_ISSUER=http://oathkeeper-api:4456
-      - CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=30m
-      - AUTHORIZER_KETO_WARDEN_KETO_URL=http://keto:4466
-      - AUTHENTICATOR_ANONYMOUS_USERNAME=anonymous
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
-      - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
-
-
-  oathkeeper-proxy:
-    image: oryd/oathkeeper:$OATHKEEPER_VERSION
-    ports:
-      # This is the public entrypoint for all APIs.
-      - 4455:4455
-    depends_on:
-      - oathkeeper-api
-    command:
-      serve proxy
-    environment:
-      - LOG_LEVEL=debug
-      - DISABLE_TELEMETRY=1
-      - PORT=4455
-      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
-      - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=ory-hydra
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=resources:hydra:jwk:oathkeeper
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=http://hydra:4445
-      - CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN=1h
-      - CREDENTIALS_ISSUER_ID_TOKEN_ISSUER=http://oathkeeper-api:4456
-      - CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=30m
-      - AUTHORIZER_KETO_WARDEN_KETO_URL=http://keto:4466
-      - AUTHENTICATOR_ANONYMOUS_USERNAME=anonymous
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://hydra:4445/oauth2/introspect
-      - AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://hydra:4444/oauth2/token
-
-
-  oauth2-config:
-    build:
-      context: ./services/oauth2_config
-      dockerfile: Dockerfile
-      args:
-        - HYDRA_VERSION=$HYDRA_VERSION
-        - KETO_VERSION=$KETO_VERSION
-        - OATHKEEPER_VERSION=$OATHKEEPER_VERSION
-    depends_on:
-      - hydra
-      - keto
-      - oathkeeper-api
-    environment:
-      # All of these URLs MUST NOT end with a trailing slash. This is very important!
-      - HYDRA_URL=http://hydra:4444
-      - HYDRA_ADMIN_URL=http://hydra:4445
-      - KETO_URL=http://keto:4466
-      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
-      - OATHKEEPER_PROXY_URL=http://oathkeeper-proxy:4455
-      - BROWSER_API_PROXY_URL=$BROWSER_API_PROXY_URL
-      - RESOURCE_SERVER_URL=http://users:10001
-
-      # This sets the prefix for all resource, action, and subject names. Be aware that this prefix is automatically
-      # applied to all OAuth2 Clients as well.
-      - "HYDRA_SUBJECT_PREFIX=subjects:hydra:"
-      - "HYDRA_RESOURCE_PREFIX=resources:hydra:"
-      - "HYDRA_ACTION_PREFIX=actions:hydra:"
-      - "OATHKEEPER_RESOURCE_PREFIX=resources:oathkeeper:"
-      - "OATHKEEPER_ACTION_PREFIX=actions:oathkeeper:"
-      - "KETO_RESOURCE_PREFIX=resources:keto:"
-      - "KETO_ACTION_PREFIX=actions:keto:"
-
-      - OATHKEEPER_HYDRA_JWK_SET_ID=jwk:oathkeeper
-      - OATHKEEPER_HYDRA_CLIENT_ID=clients:oathkeeper
-      - OATHKEEPER_HYDRA_CLIENT_SECRET=dummy-oathkeeper-secret
-      - KETO_HYDRA_CLIENT_ID=clients:keto
-      - KETO_HYDRA_CLIENT_SECRET=dummy-keto-secret
-
-
-  hydra-login2f-redis:
-    image: redis
-    ports:
-      # This may be useful during development to access the DB.
-      - 6379:6379
-
-
+  # This is a dummy mail server which is useful only for testing. It
+  # is necessary to have mail server, because the signup/login
+  # procedure sends e-mails to the users.
   mail:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.1
     ports:
-      # This may be useful during development to send and read emails.
-      - 1025:1025
       - 8025:8025
 
 
-  hydra-login2f:
-    build:
-      context: ./services/hydra_login2f
-      dockerfile: docker_flask/Dockerfile
-      args:
-        - FLASK_APP=hydra_login2f
+  # This Redis instance is used by the services that perform the
+  # OAuth2 login and consent (`creditors-login` and `debtors-login`).
+  redis:
+    image: redis:6.0.9
     volumes:
-      - './services/hydra_login2f:/usr/src/app'
-    ports:
-      # This is the public endpoint for login and consent pages.
-      - 4488:4488
-    environment:
-      - PORT=4488
-      - SQLALCHEMY_DATABASE_URI=postgresql://hydra_login2f_service:hydra_login2f_service@pg/${POSTGRES_DB}
-      - REDIS_URL=redis://hydra-login2f-redis:6379/0
-      - MAIL_SERVER=mail
-      - MAIL_PORT=1025
-      - MAIL_DEFAULT_SENDER=Swaptacular <no-reply@swaptacular.com>
-      - HYDRA_ADMIN_URL=http://hydra:4445
-      - SITE_TITLE=Swaptacular
-      - LANGUAGES=en,bg
-    command: develop
-    depends_on:
-      - pg
-      - hydra-login2f-redis
-      - mail
-      - hydra
+      - 'redis-data-volume:/data'
 
+      
+      
+
+
+      
+  # The purpose of this container is to create the database schema,
+  # and all the necessary RabbitMQ objects (queues, exchanges,
+  # etc.). It has to be run only once, but running it multiple times
+  # should not do any harm.
+  accounts-server-config:
+    image: epandurski/swpt_accounts:0.2.3
+    env_file: accounts.env
+    command: configure
+
+
+  # The purpose of this container is to create the database schemas
+  # for the `creditors-login` container. It has to be run only once,
+  # but running it multiple times should not do any harm.
+  creditors-login-config:
+    image: epandurski/swpt_login:0.10.1
+    env_file: creditors-login.env
+    command: configure
+
+
+  # The purpose of this container is to create the OAuth2 clients. It
+  # has to be run only once, but running it multiple times should not
+  # do any harm.
+  creditors-hydra-config:
+    image: epandurski/swpt_login:0.10.1
+    environment:
+      - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
+    volumes:
+      - './docker/creditors-hydra:/etc/hydra-config'
+    command:
+      hydra clients import
+      /etc/hydra-config/creditors-supervisor.json
+      /etc/hydra-config/swagger-ui.json
+      --fake-tls-termination
+      --fail-after 5m
+
+
+  # The purpose of this container is to create the database schema for
+  # the `creditors-server` container, and all the necessary RabbitMQ
+  # objects (queues, exchanges, etc.). It has to be run only once, but
+  # running it multiple times should not do any harm.
+  creditors-server-config:
+    image: epandurski/swpt_creditors:0.2.0
+    env_file: creditors.env
+    command: configure
+
+
+  # The purpose of this container is to create the database schemas
+  # for the `debtors-login` container. It has to be run only once,
+  # but running it multiple times should not do any harm.
+  debtors-login-config:
+    image: epandurski/swpt_login:0.10.1
+    env_file: debtors-login.env
+    command: configure
+
+
+  # The purpose of this container is to create the OAuth2 clients. It
+  # has to be run only once, but running it multiple times should not
+  # do any harm.
+  debtors-hydra-config:
+    image: epandurski/swpt_login:0.10.1
+    environment:
+      - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
+    volumes:
+      - './docker/debtors-hydra:/etc/hydra-config'
+    command:
+      hydra clients import
+      /etc/hydra-config/debtors-supervisor.json
+      /etc/hydra-config/swagger-ui.json
+      --fake-tls-termination
+      --fail-after 5m
+
+
+  # The purpose of this container is to create the database schema for
+  # the `debtors-server` container, and all the necessary RabbitMQ
+  # objects (queues, exchanges, etc.). It has to be run only once, but
+  # running it multiple times should not do any harm.
+  debtors-server-config:
+    image: epandurski/swpt_debtors:0.2.1
+    env_file: debtors.env
+    command: configure
+      
+      
 volumes:
   pg-data-volume:
+  rabbitmq-data-volume:
+  nginx-cache-volume:
+  redis-data-volume:
