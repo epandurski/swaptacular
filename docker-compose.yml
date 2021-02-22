@@ -30,7 +30,7 @@ services:
 
   accounts-server:
     image: epandurski/swpt_accounts:0.2.3
-    env_file: config/accounts-server.env
+    env_file: docker/accounts-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
@@ -42,7 +42,7 @@ services:
 
   creditors-server:
     image: epandurski/swpt_creditors:0.2.0
-    env_file: config/creditors-server.env
+    env_file: docker/creditors-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
@@ -53,7 +53,7 @@ services:
 
   creditors-login:
     image: epandurski/swpt_login:0.10.1
-    env_file: config/creditors-login.env
+    env_file: docker/creditors-login.env
     environment:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
@@ -86,7 +86,7 @@ services:
     
   debtors-server:
     image: epandurski/swpt_debtors:0.2.1
-    env_file: config/debtors-server.env
+    env_file: docker/debtors-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors:swpt_debtors@pg:5432/${POSTGRES_DB}'
@@ -97,7 +97,7 @@ services:
 
   debtors-login:
     image: epandurski/swpt_login:0.10.1
-    env_file: config/debtors-login.env
+    env_file: docker/debtors-login.env
     environment:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
