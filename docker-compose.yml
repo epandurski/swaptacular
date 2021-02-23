@@ -3,7 +3,7 @@ version: '3.6'
 services:
 
   pg:
-    image: postgres:13.0
+    image: postgres:$POSTGRES_VERSION
     environment:
       - 'POSTGRES_DB=$POSTGRES_DB'
       - 'POSTGRES_USER=$POSTGRES_USER'
@@ -16,7 +16,7 @@ services:
 
 
   rabbitmq:
-    image: rabbitmq:3.8.11-management-alpine
+    image: rabbitmq:$RABBITMQ_VERSION
     hostname: rabbitmq
     volumes:
       - './docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
@@ -29,7 +29,7 @@ services:
 
 
   accounts-server:
-    image: epandurski/swpt_accounts:0.2.3
+    image: epandurski/swpt_accounts:$SWPT_ACCOUNTS_VERSION
     env_file: docker/accounts-server.env
     environment:
       - 'PORT=8080'
@@ -41,7 +41,7 @@ services:
 
 
   creditors-server:
-    image: epandurski/swpt_creditors:0.2.0
+    image: epandurski/swpt_creditors:$SWPT_CREDITORS_VERSION
     env_file: docker/creditors-server.env
     environment:
       - 'PORT=8080'
@@ -52,9 +52,10 @@ services:
 
 
   creditors-login:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/creditors-login.env
     environment:
+      - 'SUBJECT_PREFIX=creditors:'
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
@@ -67,13 +68,11 @@ services:
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/creditors-hydra/oauth2/token'
       - 'API_RESOURCE_SERVER=http://creditors-server:8080'
       - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
-      - 'MAIL_SERVER=mail'
-      - 'MAIL_PORT=25'
     restart: on-failure
 
 
   creditors-swagger-ui:
-    image: epandurski/swpt_creditors_swagger_ui:0.2.0
+    image: epandurski/swpt_creditors_swagger_ui:$SWPT_CREDITORS_VERSION
     environment:
       - 'API_ROOT=https://$PUBLIC_HOST/'
       - 'BASE_URL=/creditors-swagger-ui'
@@ -85,7 +84,7 @@ services:
 
     
   debtors-server:
-    image: epandurski/swpt_debtors:0.2.1
+    image: epandurski/swpt_debtors:$SWPT_DEBTORS_VERSION
     env_file: docker/debtors-server.env
     environment:
       - 'PORT=8080'
@@ -96,9 +95,10 @@ services:
 
 
   debtors-login:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/debtors-login.env
     environment:
+      - 'SUBJECT_PREFIX=debtors:'
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
@@ -111,13 +111,11 @@ services:
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/debtors-hydra/oauth2/token'
       - 'API_RESOURCE_SERVER=http://debtors-server:8080'
       - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
-      - 'MAIL_SERVER=mail'
-      - 'MAIL_PORT=25'
     restart: on-failure
 
 
   debtors-swagger-ui:
-    image: epandurski/swpt_debtors_swagger_ui:0.2.1
+    image: epandurski/swpt_debtors_swagger_ui:$SWPT_DEBTORS_VERSION
     environment:
       - 'API_ROOT=https://$PUBLIC_HOST/'
       - 'BASE_URL=/debtors-swagger-ui'
@@ -130,7 +128,7 @@ services:
 
   # This is the HTTP gateway for all the containers.
   nginx:
-    image: nginx:1.19.4
+    image: nginx:$NGINX_VERSION
     volumes:
       - './docker/nginx/nginx.conf:/etc/nginx/nginx.conf'
       - './docker/nginx/templates:/etc/nginx/templates'
@@ -161,7 +159,7 @@ services:
   # the system scales well. (See the `APP_FETCH_API_URL` configuration
   # variable.)
   accounts-cache:
-    image: nginx:1.19.4
+    image: nginx:$NGINX_VERSION
     volumes:
       - 'nginx-cache-volume:/var/lib/nginx/data'
       - './docker/accounts-cache/nginx.conf:/etc/nginx/nginx.conf'
@@ -179,18 +177,20 @@ services:
   # is necessary to have mail server, because the signup/login
   # procedure sends e-mails to the users.
   mail:
-    image: mailhog/mailhog:v1.0.1
+    image: mailhog/mailhog:$MAILHOG_VERSION
     environment:
+      - 'MH_API_BIND_ADDR=$MAILHOG_BIND_IP:8025'
+      - 'MH_UI_BIND_ADDR=$MAILHOG_BIND_IP:8025'
       - 'MH_SMTP_BIND_ADDR=0.0.0.0:25'
     ports:
-      - 8025:8025
+      - $MAILHOG_PUBLIC_PORT:8025
     restart: on-failure
 
 
   # This Redis instance is used by the services that perform the
   # OAuth2 login and consent (`creditors-login` and `debtors-login`).
   redis:
-    image: redis:6.0.9
+    image: redis:$REDIS_VERSION
     volumes:
       - 'redis-data-volume:/data'
     restart: on-failure

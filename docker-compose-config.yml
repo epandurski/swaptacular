@@ -3,7 +3,7 @@ version: '3.6'
 services:
 
   pg:
-    image: postgres:13.0
+    image: postgres:$POSTGRES_VERSION
     environment:
       - 'POSTGRES_DB=$POSTGRES_DB'
       - 'POSTGRES_USER=$POSTGRES_USER'
@@ -15,7 +15,7 @@ services:
 
 
   rabbitmq:
-    image: rabbitmq:3.8.11-management-alpine
+    image: rabbitmq:$RABBITMQ_VERSION
     hostname: rabbitmq
     volumes:
       - './docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
@@ -27,7 +27,7 @@ services:
 
 
   accounts-server-config:
-    image: epandurski/swpt_accounts:0.2.3
+    image: epandurski/swpt_accounts:$SWPT_ACCOUNTS_VERSION
     env_file: docker/accounts-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
@@ -37,7 +37,7 @@ services:
 
 
   creditors-server-config:
-    image: epandurski/swpt_creditors:0.2.0
+    image: epandurski/swpt_creditors:$SWPT_CREDITORS_VERSION
     env_file: docker/creditors-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
@@ -46,7 +46,7 @@ services:
 
 
   creditors-login-config:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/creditors-login.env
     environment:
       - 'HYDRA_DSN=postgres://hydra_creditors:hydra_creditors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
@@ -55,7 +55,7 @@ services:
 
 
   creditors-hydra:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/creditors-login.env
     environment:
       - 'SERVE_ADMIN_PORT=4445'
@@ -65,7 +65,7 @@ services:
 
 
   creditors-hydra-config:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     environment:
       - 'HYDRA_ADMIN_URL=http://creditors-hydra:4445'
     volumes:
@@ -80,7 +80,7 @@ services:
 
 
   debtors-server-config:
-    image: epandurski/swpt_debtors:0.2.1
+    image: epandurski/swpt_debtors:$SWPT_DEBTORS_VERSION
     env_file: docker/debtors-server.env
     environment:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors:swpt_debtors@pg:5432/${POSTGRES_DB}'
@@ -89,7 +89,7 @@ services:
       
       
   debtors-login-config:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/debtors-login.env
     environment:
       - 'HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
@@ -98,7 +98,7 @@ services:
 
 
   debtors-hydra:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     env_file: docker/debtors-login.env
     environment:
       - 'SERVE_ADMIN_PORT=4445'
@@ -108,7 +108,7 @@ services:
 
 
   debtors-hydra-config:
-    image: epandurski/swpt_login:0.10.1
+    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
     environment:
       - 'HYDRA_ADMIN_URL=http://debtors-hydra:4445'
     volumes:
@@ -125,5 +125,3 @@ services:
 volumes:
   pg-data-volume:
   rabbitmq-data-volume:
-  nginx-cache-volume:
-  redis-data-volume:
