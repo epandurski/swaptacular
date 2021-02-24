@@ -3,10 +3,14 @@ set -e
 . ./export_vars.sh
 
 for envvar_name in CREDITORS_PIN_PROTECTION_SECRET \
+                       CREDITORS_SUPERVISOR_CLIENT_SECRET \
                        CREDITORS_LOGIN_COOKIE_SECRET \
                        CREDITORS_LOGIN_SYSTEM_SECRET \
+                       DEBTORS_SUPERVISOR_CLIENT_SECRET \
                        DEBTORS_LOGIN_COOKIE_SECRET \
-                       DEBTORS_LOGIN_SYSTEM_SECRET
+                       DEBTORS_LOGIN_SYSTEM_SECRET \
+                       RECAPTCHA_PUBLIC_KEY \
+                       RECAPTCHA_PIVATE_KEY
 do
     eval envvar_value=\$$envvar_name
     if [ -z "$envvar_value" ]; then
