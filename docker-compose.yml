@@ -1,5 +1,13 @@
 version: '3.6'
 
+
+volumes:
+  pg-data-volume:
+  rabbitmq-data-volume:
+  nginx-cache-volume:
+  redis-data-volume:
+
+
 services:
 
   pg:
@@ -48,6 +56,7 @@ services:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
       - 'OAUTH2_INTROSPECT_URL=http://creditors-login:4445/oauth2/introspect'
+      - 'APP_PIN_PROTECTION_SECRET=$CREDITORS_PIN_PROTECTION_SECRET'
     restart: always
 
 
@@ -60,6 +69,8 @@ services:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
+      - 'SECRETS_COOKIE=$CREDITORS_LOGIN_COOKIE_SECRET'
+      - 'SECRETS_SYSTEM=$CREDITORS_LOGIN_SYSTEM_SECRET'
       - 'HYDRA_DSN=postgres://hydra_creditors:hydra_creditors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors_login:swpt_creditors_login@pg/${POSTGRES_DB}'
       - 'REDIS_URL=redis://redis:6379/0?health_check_interval=30'
@@ -104,6 +115,8 @@ services:
       - 'SERVE_PUBLIC_PORT=4444'
       - 'SERVE_ADMIN_PORT=4445'
       - 'WEBSERVER_PORT=8080'
+      - 'SECRETS_COOKIE=$DEBTORS_LOGIN_COOKIE_SECRET'
+      - 'SECRETS_SYSTEM=$DEBTORS_LOGIN_SYSTEM_SECRET'
       - 'HYDRA_DSN=postgres://hydra_debtors:hydra_debtors@pg/${POSTGRES_DB}?sslmode=disable&max_conns=2&max_idle_conns=1&max_conn_lifetime=30s'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors_login:swpt_debtors_login@pg/${POSTGRES_DB}'
       - 'REDIS_URL=redis://redis:6379/1?health_check_interval=30'
@@ -196,10 +209,3 @@ services:
     volumes:
       - 'redis-data-volume:/data'
     restart: always
-
-
-volumes:
-  pg-data-volume:
-  rabbitmq-data-volume:
-  nginx-cache-volume:
-  redis-data-volume:
