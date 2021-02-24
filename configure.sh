@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+. ./export_vars.sh
 
 for envvar_name in CREDITORS_PIN_PROTECTION_SECRET \
                        CREDITORS_LOGIN_COOKIE_SECRET \
