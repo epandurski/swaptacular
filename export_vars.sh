@@ -1,4 +1,6 @@
 export PUBLIC_HOST=localhost:44301
+export RECAPTCHA_PUBLIC_KEY=6Lc902MUAAAAAJL22lcbpY3fvg3j4LSERDDQYe37
+export RECAPTCHA_PIVATE_KEY=6Lc902MUAAAAAN--r4vUr8Vr7MU1PF16D9k2Ds9Q
 export CREDITORS_SUPERVISOR_CLIENT_SECRET=creditors-supervisor
 export CREDITORS_PIN_PROTECTION_SECRET=some-long-string-that-must-be-kept-secret
 export CREDITORS_LOGIN_COOKIE_SECRET=some-long-string-that-must-be-kept-secret

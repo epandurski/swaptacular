@@ -81,6 +81,8 @@ services:
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/creditors-hydra/oauth2/token'
       - 'API_RESOURCE_SERVER=http://creditors-server:8080'
       - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
+      - 'RECAPTCHA_PUBLIC_KEY=$RECAPTCHA_PUBLIC_KEY'
+      - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
     restart: always
 
 
@@ -128,6 +130,8 @@ services:
       - 'API_AUTH2_TOKEN_URL=https://nginx:$PUBLIC_PORT/debtors-hydra/oauth2/token'
       - 'API_RESOURCE_SERVER=http://debtors-server:8080'
       - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
+      - 'RECAPTCHA_PUBLIC_KEY=$RECAPTCHA_PUBLIC_KEY'
+      - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
     restart: always
 
 
