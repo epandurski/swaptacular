@@ -9,5 +9,13 @@ if [ -z "$1" ]; then
     exit 2
 fi
 
-filepath="$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+cleanup() {
+    rm "$filepath"
+}
+
+filepath=$(mktemp --tmpdir="$(pwd)")
+trap cleanup EXIT
+
+chmod a+r "$filepath"
+envsubst '$PUBLIC_HOST $CREDITORS_SUPERVISOR_CLIENT_SECRET' < "$1" > "$filepath"
 docker-compose run --volume="$filepath:/client.json" creditors-login hydra clients import /client.json --fake-tls-termination

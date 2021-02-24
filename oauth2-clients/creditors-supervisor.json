@@ -1,6 +1,6 @@
 {
   "client_id": "creditors-supervisor",
-  "client_secret": "creditors-supervisor",
+  "client_secret": "$CREDITORS_SUPERVISOR_CLIENT_SECRET",
   "description": "This is the creditors supervisor.",
   "scope": "access.readonly activate",
   "grant_types": [

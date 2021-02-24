@@ -12,6 +12,6 @@
   ],
   "token_endpoint_auth_method": "client_secret_post",
   "redirect_uris": [
-    "https://localhost:44301/debtors-swagger-ui/oauth2-redirect.html"
+    "https://${PUBLIC_HOST}/debtors-swagger-ui/oauth2-redirect.html"
   ]
 }
