@@ -211,7 +211,7 @@ services:
   # is necessary to have mail server, because the signup/login
   # procedure sends e-mails to the users.
   mail:
-    image: juanluisbaptiste/postfix:$MAIL_RELAYER_VERSION
+    image: epandurski/docker_postfix:$MAIL_RELAYER_VERSION
     volumes:
       - 'postfix-spool-volume:/var/spool/postfix'
     environment:
