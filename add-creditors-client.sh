@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-. ./export_vars.sh
+. ./export-vars.sh
 
 if [ -z "$1" ]; then
     echo "Usage: add-creditors-client.sh FILE"

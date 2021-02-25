@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
-. ./export_vars.sh
+. ./export-vars.sh
 
 docker-compose down
