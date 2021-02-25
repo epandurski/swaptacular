@@ -14,7 +14,7 @@ cleanup() {
 }
 
 filepath=$(mktemp --tmpdir="$(pwd)")
-trap cleanup EXIT
+trap cleanup EXIT INT
 
 chmod a+r "$filepath"
 envsubst '$PUBLIC_HOST $CREDITORS_SUPERVISOR_CLIENT_SECRET' < "$1" > "$filepath"

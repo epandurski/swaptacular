@@ -10,7 +10,9 @@ for envvar_name in CREDITORS_PIN_PROTECTION_SECRET \
                        DEBTORS_LOGIN_COOKIE_SECRET \
                        DEBTORS_LOGIN_SYSTEM_SECRET \
                        RECAPTCHA_PUBLIC_KEY \
-                       RECAPTCHA_PIVATE_KEY
+                       RECAPTCHA_PIVATE_KEY \
+                       PUBLIC_HOST \
+                       PUBLIC_PORT
 do
     eval envvar_value=\$$envvar_name
     if [ -z "$envvar_value" ]; then
@@ -19,6 +21,11 @@ do
     fi
 done
 
+cleanup() {
+    docker-compose down
+}
+
+trap cleanup EXIT INT
 docker-compose up -d pg
 docker-compose up -d rabbitmq
 docker-compose up -d redis
@@ -37,5 +44,3 @@ echo -n "Waiting for services to become operational ..."; sleep 30; echo " done.
 ./add-creditors-client.sh oauth2-clients/creditors-supervisor.json || true
 ./add-debtors-client.sh oauth2-clients/debtors-swagger-ui.json || true
 ./add-debtors-client.sh oauth2-clients/debtors-supervisor.json || true
-
-docker-compose down
