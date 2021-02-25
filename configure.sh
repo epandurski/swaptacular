@@ -22,11 +22,20 @@ done
 docker-compose up -d pg
 docker-compose up -d rabbitmq
 docker-compose up -d redis
-echo "Waiting for services to become operational ..."
-sleep 30
+echo -n "Waiting for services to become operational ..."; sleep 30; echo " done."
+
 docker-compose run accounts-server configure
 docker-compose run creditors-server configure
 docker-compose run creditors-login configure
 docker-compose run debtors-server configure
 docker-compose run debtors-login configure
+docker-compose up -d creditors-login
+docker-compose up -d debtors-login
+echo -n "Waiting for services to become operational ..."; sleep 30; echo " done."
+
+./add-creditors-client.sh oauth2-clients/creditors-swagger-ui.json || true
+./add-creditors-client.sh oauth2-clients/creditors-supervisor.json || true
+./add-debtors-client.sh oauth2-clients/debtors-swagger-ui.json || true
+./add-debtors-client.sh oauth2-clients/debtors-supervisor.json || true
+
 docker-compose down

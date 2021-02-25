@@ -18,4 +18,5 @@ trap cleanup EXIT
 
 chmod a+r "$filepath"
 envsubst '$PUBLIC_HOST $CREDITORS_SUPERVISOR_CLIENT_SECRET' < "$1" > "$filepath"
+echo "Creating an Oauth2 creditors client from $1 ..."
 docker-compose run --volume="$filepath:/client.json" creditors-login hydra clients import /client.json --fake-tls-termination
