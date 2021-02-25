@@ -6,6 +6,7 @@ volumes:
   rabbitmq-data-volume:
   nginx-cache-volume:
   redis-data-volume:
+  postfix-spool-volume:
 
 
 services:
@@ -211,6 +212,8 @@ services:
   # procedure sends e-mails to the users.
   mail:
     image: juanluisbaptiste/postfix:$MAIL_RELAYER_VERSION
+    volumes:
+      - 'postfix-spool-volume:/var/spool/postfix'
     environment:
       - 'SMTP_SERVER=$SMTP_SERVER'
       - 'SMTP_PORT=$SMTP_PORT'
