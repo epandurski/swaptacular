@@ -17,7 +17,12 @@ for envvar_name in CREDITORS_PIN_PROTECTION_SECRET \
                        MIN_CREDITOR_ID \
                        MAX_CREDITOR_ID \
                        MIN_DEBTOR_ID \
-                       MAX_DEBTOR_ID
+                       MAX_DEBTOR_ID \
+                       SMTP_SERVER \
+                       SMTP_PORT \
+                       SMTP_USERNAME \
+                       SMTP_PASSWORD \
+                       MAIL_SERVER_HOSTNAME
 do
     eval envvar_value=\$$envvar_name
     if [ -z "$envvar_value" ]; then

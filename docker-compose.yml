@@ -88,6 +88,8 @@ services:
       - 'HYDRA_ADMIN_URL=http://creditors-login:4445'
       - 'RECAPTCHA_PUBLIC_KEY=$RECAPTCHA_PUBLIC_KEY'
       - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
+      - 'MAIL_SERVER=mail'
+      - 'MAIL_PORT=25'
     restart: always
 
 
@@ -140,6 +142,8 @@ services:
       - 'HYDRA_ADMIN_URL=http://debtors-login:4445'
       - 'RECAPTCHA_PUBLIC_KEY=$RECAPTCHA_PUBLIC_KEY'
       - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
+      - 'MAIL_SERVER=mail'
+      - 'MAIL_PORT=25'
     restart: always
 
 
@@ -206,13 +210,13 @@ services:
   # is necessary to have mail server, because the signup/login
   # procedure sends e-mails to the users.
   mail:
-    image: mailhog/mailhog:$MAILHOG_VERSION
+    image: juanluisbaptiste/postfix:$MAIL_RELAYER_VERSION
     environment:
-      - 'MH_API_BIND_ADDR=$MAILHOG_BIND_IP:8025'
-      - 'MH_UI_BIND_ADDR=$MAILHOG_BIND_IP:8025'
-      - 'MH_SMTP_BIND_ADDR=0.0.0.0:25'
-    ports:
-      - $MAILHOG_PUBLIC_PORT:8025
+      - 'SMTP_SERVER=$SMTP_SERVER'
+      - 'SMTP_PORT=$SMTP_PORT'
+      - 'SMTP_USERNAME=$SMTP_USERNAME'
+      - 'SMTP_PASSWORD=$SMTP_PASSWORD'
+      - 'SERVER_HOSTNAME=$MAIL_SERVER_HOSTNAME'
     restart: always
 
 
