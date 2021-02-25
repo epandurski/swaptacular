@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+cd "$(dirname $0)"
 . ./export-vars.sh
 
 for envvar_name in CREDITORS_PIN_PROTECTION_SECRET \
