@@ -20,6 +20,8 @@ services:
       - 'pg-data-volume:/var/lib/postgresql/data'
       - './docker/pg/create-users.sql:/docker-entrypoint-initdb.d/create-users.sql'
     command: -c log_min_messages=FATAL
+    ports:
+      - $POSTGRES_LOCAL_PORT:5432
     restart: always
 
 
