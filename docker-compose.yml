@@ -40,7 +40,7 @@ services:
 
   accounts-server:
     image: epandurski/swpt_accounts:$SWPT_ACCOUNTS_VERSION
-    env_file: docker/accounts-server.env
+    env_file: configuration/accounts-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
@@ -52,7 +52,7 @@ services:
 
   creditors-server:
     image: epandurski/swpt_creditors:$SWPT_CREDITORS_VERSION
-    env_file: docker/creditors-server.env
+    env_file: configuration/creditors-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
@@ -67,7 +67,7 @@ services:
 
   creditors-login:
     image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
-    env_file: docker/creditors-login.env
+    env_file: configuration/creditors-login.env
     environment:
       - 'SUBJECT_PREFIX=creditors:'
       - 'SERVE_TLS_ALLOW_TERMINATION_FROM=0.0.0.0/0'
@@ -105,7 +105,7 @@ services:
     
   debtors-server:
     image: epandurski/swpt_debtors:$SWPT_DEBTORS_VERSION
-    env_file: docker/debtors-server.env
+    env_file: configuration/debtors-server.env
     environment:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_debtors:swpt_debtors@pg:5432/${POSTGRES_DB}'
@@ -119,7 +119,7 @@ services:
 
   debtors-login:
     image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
-    env_file: docker/debtors-login.env
+    env_file: configuration/debtors-login.env
     environment:
       - 'SUBJECT_PREFIX=debtors:'
       - 'SERVE_TLS_ALLOW_TERMINATION_FROM=0.0.0.0/0'
