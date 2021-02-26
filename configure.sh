@@ -35,7 +35,7 @@ cleanup() {
     docker-compose down
 }
 
-trap cleanup EXIT INT
+trap cleanup EXIT INT TERM
 docker-compose up -d pg
 docker-compose up -d rabbitmq
 docker-compose up -d redis
