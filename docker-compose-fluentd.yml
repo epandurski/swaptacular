@@ -1,0 +1,107 @@
+version: '3.6'
+
+
+services:
+
+  pg:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: pg
+
+
+  rabbitmq:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: rabbitmq
+
+
+  accounts-server:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: accounts_server
+
+
+  creditors-server:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: creditors_server
+
+
+  creditors-login:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: creditors_login
+
+
+  creditors-swagger-ui:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: creditors_swagger_ui
+
+    
+  debtors-server:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: debtors_server
+
+
+  debtors-login:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: debtors_login
+
+
+  debtors-swagger-ui:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: debtors_swagger_ui
+
+
+  nginx:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: nginx
+
+
+  accounts-cache:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: accounts_cache
+
+
+  mail:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: mail
+
+
+  redis:
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: $FLUENTD_ADDRESS
+        tag: redis
