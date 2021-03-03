@@ -7,7 +7,7 @@ volumes:
 services:
 
   nginx:
-    image: staticfloat/nginx-certbot
+    image: epandurski/docker-nginx-certbot:$NGINX_CERTBOT_VERSION
     volumes:
       - './docker/nginx/templates/default.conf.template:/etc/nginx/user.conf.d/default.conf:ro'
       - 'letsencrypt:/etc/letsencrypt'
