@@ -141,9 +141,11 @@ All the above implementations try to:
 A **fully functional demo deployment** from this source code
 repository can be found here:
 * [Debtors Aggent Swagger
-  UI](https://demo.swaptacular.org/debtors-swagger-ui/)
+  UI](https://demo.swaptacular.org/debtors-swagger-ui/) (client_id:
+  `swagger-ui`, client_secret: `swagger-ui`)
 * [Creditors Aggent Swagger
-  UI](https://demo.swaptacular.org/creditors-swagger-ui/)
+  UI](https://demo.swaptacular.org/creditors-swagger-ui/) (client_id:
+  `swagger-ui`, client_secret: `swagger-ui`)
 
 
 Remaining work
