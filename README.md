@@ -138,7 +138,8 @@ All the above implementations try to:
 4. Demonstrate that an implementation that does scale very well
    horizontally, is indeed possible.
 
-A **fully functional demo deployment** can be found here:
+A **fully functional demo deployment** for this repository can be
+found here:
 * [Debtors Aggent Swagger
   UI](https://demo.swaptacular.org/debtors-swagger-ui/)
 * [Creditors Aggent Swagger
