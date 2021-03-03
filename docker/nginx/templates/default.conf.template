@@ -1,6 +1,11 @@
 server {
     listen ${PORT} ssl;
     server_name $hostname;
+    ssl_certificate ${CERTIFICATE_FILE};
+    ssl_certificate_key ${CERTIFICATE_KEY_FILE};
+    ssl_session_cache   shared:SSL:20m;
+    ssl_session_timeout 30m;
+
     location /creditors-hydra/oauth2/ {
         proxy_pass ${CREDITORS_HYDRA_URL}/oauth2/;
         proxy_redirect default;

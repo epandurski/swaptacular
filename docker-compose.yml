@@ -164,23 +164,24 @@ services:
   nginx:
     image: nginx:$NGINX_VERSION
     volumes:
-      - './docker/nginx/nginx.conf:/etc/nginx/nginx.conf'
-      - './docker/nginx/templates:/etc/nginx/templates'
-      - './docker/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem'
-      - './docker/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem'
+      - './docker/nginx/templates:/etc/nginx/templates:ro'
+      - './docker/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro'
+      - './docker/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem:ro'
     ports:
       - $PUBLIC_PORT:$PUBLIC_PORT
     environment:
-      - 'PORT=$PUBLIC_PORT'
-      - 'CREDITORS_HYDRA_URL=http://creditors-login:4444'
-      - 'CREDITORS_LOGIN_URL=http://creditors-login:8080'
-      - 'CREDITORS_SERVER_URL=http://creditors-server:8080'
-      - 'CREDITORS_SWAGGER_UI_URL=http://creditors-swagger-ui:8080'
-      - 'DEBTORS_HYDRA_URL=http://debtors-login:4444'
-      - 'DEBTORS_LOGIN_URL=http://debtors-login:8080'
-      - 'DEBTORS_SERVER_URL=http://debtors-server:8080'
-      - 'DEBTORS_SWAGGER_UI_URL=http://debtors-swagger-ui:8080'
-      - 'NGINX_ENTRYPOINT_QUIET_LOGS=1'
+      PORT: $PUBLIC_PORT
+      CREDITORS_HYDRA_URL: 'http://creditors-login:4444'
+      CREDITORS_LOGIN_URL: 'http://creditors-login:8080'
+      CREDITORS_SERVER_URL: 'http://creditors-server:8080'
+      CREDITORS_SWAGGER_UI_URL: 'http://creditors-swagger-ui:8080'
+      DEBTORS_HYDRA_URL: 'http://debtors-login:4444'
+      DEBTORS_LOGIN_URL: 'http://debtors-login:8080'
+      DEBTORS_SERVER_URL: 'http://debtors-server:8080'
+      DEBTORS_SWAGGER_UI_URL: 'http://debtors-swagger-ui:8080'
+      CERTIFICATE_FILE: '/etc/nginx/ssl/cert.pem'
+      CERTIFICATE_KEY_FILE: '/etc/nginx/ssl/key.pem'
+      NGINX_ENTRYPOINT_QUIET_LOGS: '1'
     restart: always
 
 
