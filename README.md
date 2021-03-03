@@ -100,12 +100,6 @@ Another important thing to note is that different network nodes
 operated by different organizations or individuals. Thus, very much
 like Internet, Swaptacular's network is decentralized by its nature.
 
-A fully functional **demo deployment** can be found here:
-* [Debtors Aggent Swagger
-  UI](https://demo.swaptacular.org/debtors-swagger-ui/))
-* [Creditors Aggent Swagger
-  UI](https://demo.swaptacular.org/creditors-swagger-ui/))
-
 
 Interoperability protocols
 --------------------------
@@ -144,11 +138,17 @@ All the above implementations try to:
 4. Demonstrate that an implementation that does scale very well
    horizontally, is indeed possible.
 
+A **fully functional demo deployment** can be found here:
+* [Debtors Aggent Swagger
+  UI](https://demo.swaptacular.org/debtors-swagger-ui/)
+* [Creditors Aggent Swagger
+  UI](https://demo.swaptacular.org/creditors-swagger-ui/)
+
 
 Remaining work
 --------------
 
-- [ ] Add link to a demo server, running the reference implementation.
+- [x] Add link to a demo server, running the reference implementation.
 - [ ] Implement a user friendly UI for currency issuing.
 - [ ] Implement a user friendly UI for making and receiving payments.
 - [ ] Define and implement a standard binary serialization for the
