@@ -65,24 +65,18 @@
       "CreditorReservation": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "CreditorReservation"
+          },
           "reservationId": {
             "readOnly": true,
             "type": "integer",
             "format": "int64",
             "description": "A number that will be needed in order to activate the creditor.",
             "example": 12345
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the reservation was created."
-          },
-          "validUntil": {
-            "readOnly": true,
-            "type": "string",
-            "format": "date-time",
-            "description": "The moment at which the reservation will expire."
           },
           "creditorId": {
             "readOnly": true,
@@ -91,11 +85,17 @@
             "description": "The reserved creditor ID.",
             "example": "1"
           },
-          "type": {
+          "validUntil": {
             "readOnly": true,
             "type": "string",
-            "description": "The type of this object.",
-            "example": "CreditorReservation"
+            "format": "date-time",
+            "description": "The moment at which the reservation will expire."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the reservation was created."
           }
         },
         "required": [
@@ -109,10 +109,6 @@
       "Error": {
         "type": "object",
         "properties": {
-          "errors": {
-            "type": "object",
-            "description": "Errors"
-          },
           "status": {
             "type": "string",
             "description": "Error name"
@@ -120,6 +116,10 @@
           "code": {
             "type": "integer",
             "description": "Error code"
+          },
+          "errors": {
+            "type": "object",
+            "description": "Errors"
           },
           "message": {
             "type": "string",
@@ -130,6 +130,18 @@
       "CreditorsList": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "CreditorsList"
+          },
+          "itemsType": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The type of the items in the paginated list.",
+            "example": "string"
+          },
           "first": {
             "type": "string",
             "readOnly": true,
@@ -143,18 +155,6 @@
             "format": "uri-reference",
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/creditors/.list"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "CreditorsList"
-          },
-          "itemsType": {
-            "type": "string",
-            "readOnly": true,
-            "description": "The type of the items in the paginated list.",
-            "example": "string"
           }
         },
         "required": [
@@ -181,25 +181,11 @@
       "ObjectReferencesPage": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/"
-          },
           "type": {
             "readOnly": true,
             "type": "string",
             "description": "The type of this object.",
             "example": "ObjectReferencesPage"
-          },
-          "next": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
-            "example": "?prev=111"
           },
           "items": {
             "readOnly": true,
@@ -219,6 +205,20 @@
             "items": {
               "$ref": "#/components/schemas/ObjectReference"
             }
+          },
+          "next": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
+            "example": "?prev=111"
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/"
           }
         },
         "required": [
@@ -249,14 +249,6 @@
       "Creditor": {
         "type": "object",
         "properties": {
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
           "wallet": {
             "readOnly": true,
             "description": "The URI of the creditor's `Wallet`.",
@@ -268,6 +260,26 @@
                 "$ref": "#/components/schemas/ObjectReference"
               }
             ]
+          },
+          "type": {
+            "type": "string",
+            "default": "Creditor",
+            "description": "The type of this object.",
+            "example": "Creditor"
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
           },
           "uri": {
             "type": "string",
@@ -281,18 +293,6 @@
             "format": "date-time",
             "readOnly": true,
             "description": "The moment at which the creditor was created."
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "type": "string",
-            "default": "Creditor",
-            "description": "The type of this object.",
-            "example": "Creditor"
           }
         },
         "required": [
@@ -318,6 +318,18 @@
       "PaginatedStream": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "PaginatedStream"
+          },
+          "itemsType": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The type of the items in the paginated stream.",
+            "example": "string"
+          },
           "forthcoming": {
             "type": "string",
             "readOnly": true,
@@ -331,18 +343,6 @@
             "format": "uri-reference",
             "description": "The URI of the first page in the paginated stream. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated stream; 2) May have a `next` field (a string), which would contain the URI of the next page in the stream; 3) If the `next` field is not present, will have a `forthcoming` field, for obtaining items that might be added to the stream in the future.",
             "example": "/stream?page=1"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "PaginatedStream"
-          },
-          "itemsType": {
-            "type": "string",
-            "readOnly": true,
-            "description": "The type of the items in the paginated stream.",
-            "example": "string"
           }
         },
         "required": [
@@ -355,18 +355,6 @@
       "Wallet": {
         "type": "object",
         "properties": {
-          "createTransfer": {
-            "readOnly": true,
-            "description": "A URI to which a `TransferCreationRequest` can be POST-ed to create a new `Transfer`.",
-            "example": {
-              "uri": "/creditors/2/transfers/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
           "debtorLookup": {
             "readOnly": true,
             "description": "A URI to which a `DebtorIdentity` object can be POST-ed, trying to find an existing account with this debtor. If an existing account is found, the response will redirect to the `Account` (response code 303). Otherwise, the response will be empty (response code 204).",
@@ -379,38 +367,17 @@
               }
             ]
           },
-          "log": {
+          "type": {
             "readOnly": true,
-            "description": "A `PaginatedStream` of creditor's `LogEntry`s. The paginated stream will be sorted in chronological order (smaller entry IDs go first). The main purpose of the log stream is to allow the clients of the API to reliably and efficiently invalidate their caches, simply by following the \"log\".",
-            "example": {
-              "first": "/creditors/2/log",
-              "forthcoming": "/creditors/2/log?prev=12345",
-              "itemsType": "LogEntry",
-              "type": "PaginatedStream"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PaginatedStream"
-              }
-            ]
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Wallet"
           },
-          "accountsList": {
+          "createTransfer": {
             "readOnly": true,
-            "description": "The URI of creditor's `AccountsList`. That is: an URI of a `PaginatedList` of `ObjectReference`s to all `Account`s belonging to the creditor. The paginated list will not be sorted in any particular order.",
+            "description": "A URI to which a `TransferCreationRequest` can be POST-ed to create a new `Transfer`.",
             "example": {
-              "uri": "/creditors/2/accounts-list"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "accountLookup": {
-            "readOnly": true,
-            "description": "A URI to which the recipient account's `AccountIdentity` can be POST-ed, trying to find the identify of the account's debtor. If the debtor has been identified successfully, the response will contain the debtor's `DebtorIdentity`. Otherwise, the response code will be 422.",
-            "example": {
-              "uri": "/creditors/2/account-lookup"
+              "uri": "/creditors/2/transfers/"
             },
             "allOf": [
               {
@@ -430,24 +397,23 @@
               }
             ]
           },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/wallet"
-          },
-          "requirePin": {
-            "type": "boolean",
-            "readOnly": true,
-            "description": "Whether the PIN is required for potentially dangerous operations.\n\n**Note:** The PIN will never be required when in \"PIN reset\" mode.",
-            "example": true
-          },
           "transfersList": {
             "readOnly": true,
             "description": "The URI of creditor's `TransfersList`. That is: an URI of a `PaginatedList` of `ObjectReference`s to all `Transfer`s initiated by the creditor, which have not been deleted yet. The paginated list will not be sorted in any particular order.",
             "example": {
               "uri": "/creditors/2/transfers-list"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "accountsList": {
+            "readOnly": true,
+            "description": "The URI of creditor's `AccountsList`. That is: an URI of a `PaginatedList` of `ObjectReference`s to all `Account`s belonging to the creditor. The paginated list will not be sorted in any particular order.",
+            "example": {
+              "uri": "/creditors/2/accounts-list"
             },
             "allOf": [
               {
@@ -486,11 +452,45 @@
               }
             ]
           },
-          "type": {
+          "log": {
             "readOnly": true,
+            "description": "A `PaginatedStream` of creditor's `LogEntry`s. The paginated stream will be sorted in chronological order (smaller entry IDs go first). The main purpose of the log stream is to allow the clients of the API to reliably and efficiently invalidate their caches, simply by following the \"log\".",
+            "example": {
+              "first": "/creditors/2/log",
+              "forthcoming": "/creditors/2/log?prev=12345",
+              "itemsType": "LogEntry",
+              "type": "PaginatedStream"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaginatedStream"
+              }
+            ]
+          },
+          "uri": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "Wallet"
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/wallet"
+          },
+          "requirePin": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Whether the PIN is required for potentially dangerous operations.\n\n**Note:** The PIN will never be required when in \"PIN reset\" mode.",
+            "example": true
+          },
+          "accountLookup": {
+            "readOnly": true,
+            "description": "A URI to which the recipient account's `AccountIdentity` can be POST-ed, trying to find the identify of the account's debtor. If the debtor has been identified successfully, the response will contain the debtor's `DebtorIdentity`. Otherwise, the response code will be 422.",
+            "example": {
+              "uri": "/creditors/2/account-lookup"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
           }
         },
         "required": [
@@ -512,21 +512,6 @@
       "PinInfo": {
         "type": "object",
         "properties": {
-          "pin": {
-            "type": "string",
-            "writeOnly": true,
-            "pattern": "^[0-9]{4,10}$",
-            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
-            "example": "1234"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
           "wallet": {
             "readOnly": true,
             "description": "The URI of the creditor's `Wallet`.",
@@ -538,6 +523,39 @@
                 "$ref": "#/components/schemas/ObjectReference"
               }
             ]
+          },
+          "type": {
+            "type": "string",
+            "default": "PinInfo",
+            "description": "The type of this object.",
+            "example": "PinInfo"
+          },
+          "status": {
+            "type": "string",
+            "pattern": "^(off|on|blocked)$",
+            "description": "The status of the PIN.\n\n* `\"off\"` means that the PIN is not required for potentially   dangerous operations.\n* `\"on\"` means that the PIN is required for potentially dangerous   operations.\n* `\"blocked\"` means that the PIN has been blocked.",
+            "example": "on"
+          },
+          "pin": {
+            "type": "string",
+            "writeOnly": true,
+            "pattern": "^[0-9]{4,10}$",
+            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
+            "example": "1234"
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
           },
           "uri": {
             "type": "string",
@@ -552,24 +570,6 @@
             "pattern": "^[0-9]{4,10}$",
             "description": "The new PIN. When `status` is \"on\", this field must be present. Note that when changing the PIN, the `pin` field should contain the old PIN, and the `newPin` field should contain the new PIN.",
             "example": "5678"
-          },
-          "status": {
-            "type": "string",
-            "pattern": "^(off|on|blocked)$",
-            "description": "The status of the PIN.\n\n* `\"off\"` means that the PIN is not required for potentially   dangerous operations.\n* `\"on\"` means that the PIN is required for potentially dangerous   operations.\n* `\"blocked\"` means that the PIN has been blocked.",
-            "example": "on"
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "type": "string",
-            "default": "PinInfo",
-            "description": "The type of this object.",
-            "example": "PinInfo"
           }
         },
         "required": [
@@ -589,42 +589,6 @@
             "description": "The type of this object.",
             "example": "LogEntry"
           },
-          "deleted": {
-            "readOnly": true,
-            "type": "boolean",
-            "description": "Whether the object has been deleted.",
-            "example": false
-          },
-          "entryId": {
-            "type": "integer",
-            "readOnly": true,
-            "format": "int64",
-            "description": "The ID of the log entry. This will always be a positive number. The first log entry has an ID of `1`, and the ID of each subsequent log entry will be equal to the ID of the previous log entry plus one.",
-            "example": 12345
-          },
-          "addedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the entry was added to the log."
-          },
-          "objectUpdateId": {
-            "type": "integer",
-            "readOnly": true,
-            "description": "A positive number which gets incremented after each change in the object. When this field is not present, this means that the changed object does not have an update ID (the object is immutable, or has been deleted, for example).",
-            "example": 10
-          },
-          "data": {
-            "type": "object",
-            "readOnly": true,
-            "description": "Optional information about the new state of the created/updated object. When present, this information can be used to avoid making a network request to obtain the new state. What properties the \"data\" object will have, depends on the value of the `objectType` field:\n\n### When the object type is \"AccountLedger\"\n`principal` and `nextEntryId` properties will  be present.\n\n### When the object type is \"Transfer\"\nIf the transfer is finalized, `finalizedAt` and (only when there is an error) `errorCode` properties will be present. If the transfer is not finalized, the \"data\" object will not be present.\n\n**Note:** This field will never be present when the object has been deleted."
-          },
-          "objectType": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of the object that has been created, updated, or deleted.",
-            "example": "Account"
-          },
           "object": {
             "readOnly": true,
             "description": "The URI of the object that has been created, updated, or deleted.",
@@ -636,6 +600,43 @@
                 "$ref": "#/components/schemas/ObjectReference"
               }
             ]
+          },
+          "entryId": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The ID of the log entry. This will always be a positive number. The first log entry has an ID of `1`, and the ID of each subsequent log entry will be equal to the ID of the previous log entry plus one.",
+            "example": 12345
+          },
+          "deleted": {
+            "readOnly": true,
+            "type": "boolean",
+            "description": "Whether the object has been deleted.",
+            "example": false
+          },
+          "objectType": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of the object that has been created, updated, or deleted.",
+            "example": "Account"
+          },
+          "objectUpdateId": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "A positive number which gets incremented after each change in the object. When this field is not present, this means that the changed object does not have an update ID (the object is immutable, or has been deleted, for example).",
+            "example": 10
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the entry was added to the log."
+          },
+          "data": {
+            "type": "object",
+            "readOnly": true,
+            "description": "Optional information about the new state of the created/updated object. When present, this information can be used to avoid making a network request to obtain the new state. What properties the \"data\" object will have, depends on the value of the `objectType` field:\n\n### When the object type is \"AccountLedger\"\n`principal` and `nextEntryId` properties will  be present.\n\n### When the object type is \"Transfer\"\nIf the transfer is finalized, `finalizedAt` and (only when there is an error) `errorCode` properties will be present. If the transfer is not finalized, the \"data\" object will not be present.\n\n**Note:** This field will never be present when the object has been deleted."
           }
         },
         "required": [
@@ -650,19 +651,18 @@
       "LogEntriesPage": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "LogEntriesPage"
+          },
           "forthcoming": {
             "type": "string",
             "readOnly": true,
             "format": "uri-reference",
             "description": "An URI of another `LogEntriesPage` object which would contain items that might be added in the future. That is: items that are not currently available, but may become available in the future. This is useful when we want to follow a continuous stream of log entries. This field will not be present if, and only if, the `next` field is present. This can be a relative URI.",
             "example": "?prev=12345"
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/log"
           },
           "items": {
             "readOnly": true,
@@ -672,18 +672,19 @@
               "$ref": "#/components/schemas/LogEntry"
             }
           },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "LogEntriesPage"
-          },
           "next": {
             "type": "string",
             "readOnly": true,
             "format": "uri-reference",
             "description": "An URI of another `LogEntriesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
             "example": "?prev=12345"
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/log"
           }
         },
         "required": [
@@ -695,20 +696,6 @@
       "AccountsList": {
         "type": "object",
         "properties": {
-          "itemsType": {
-            "type": "string",
-            "readOnly": true,
-            "description": "The type of the items in the paginated list.",
-            "example": "string"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
           "wallet": {
             "readOnly": true,
             "description": "The URI of the creditor's `Wallet` that contains the accounts list.",
@@ -721,12 +708,17 @@
               }
             ]
           },
-          "uri": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "AccountsList"
+          },
+          "itemsType": {
             "type": "string",
             "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts-list"
+            "description": "The type of the items in the paginated list.",
+            "example": "string"
           },
           "first": {
             "type": "string",
@@ -741,11 +733,20 @@
             "readOnly": true,
             "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
           },
-          "type": {
-            "readOnly": true,
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "uri": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "AccountsList"
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts-list"
           }
         },
         "required": [
@@ -761,20 +762,6 @@
       "TransfersList": {
         "type": "object",
         "properties": {
-          "itemsType": {
-            "type": "string",
-            "readOnly": true,
-            "description": "The type of the items in the paginated list.",
-            "example": "string"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
           "wallet": {
             "readOnly": true,
             "description": "The URI of the creditor's `Wallet` that contains the transfers list.",
@@ -787,12 +774,17 @@
               }
             ]
           },
-          "uri": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransfersList"
+          },
+          "itemsType": {
             "type": "string",
             "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/transfers-list"
+            "description": "The type of the items in the paginated list.",
+            "example": "string"
           },
           "first": {
             "type": "string",
@@ -807,11 +799,20 @@
             "readOnly": true,
             "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
           },
-          "type": {
-            "readOnly": true,
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "uri": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "TransfersList"
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/transfers-list"
           }
         },
         "required": [
@@ -827,17 +828,17 @@
       "AccountIdentity": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "maxLength": 200,
-            "format": "uri",
-            "description": "The information contained in this field must be enough to: 1) uniquely and reliably identify the debtor, 2) uniquely and reliably identify the creditor's account with the debtor. Note that a network request *should not be needed* to identify the account.\n\nFor example, if the debtor happens to be a bank, the URI would reveal the type of the debtor (a bank), the ID of the bank, and the bank account number."
-          },
           "type": {
             "type": "string",
             "default": "AccountIdentity",
             "description": "The type of this object.",
             "example": "AccountIdentity"
+          },
+          "uri": {
+            "type": "string",
+            "maxLength": 200,
+            "format": "uri",
+            "description": "The information contained in this field must be enough to: 1) uniquely and reliably identify the debtor, 2) uniquely and reliably identify the creditor's account with the debtor. Note that a network request *should not be needed* to identify the account.\n\nFor example, if the debtor happens to be a bank, the URI would reveal the type of the debtor (a bank), the ID of the bank, and the bank account number."
           }
         },
         "required": [
@@ -847,18 +848,18 @@
       "DebtorIdentity": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "default": "DebtorIdentity",
+            "description": "The type of this object.",
+            "example": "DebtorIdentity"
+          },
           "uri": {
             "type": "string",
             "maxLength": 100,
             "format": "uri",
             "description": "The information contained in this field must be enough to uniquely and reliably identify the debtor. Note that a network request *should not be needed* to identify the debtor.\n\nFor example, if the debtor happens to be a bank, the URI would reveal the type of the debtor (a bank), and the ID of the bank. Note that some debtors may be used only to represent a physical value measurement unit (like ounces of gold). Those *dummy debtors* do not represent a person or an organization, do not owe anything to anyone, and are used solely as identifiers of value measurement units.",
             "example": "swpt:1"
-          },
-          "type": {
-            "type": "string",
-            "default": "DebtorIdentity",
-            "description": "The type of this object.",
-            "example": "DebtorIdentity"
           }
         },
         "required": [
@@ -868,11 +869,11 @@
       "DebtorInfo": {
         "type": "object",
         "properties": {
-          "contentType": {
+          "type": {
             "type": "string",
-            "maxLength": 100,
-            "description": "Optional MIME type of the document that the `iri` field refers to.",
-            "example": "text/html"
+            "default": "DebtorInfo",
+            "description": "The type of this object.",
+            "example": "DebtorInfo"
           },
           "sha256": {
             "type": "string",
@@ -887,203 +888,26 @@
             "description": "A link (Internationalized Resource Identifier) referring to a document containing information about the debtor.",
             "example": "https://example.com/debtors/1/"
           },
-          "type": {
+          "contentType": {
             "type": "string",
-            "default": "DebtorInfo",
-            "description": "The type of this object.",
-            "example": "DebtorInfo"
+            "maxLength": 100,
+            "description": "Optional MIME type of the document that the `iri` field refers to.",
+            "example": "text/html"
           }
         },
         "required": [
           "iri"
         ]
       },
-      "AccountInfo": {
-        "type": "object",
-        "properties": {
-          "identity": {
-            "readOnly": true,
-            "description": "Account's `AccountIdentity`. It uniquely and reliably identifies the account when it participates in transfers as sender or recipient. When this field is not present, this means that the account does not have an identity yet (or anymore), and can not participate in transfers.\n\n**Note:** This field will not be present at all for *dummy accounts*. Dummy accounts can be useful for two purposes: 1) They can represent physical value measurement units (like ounces of gold), to which debtors can peg their currencies; 2) They can represent accounts with debtors to which no network connection is available, still allowing those accounts to act as links in a chain of currency pegs.",
-            "example": {
-              "type": "AccountIdentity",
-              "uri": "swpt:1/2"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountIdentity"
-              }
-            ]
-          },
-          "safeToDelete": {
-            "type": "boolean",
-            "readOnly": true,
-            "description": "Whether it is safe to delete this account.",
-            "example": false
-          },
-          "account": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Account`.",
-            "example": {
-              "uri": "/creditors/2/accounts/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
-          "interestRate": {
-            "type": "number",
-            "readOnly": true,
-            "description": "Annual rate (in percents) at which interest accumulates on the account.",
-            "example": 0.0
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/info"
-          },
-          "configError": {
-            "type": "string",
-            "readOnly": true,
-            "description": "When this field is present, this means that for some reason, the current `AccountConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
-            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
-          },
-          "noteMaxBytes": {
-            "type": "integer",
-            "readOnly": true,
-            "description": "The maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded. This will be a non-negative number.",
-            "example": 500
-          },
-          "debtorInfo": {
-            "readOnly": true,
-            "description": "Optional information about the debtor.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DebtorInfo"
-              }
-            ]
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "interestRateChangedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the latest change in the interest rate happened."
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "AccountInfo"
-          }
-        },
-        "required": [
-          "account",
-          "interestRate",
-          "interestRateChangedAt",
-          "latestUpdateAt",
-          "latestUpdateId",
-          "noteMaxBytes",
-          "safeToDelete",
-          "type",
-          "uri"
-        ]
-      },
-      "AccountConfig": {
-        "type": "object",
-        "properties": {
-          "account": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Account`.",
-            "example": {
-              "uri": "/creditors/2/accounts/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "pin": {
-            "type": "string",
-            "writeOnly": true,
-            "pattern": "^[0-9]{4,10}$",
-            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
-            "example": "1234"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
-          "allowUnsafeDeletion": {
-            "type": "boolean",
-            "description": "Whether unsafe deletion of the account is allowed by the creditor. Note that the deletion of an account which allows unsafe deletion may result in losing a non-negligible amount of money on the account.\n\n**Note:** For new accounts the value of this field will be `False`.",
-            "example": false
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/config"
-          },
-          "scheduledForDeletion": {
-            "type": "boolean",
-            "description": "Whether the account is scheduled for deletion. The safest way to delete an account whose status (`AccountInfo`) indicates that deletion is not safe, is to first schedule it for deletion, and delete it only when the account status indicates that deletion is safe. Note that this may also require making outgoing transfers, so as to reduce the balance on the account to a negligible amount.\n\n**Note:** For new accounts the value of this field will be `False`.",
-            "example": false
-          },
-          "negligibleAmount": {
-            "type": "number",
-            "minimum": 0.0,
-            "description": "The maximum amount that is considered negligible. It can be used to decide whether the account can be safely deleted, and whether an incoming transfer should be considered as insignificant. Must be non-negative.\n\n**Note:** For new accounts the value of this field will be `1e30`.",
-            "example": 0.0
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "type": "string",
-            "default": "AccountConfig",
-            "description": "The type of this object.",
-            "example": "AccountConfig"
-          }
-        },
-        "required": [
-          "account",
-          "allowUnsafeDeletion",
-          "latestUpdateAt",
-          "latestUpdateId",
-          "negligibleAmount",
-          "scheduledForDeletion",
-          "uri"
-        ]
-      },
       "AccountKnowledge": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "default": "AccountKnowledge",
+            "description": "The type of this object.",
+            "example": "AccountKnowledge"
+          },
           "account": {
             "readOnly": true,
             "description": "The URI of the corresponding `Account`.",
@@ -1095,33 +919,6 @@
                 "$ref": "#/components/schemas/ObjectReference"
               }
             ]
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
-          "interestRate": {
-            "type": "number",
-            "description": "Optional annual account interest rate (in percents), which is known to the creditor.",
-            "example": 0.0
-          },
-          "noteMaxBytes": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 500,
-            "description": "Optional maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded, which is known to the creditor.",
-            "example": 500
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/knowledge"
           },
           "identity": {
             "description": "Optional `AccountIdentity`, which is known to the creditor.",
@@ -1135,92 +932,25 @@
               }
             ]
           },
-          "interestRateChangedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Optional moment at which the latest change in the interest rate has happened, which is known to the creditor."
+          "interestRate": {
+            "type": "number",
+            "format": "float",
+            "description": "Optional annual account interest rate (in percents), which is known to the creditor.",
+            "example": 0.0
           },
-          "debtorInfo": {
-            "description": "Optional `DebtorInfo`, which is known to the creditor.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DebtorInfo"
-              }
-            ]
+          "noteMaxBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 500,
+            "format": "int32",
+            "description": "Optional maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded, which is known to the creditor.",
+            "example": 500
           },
           "latestUpdateAt": {
             "type": "string",
             "format": "date-time",
             "readOnly": true,
             "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "type": "string",
-            "default": "AccountKnowledge",
-            "description": "The type of this object.",
-            "example": "AccountKnowledge"
-          }
-        },
-        "required": [
-          "account",
-          "latestUpdateAt",
-          "latestUpdateId",
-          "uri"
-        ]
-      },
-      "CurrencyPeg": {
-        "type": "object",
-        "properties": {
-          "account": {
-            "description": "The URI of the peg currency's `Account`.",
-            "example": {
-              "uri": "/creditors/2/accounts/11/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "type": {
-            "type": "string",
-            "default": "CurrencyPeg",
-            "description": "The type of this object.",
-            "example": "CurrencyPeg"
-          },
-          "exchangeRate": {
-            "type": "number",
-            "minimum": 0.0,
-            "description": "The exchange rate between the pegged currency and the peg currency. For example, `2.0` would mean that pegged currency's tokens are twice as valuable as peg currency's tokens.",
-            "example": 1.0
-          }
-        },
-        "required": [
-          "account",
-          "exchangeRate"
-        ]
-      },
-      "AccountExchange": {
-        "type": "object",
-        "properties": {
-          "account": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Account`.",
-            "example": {
-              "uri": "/creditors/2/accounts/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "pin": {
-            "type": "string",
-            "writeOnly": true,
-            "pattern": "^[0-9]{4,10}$",
-            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
-            "example": "1234"
           },
           "latestUpdateId": {
             "type": "integer",
@@ -1235,71 +965,32 @@
             "readOnly": true,
             "format": "uri-reference",
             "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/exchange"
+            "example": "/creditors/2/accounts/1/knowledge"
           },
-          "minPrincipal": {
-            "type": "integer",
-            "minimum": -9223372036854775808,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The principal amount on the account should not fall below this value. Note that this limit applies only for automatic exchanges, and is enforced on \"best effort\" bases.\n\n**Note:** For new accounts the value of this field will be `-9223372036854775808`.",
-            "example": 1000
-          },
-          "maxPrincipal": {
-            "type": "integer",
-            "minimum": -9223372036854775808,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The principal amount on the account should not exceed this value. Note that this limit applies only for automatic exchanges, and is enforced on \"best effort\" bases. The value of this field must be greater or equal than the value of the `minPrincipal` field.\n\n**Note:** For new accounts the value of this field will be `9223372036854775807`.",
-            "example": 5000
-          },
-          "peg": {
-            "description": "Optional `CurrencyPeg`. A currency peg is an exchange strategy in which the creditor sets a specific fixed exchange rate between the tokens of two of his accounts (the pegged currency, and the peg currency). Sometimes the peg currency is itself pegged to another currency. This is called a \"peg-chain\".",
+          "debtorInfo": {
+            "description": "Optional `DebtorInfo`, which is known to the creditor.",
             "allOf": [
               {
-                "$ref": "#/components/schemas/CurrencyPeg"
+                "$ref": "#/components/schemas/DebtorInfo"
               }
             ]
           },
-          "latestUpdateAt": {
+          "interestRateChangedAt": {
             "type": "string",
             "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "policy": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 40,
-            "description": "The name of the automatic exchange policy. If this field is not present, this means that the account will not participate in automatic exchanges.\n\n`\"conservative\"` is the most straightforward exchange policy. It tries to make the *mimimal exchange* that would bring account's principal between `minPrincipal` and `maxPrincipal`, or if this is not possible, it tries to bring the principal as close as possible to that interval.\n\n**Note:** Different implementations may define additional exchange policies.",
-            "example": "conservative"
-          },
-          "type": {
-            "type": "string",
-            "default": "AccountExchange",
-            "description": "The type of this object.",
-            "example": "AccountExchange"
+            "description": "Optional moment at which the latest change in the interest rate has happened, which is known to the creditor."
           }
         },
         "required": [
           "account",
           "latestUpdateAt",
           "latestUpdateId",
-          "maxPrincipal",
-          "minPrincipal",
           "uri"
         ]
       },
       "PaginatedList": {
         "type": "object",
         "properties": {
-          "first": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of the first page in the paginated list. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated list; 2) May have a `next` field (a string), which would contain the URI of the next page in the list.",
-            "example": "/list?page=1"
-          },
           "type": {
             "readOnly": true,
             "type": "string",
@@ -1311,6 +1002,13 @@
             "readOnly": true,
             "description": "The type of the items in the paginated list.",
             "example": "string"
+          },
+          "first": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of the first page in the paginated list. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated list; 2) May have a `next` field (a string), which would contain the URI of the next page in the list.",
+            "example": "/list?page=1"
           }
         },
         "required": [
@@ -1322,6 +1020,19 @@
       "AccountLedger": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "AccountLedger"
+          },
+          "principal": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The principal amount on the account.",
+            "example": 0
+          },
           "account": {
             "readOnly": true,
             "description": "The URI of the corresponding `Account`.",
@@ -1333,21 +1044,6 @@
                 "$ref": "#/components/schemas/ObjectReference"
               }
             ]
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/ledger"
           },
           "entries": {
             "readOnly": true,
@@ -1370,30 +1066,32 @@
             "description": "The `entryID` of the next ledger entry to come. This will always be a positive number. The first ledger entry for each account will have an ID of `1`, and the ID of each subsequent ledger entry will be equal to the ID of the previous ledger entry plus one.",
             "example": 123
           },
-          "interest": {
-            "type": "integer",
-            "readOnly": true,
-            "format": "int64",
-            "description": "The approximate amount of interest accumulated on the account, which has not been added to the principal yet. This can be a negative number. Once in a while, the accumulated interest will be zeroed out and added to the principal (an interest payment).\n\n**Note:** The value of this field is calculated on-the-fly, so it may change from one request to another, and no `LogEntry` for the change will be added to the log.",
-            "example": 0
-          },
           "latestUpdateAt": {
             "type": "string",
             "format": "date-time",
             "readOnly": true,
             "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
           },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "AccountLedger"
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
           },
-          "principal": {
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/ledger"
+          },
+          "interest": {
             "type": "integer",
             "readOnly": true,
             "format": "int64",
-            "description": "The principal amount on the account.",
+            "description": "The approximate amount of interest accumulated on the account, which has not been added to the principal yet. This can be a negative number. Once in a while, the accumulated interest will be zeroed out and added to the principal (an interest payment).\n\n**Note:** The value of this field is calculated on-the-fly, so it may change from one request to another, and no `LogEntry` for the change will be added to the log.",
             "example": 0
           }
         },
@@ -1409,9 +1107,324 @@
           "uri"
         ]
       },
+      "AccountInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "AccountInfo"
+          },
+          "account": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Account`.",
+            "example": {
+              "uri": "/creditors/2/accounts/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "interestRateChangedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the latest change in the interest rate happened."
+          },
+          "noteMaxBytes": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int32",
+            "description": "The maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded. This will be a non-negative number.",
+            "example": 500
+          },
+          "configError": {
+            "type": "string",
+            "readOnly": true,
+            "description": "When this field is present, this means that for some reason, the current `AccountConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
+            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
+          },
+          "safeToDelete": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Whether it is safe to delete this account.",
+            "example": false
+          },
+          "identity": {
+            "readOnly": true,
+            "description": "Account's `AccountIdentity`. It uniquely and reliably identifies the account when it participates in transfers as sender or recipient. When this field is not present, this means that the account does not have an identity yet (or anymore), and can not participate in transfers.\n\n**Note:** This field will not be present at all for *dummy accounts*. Dummy accounts can be useful for two purposes: 1) They can represent physical value measurement units (like ounces of gold), to which debtors can peg their currencies; 2) They can represent accounts with debtors to which no network connection is available, still allowing those accounts to act as links in a chain of currency pegs.",
+            "example": {
+              "type": "AccountIdentity",
+              "uri": "swpt:1/2"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountIdentity"
+              }
+            ]
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "debtorInfo": {
+            "readOnly": true,
+            "description": "Optional information about the debtor.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DebtorInfo"
+              }
+            ]
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/info"
+          },
+          "interestRate": {
+            "type": "number",
+            "readOnly": true,
+            "format": "float",
+            "description": "Annual rate (in percents) at which interest accumulates on the account.",
+            "example": 0.0
+          }
+        },
+        "required": [
+          "account",
+          "interestRate",
+          "interestRateChangedAt",
+          "latestUpdateAt",
+          "latestUpdateId",
+          "noteMaxBytes",
+          "safeToDelete",
+          "type",
+          "uri"
+        ]
+      },
+      "CurrencyPeg": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "default": "CurrencyPeg",
+            "description": "The type of this object.",
+            "example": "CurrencyPeg"
+          },
+          "account": {
+            "description": "The URI of the peg currency's `Account`.",
+            "example": {
+              "uri": "/creditors/2/accounts/11/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "exchangeRate": {
+            "type": "number",
+            "minimum": 0.0,
+            "format": "double",
+            "description": "The exchange rate between the pegged currency and the peg currency. For example, `2.0` would mean that pegged currency's tokens are twice as valuable as peg currency's tokens.",
+            "example": 1.0
+          }
+        },
+        "required": [
+          "account",
+          "exchangeRate"
+        ]
+      },
+      "AccountExchange": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "default": "AccountExchange",
+            "description": "The type of this object.",
+            "example": "AccountExchange"
+          },
+          "account": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Account`.",
+            "example": {
+              "uri": "/creditors/2/accounts/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "minPrincipal": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The principal amount on the account should not fall below this value. Note that this limit applies only for automatic exchanges, and is enforced on \"best effort\" bases.\n\n**Note:** For new accounts the value of this field will be `-9223372036854775808`.",
+            "example": 1000
+          },
+          "pin": {
+            "type": "string",
+            "writeOnly": true,
+            "pattern": "^[0-9]{4,10}$",
+            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
+            "example": "1234"
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "policy": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "The name of the automatic exchange policy. If this field is not present, this means that the account will not participate in automatic exchanges.\n\n`\"conservative\"` is the most straightforward exchange policy. It tries to make the *mimimal exchange* that would bring account's principal between `minPrincipal` and `maxPrincipal`, or if this is not possible, it tries to bring the principal as close as possible to that interval.\n\n**Note:** Different implementations may define additional exchange policies.",
+            "example": "conservative"
+          },
+          "maxPrincipal": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The principal amount on the account should not exceed this value. Note that this limit applies only for automatic exchanges, and is enforced on \"best effort\" bases. The value of this field must be greater or equal than the value of the `minPrincipal` field.\n\n**Note:** For new accounts the value of this field will be `9223372036854775807`.",
+            "example": 5000
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/exchange"
+          },
+          "peg": {
+            "description": "Optional `CurrencyPeg`. A currency peg is an exchange strategy in which the creditor sets a specific fixed exchange rate between the tokens of two of his accounts (the pegged currency, and the peg currency). Sometimes the peg currency is itself pegged to another currency. This is called a \"peg-chain\".",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CurrencyPeg"
+              }
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "latestUpdateAt",
+          "latestUpdateId",
+          "maxPrincipal",
+          "minPrincipal",
+          "uri"
+        ]
+      },
+      "AccountConfig": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "default": "AccountConfig",
+            "description": "The type of this object.",
+            "example": "AccountConfig"
+          },
+          "account": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Account`.",
+            "example": {
+              "uri": "/creditors/2/accounts/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "allowUnsafeDeletion": {
+            "type": "boolean",
+            "description": "Whether unsafe deletion of the account is allowed by the creditor. Note that the deletion of an account which allows unsafe deletion may result in losing a non-negligible amount of money on the account.\n\n**Note:** For new accounts the value of this field will be `False`.",
+            "example": false
+          },
+          "pin": {
+            "type": "string",
+            "writeOnly": true,
+            "pattern": "^[0-9]{4,10}$",
+            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
+            "example": "1234"
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "negligibleAmount": {
+            "type": "number",
+            "minimum": 0.0,
+            "format": "float",
+            "description": "The maximum amount that is considered negligible. It can be used to decide whether the account can be safely deleted, and whether an incoming transfer should be considered as insignificant. Must be non-negative.\n\n**Note:** For new accounts the value of this field will be `1e30`.",
+            "example": 0.0
+          },
+          "scheduledForDeletion": {
+            "type": "boolean",
+            "description": "Whether the account is scheduled for deletion. The safest way to delete an account whose status (`AccountInfo`) indicates that deletion is not safe, is to first schedule it for deletion, and delete it only when the account status indicates that deletion is safe. Note that this may also require making outgoing transfers, so as to reduce the balance on the account to a negligible amount.\n\n**Note:** For new accounts the value of this field will be `False`.",
+            "example": false
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/config"
+          }
+        },
+        "required": [
+          "account",
+          "allowUnsafeDeletion",
+          "latestUpdateAt",
+          "latestUpdateId",
+          "negligibleAmount",
+          "scheduledForDeletion",
+          "uri"
+        ]
+      },
       "AccountDisplay": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "default": "AccountDisplay",
+            "description": "The type of this object.",
+            "example": "AccountDisplay"
+          },
           "hide": {
             "type": "boolean",
             "description": "Whether the account should be hidden. That is: not shown when the user views his accounts list. For new accounts the value of this field will be `False`.",
@@ -1429,12 +1442,40 @@
               }
             ]
           },
+          "debtorName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "The name of the debtor. All accounts belonging to a given creditor must have different `debtorName`s. The creditor may choose any name that is convenient, or easy to remember.\n\n**Note:** For new accounts this field will not be present, and it should be set as soon as possible, otherwise the real identity of the debtor may remain unknown to the creditor, which may lead to confusion and financial loses.",
+            "example": "United States of America"
+          },
+          "amountDivisor": {
+            "type": "number",
+            "minimum": 0.0,
+            "format": "double",
+            "description": "Before displaying the amount, it should be divided by this number. For new accounts the value of this field will be `1`.\n\n**Note:** This value should be used for display purposes only. Notably, the value of this field must be ignored when the exchange rate  between pegged accounts is calculated.",
+            "example": 100.0
+          },
           "pin": {
             "type": "string",
             "writeOnly": true,
             "pattern": "^[0-9]{4,10}$",
             "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
             "example": "1234"
+          },
+          "decimalPlaces": {
+            "type": "integer",
+            "minimum": -20,
+            "maximum": 20,
+            "format": "int32",
+            "description": "The number of digits to show after the decimal point, when displaying the amount. A negative number signifies the number of insignificant digits at the end of the integer number. For new accounts the value of this field will be `0`.",
+            "example": 2
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
           },
           "latestUpdateId": {
             "type": "integer",
@@ -1457,38 +1498,6 @@
             "maxLength": 40,
             "description": "The value measurement unit specified by the debtor. It should be shown right after the displayed amount, \"500.00 USD\" for example. If the account does not have its `unit` field set, the generic currency sign (\u00a4), or the \"XXX\" ISO 4217 currency code should be shown.\n\n**Note:** For new accounts this field will not be present, and it should be set as soon as possible, otherwise the value measurement unit may remain unknown to the creditor, which may lead to confusion and financial loses.",
             "example": "USD"
-          },
-          "decimalPlaces": {
-            "type": "integer",
-            "minimum": -20,
-            "maximum": 20,
-            "description": "The number of digits to show after the decimal point, when displaying the amount. A negative number signifies the number of insignificant digits at the end of the integer number. For new accounts the value of this field will be `0`.",
-            "example": 2
-          },
-          "debtorName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 40,
-            "description": "The name of the debtor. All accounts belonging to a given creditor must have different `debtorName`s. The creditor may choose any name that is convenient, or easy to remember.\n\n**Note:** For new accounts this field will not be present, and it should be set as soon as possible, otherwise the real identity of the debtor may remain unknown to the creditor, which may lead to confusion and financial loses.",
-            "example": "United States of America"
-          },
-          "amountDivisor": {
-            "type": "number",
-            "minimum": 0.0,
-            "description": "Before displaying the amount, it should be divided by this number. For new accounts the value of this field will be `1`.\n\n**Note:** This value should be used for display purposes only. Notably, the value of this field must be ignored when the exchange rate  between pegged accounts is calculated.",
-            "example": 100.0
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "type": "string",
-            "default": "AccountDisplay",
-            "description": "The type of this object.",
-            "example": "AccountDisplay"
           }
         },
         "required": [
@@ -1504,6 +1513,39 @@
       "Account": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Account"
+          },
+          "knowledge": {
+            "readOnly": true,
+            "description": "Account's `AccountKnowledge` settings.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountKnowledge"
+              }
+            ]
+          },
+          "ledger": {
+            "readOnly": true,
+            "description": "Account's `AccountLedger`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountLedger"
+              }
+            ]
+          },
+          "info": {
+            "readOnly": true,
+            "description": "Account's `AccountInfo`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountInfo"
+              }
+            ]
+          },
           "accountsList": {
             "readOnly": true,
             "description": "The URI of creditor's `AccountsList`.",
@@ -1513,6 +1555,30 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "exchange": {
+            "readOnly": true,
+            "description": "Account's `AccountExchange` settings.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountExchange"
+              }
+            ]
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "config": {
+            "readOnly": true,
+            "description": "Account's `AccountConfig` settings.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountConfig"
               }
             ]
           },
@@ -1531,42 +1597,6 @@
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/creditors/2/accounts/1/"
           },
-          "info": {
-            "readOnly": true,
-            "description": "Account's `AccountInfo`.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountInfo"
-              }
-            ]
-          },
-          "config": {
-            "readOnly": true,
-            "description": "Account's `AccountConfig` settings.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountConfig"
-              }
-            ]
-          },
-          "knowledge": {
-            "readOnly": true,
-            "description": "Account's `AccountKnowledge` settings.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountKnowledge"
-              }
-            ]
-          },
-          "exchange": {
-            "readOnly": true,
-            "description": "Account's `AccountExchange` settings.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountExchange"
-              }
-            ]
-          },
           "debtor": {
             "readOnly": true,
             "description": "Account's `DebtorIdentity`.",
@@ -1580,33 +1610,6 @@
               }
             ]
           },
-          "ledger": {
-            "readOnly": true,
-            "description": "Account's `AccountLedger`.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountLedger"
-              }
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the account was created."
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "Account"
-          },
           "display": {
             "readOnly": true,
             "description": "Account's `AccountDisplay` settings.",
@@ -1615,6 +1618,12 @@
                 "$ref": "#/components/schemas/AccountDisplay"
               }
             ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the account was created."
           }
         },
         "required": [
@@ -1636,17 +1645,18 @@
       "LedgerEntry": {
         "type": "object",
         "properties": {
-          "transfer": {
+          "type": {
             "readOnly": true,
-            "description": "Optional URI of the corresponding `CommittedTransfer`. When this field is not present, this means that the ledger entry compensates for one or more negligible transfers.",
-            "example": {
-              "uri": "/creditors/2/accounts/1/transfers/18444-999"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "LedgerEntry"
+          },
+          "aquiredAmount": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The amount added to the account's principal. Can be a positive number (an increase), a negative number (a decrease), or zero.",
+            "example": 1000
           },
           "entryId": {
             "type": "integer",
@@ -1667,18 +1677,17 @@
               }
             ]
           },
-          "aquiredAmount": {
-            "type": "integer",
+          "transfer": {
             "readOnly": true,
-            "format": "int64",
-            "description": "The amount added to the account's principal. Can be a positive number (an increase), a negative number (a decrease), or zero.",
-            "example": 1000
-          },
-          "addedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the entry was added to the ledger."
+            "description": "Optional URI of the corresponding `CommittedTransfer`. When this field is not present, this means that the ledger entry compensates for one or more negligible transfers.",
+            "example": {
+              "uri": "/creditors/2/accounts/1/transfers/18444-999"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
           },
           "principal": {
             "type": "integer",
@@ -1687,11 +1696,11 @@
             "description": "The new principal amount on the account, as it is after the transfer. Unless a principal overflow has occurred, the new principal amount will be equal to `aquiredAmount` plus the old principal amount.",
             "example": 1500
           },
-          "type": {
-            "readOnly": true,
+          "addedAt": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "LedgerEntry"
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the entry was added to the ledger."
           }
         },
         "required": [
@@ -1706,24 +1715,11 @@
       "LedgerEntriesPage": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/entries?prev=124"
-          },
           "type": {
             "readOnly": true,
             "type": "string",
             "description": "The type of this object.",
             "example": "LedgerEntriesPage"
-          },
-          "next": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "An URI of another `LedgerEntriesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI."
           },
           "items": {
             "readOnly": true,
@@ -1732,6 +1728,19 @@
             "items": {
               "$ref": "#/components/schemas/LedgerEntry"
             }
+          },
+          "next": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "An URI of another `LedgerEntriesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI."
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/entries?prev=124"
           }
         },
         "required": [
@@ -1743,18 +1752,24 @@
       "TransferOptions": {
         "type": "object",
         "properties": {
-          "minInterestRate": {
-            "type": "number",
-            "default": -100.0,
-            "minimum": -100.0,
-            "description": "The minimal approved interest rate. If the interest rate on the account becomes lower than this value, the transfer will not be successful. This can be useful when the transferred amount may need to be decreased if the interest rate on the account has decreased.",
-            "example": -100.0
+          "deadline": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The transfer will be successful only if it is committed before this moment. This can be useful, for example, when the transferred amount may need to be changed if the transfer can not be committed in time. When this field is not present, this means that the deadline for the transfer will not be earlier than normal."
           },
           "type": {
             "type": "string",
             "default": "TransferOptions",
             "description": "The type of this object.",
             "example": "TransferOptions"
+          },
+          "minInterestRate": {
+            "type": "number",
+            "default": -100.0,
+            "minimum": -100.0,
+            "format": "float",
+            "description": "The minimal approved interest rate. If the interest rate on the account becomes lower than this value, the transfer will not be successful. This can be useful when the transferred amount may need to be decreased if the interest rate on the account has decreased.",
+            "example": -100.0
           },
           "lockedAmount": {
             "type": "integer",
@@ -1764,29 +1779,46 @@
             "format": "int64",
             "description": "The amount that should to be locked when the transer is prepared. This must be a non-negative number.",
             "example": 0
-          },
-          "deadline": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The transfer will be successful only if it is committed before this moment. This can be useful, for example, when the transferred amount may need to be changed if the transfer can not be committed in time. When this field is not present, this means that the deadline for the transfer will not be earlier than normal."
           }
         }
       },
       "TransferCreationRequest": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "default": "TransferCreationRequest",
+            "description": "The type of this object.",
+            "example": "TransferCreationRequest"
+          },
+          "note": {
+            "type": "string",
+            "default": "",
+            "maxLength": 500,
+            "description": "A note from the sender. Can be any string that contains information which the sender wants the recipient to see, including an empty string.",
+            "example": "Hello, World!"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the sender wants to verify whether the recipient's account exists and accepts incoming transfers.",
+            "example": 1000
+          },
           "transferUuid": {
             "type": "string",
             "format": "uuid",
             "description": "A client-generated UUID for the transfer.",
             "example": "123e4567-e89b-12d3-a456-426655440000"
           },
-          "noteFormat": {
-            "type": "string",
-            "default": "",
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
+          "options": {
+            "description": "Optional `TransferOptions`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransferOptions"
+              }
+            ]
           },
           "pin": {
             "type": "string",
@@ -1794,6 +1826,13 @@
             "pattern": "^[0-9]{4,10}$",
             "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
             "example": "1234"
+          },
+          "noteFormat": {
+            "type": "string",
+            "default": "",
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
           },
           "recipient": {
             "description": "The recipient's `AccountIdentity` information.",
@@ -1806,35 +1845,6 @@
                 "$ref": "#/components/schemas/AccountIdentity"
               }
             ]
-          },
-          "amount": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the sender wants to verify whether the recipient's account exists and accepts incoming transfers.",
-            "example": 1000
-          },
-          "note": {
-            "type": "string",
-            "default": "",
-            "maxLength": 500,
-            "description": "A note from the sender. Can be any string that contains information which the sender wants the recipient to see, including an empty string.",
-            "example": "Hello, World!"
-          },
-          "options": {
-            "description": "Optional `TransferOptions`.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransferOptions"
-              }
-            ]
-          },
-          "type": {
-            "type": "string",
-            "default": "TransferCreationRequest",
-            "description": "The type of this object.",
-            "example": "TransferCreationRequest"
           }
         },
         "required": [
@@ -1846,6 +1856,12 @@
       "TransferError": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransferError"
+          },
           "totalLockedAmount": {
             "readOnly": true,
             "format": "int64",
@@ -1857,12 +1873,6 @@
             "readOnly": true,
             "description": "The error code.\n\n* `\"CANCELED_BY_THE_SENDER\"` signifies that the transfer has been   canceled the sender.\n* `\"SENDER_DOES_NOT_EXIST\"` signifies that the sender's account   does not exist.\n* `\"RECIPIENT_IS_UNREACHABLE\"` signifies that the recipient's  account does not exist, or does not accept incoming transfers.\n* `\"TRANSFER_NOTE_IS_TOO_LONG\"` signifies that the transfer has been   rejected because the byte-length of the transfer note is too big.\n* `\"INSUFFICIENT_AVAILABLE_AMOUNT\"` signifies that the transfer   has been rejected due to insufficient amount available on the   sender's account.\n* `\"TERMINATED\"` signifies that the transfer has been terminated   due to expired deadline, unapproved interest rate change, or   some other *temporary or correctable condition*. If the client   verifies the transer options and retries the transfer, chances   are that it will be committed successfully.\n",
             "example": "INSUFFICIENT_AVAILABLE_AMOUNT"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransferError"
           }
         },
         "required": [
@@ -1873,12 +1883,6 @@
       "TransferResult": {
         "type": "object",
         "properties": {
-          "finalizedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the transfer was finalized."
-          },
           "type": {
             "readOnly": true,
             "type": "string",
@@ -1893,6 +1897,12 @@
                 "$ref": "#/components/schemas/TransferError"
               }
             ]
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the transfer was finalized."
           },
           "committedAmount": {
             "type": "integer",
@@ -1911,45 +1921,17 @@
       "Transfer": {
         "type": "object",
         "properties": {
-          "transferUuid": {
+          "type": {
+            "readOnly": true,
             "type": "string",
-            "format": "uuid",
-            "description": "A client-generated UUID for the transfer.",
-            "example": "123e4567-e89b-12d3-a456-426655440000"
+            "description": "The type of this object.",
+            "example": "Transfer"
           },
-          "noteFormat": {
+          "note": {
             "type": "string",
             "readOnly": true,
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
-          "pin": {
-            "type": "string",
-            "writeOnly": true,
-            "pattern": "^[0-9]{4,10}$",
-            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
-            "example": "1234"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          },
-          "recipient": {
-            "description": "The recipient's `AccountIdentity` information.",
-            "example": {
-              "type": "AccountIdentity",
-              "uri": "swpt:1/2222"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountIdentity"
-              }
-            ]
+            "description": "A note from the sender. Can be any string that contains information which the sender wants the recipient to see, including an empty string.",
+            "example": "Hello, World!"
           },
           "amount": {
             "type": "integer",
@@ -1959,11 +1941,11 @@
             "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the sender wants to verify whether the recipient's account exists and accepts incoming transfers.",
             "example": 1000
           },
-          "note": {
+          "transferUuid": {
             "type": "string",
-            "readOnly": true,
-            "description": "A note from the sender. Can be any string that contains information which the sender wants the recipient to see, including an empty string.",
-            "example": "Hello, World!"
+            "format": "uuid",
+            "description": "A client-generated UUID for the transfer.",
+            "example": "123e4567-e89b-12d3-a456-426655440000"
           },
           "options": {
             "readOnly": true,
@@ -1973,6 +1955,58 @@
                 "$ref": "#/components/schemas/TransferOptions"
               }
             ]
+          },
+          "pin": {
+            "type": "string",
+            "writeOnly": true,
+            "pattern": "^[0-9]{4,10}$",
+            "description": "Optional PIN (Personal Identification Number).\n\n**Note:** This field must be present when the PIN is required for potentially dangerous operations. In such cases, if the passed value is incorrect, the operation will fail. After several such failed attempts, the creditor's PIN will be blocked.",
+            "example": "1234"
+          },
+          "transfersList": {
+            "readOnly": true,
+            "description": "The URI of creditor's `TransfersList`.",
+            "example": {
+              "uri": "/creditors/2/transfers-list"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "initiatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the transfer was initiated."
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
+          },
+          "checkupAt": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "The moment at which the sender is advised to look at the transfer again, to see if it's status has changed. If this field is not present, this means either that the status of the transfer is not expected to change, or that the moment of the expected change can not be predicted.\n\n**Note:** The value of this field is calculated on-the-fly, so it may change from one request to another, and no `LogEntry` for the change will be added to the log."
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented after each change in the object.\n\nWhen the object is changed by the server, the value of this field will be incremented automatically, and will be equal to the value of the `objectUpdateId` field in the latest `LogEntry` for this object in the log. In this case, the value of the field can be used by the client to decide whether a network request should made to obtain the newest state of the object.\n\nWhen the object is changed by the client, the value of this field must be incremented by the client. In this case, the server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "noteFormat": {
+            "type": "string",
+            "readOnly": true,
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
           },
           "uri": {
             "type": "string",
@@ -1990,41 +2024,17 @@
               }
             ]
           },
-          "transfersList": {
-            "readOnly": true,
-            "description": "The URI of creditor's `TransfersList`.",
+          "recipient": {
+            "description": "The recipient's `AccountIdentity` information.",
             "example": {
-              "uri": "/creditors/2/transfers-list"
+              "type": "AccountIdentity",
+              "uri": "swpt:1/2222"
             },
             "allOf": [
               {
-                "$ref": "#/components/schemas/ObjectReference"
+                "$ref": "#/components/schemas/AccountIdentity"
               }
             ]
-          },
-          "checkupAt": {
-            "readOnly": true,
-            "type": "string",
-            "format": "date-time",
-            "description": "The moment at which the sender is advised to look at the transfer again, to see if it's status has changed. If this field is not present, this means either that the status of the transfer is not expected to change, or that the moment of the expected change can not be predicted.\n\n**Note:** The value of this field is calculated on-the-fly, so it may change from one request to another, and no `LogEntry` for the change will be added to the log."
-          },
-          "initiatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the transfer was initiated."
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object. The value is the same as the value of the `addedAt` field in the latest `LogEntry` for this object in the log."
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "Transfer"
           }
         },
         "required": [
@@ -2056,56 +2066,11 @@
       "CommittedTransfer": {
         "type": "object",
         "properties": {
-          "account": {
+          "type": {
             "readOnly": true,
-            "description": "The URI of the affected `Account`.",
-            "example": {
-              "uri": "/creditors/2/accounts/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "noteFormat": {
             "type": "string",
-            "readOnly": true,
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
-          "recipient": {
-            "readOnly": true,
-            "description": "The recipient's `AccountIdentity` information.",
-            "example": {
-              "type": "AccountIdentity",
-              "uri": "swpt:1/2222"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountIdentity"
-              }
-            ]
-          },
-          "note": {
-            "type": "string",
-            "readOnly": true,
-            "description": "A note from the committer of the transfer. Can be any string that contains information which whoever committed the transfer wants the recipient (and the sender) to see. Can be an empty string.",
-            "example": ""
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/creditors/2/accounts/1/transfers/18444-999"
-          },
-          "committedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the transfer was committed."
+            "description": "The type of this object.",
+            "example": "CommittedTransfer"
           },
           "sender": {
             "readOnly": true,
@@ -2120,24 +2085,69 @@
               }
             ]
           },
-          "acquiredAmount": {
-            "type": "integer",
+          "account": {
             "readOnly": true,
-            "format": "int64",
-            "description": "The amount that this transfer has added to the account's principal. This can be a positive number (an incoming transfer), a negative number (an outgoing transfer), but can not be zero.",
-            "example": 1000
+            "description": "The URI of the affected `Account`.",
+            "example": {
+              "uri": "/creditors/2/accounts/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
           },
-          "type": {
-            "readOnly": true,
+          "note": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "CommittedTransfer"
+            "readOnly": true,
+            "description": "A note from the committer of the transfer. Can be any string that contains information which whoever committed the transfer wants the recipient (and the sender) to see. Can be an empty string.",
+            "example": ""
+          },
+          "committedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the transfer was committed."
           },
           "rationale": {
             "type": "string",
             "readOnly": true,
             "description": "This field will be present only for system transfers. Its value indicates the subsystem which originated the transfer. For interest payments the value will be `\"interest\"`. For transfers that create new money into existence, the value will be `\"issuing\"`.",
             "example": "interest"
+          },
+          "noteFormat": {
+            "type": "string",
+            "readOnly": true,
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/creditors/2/accounts/1/transfers/18444-999"
+          },
+          "recipient": {
+            "readOnly": true,
+            "description": "The recipient's `AccountIdentity` information.",
+            "example": {
+              "type": "AccountIdentity",
+              "uri": "swpt:1/2222"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountIdentity"
+              }
+            ]
+          },
+          "acquiredAmount": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The amount that this transfer has added to the account's principal. This can be a positive number (an incoming transfer), a negative number (an outgoing transfer), but can not be zero.",
+            "example": 1000
           }
         },
         "required": [
