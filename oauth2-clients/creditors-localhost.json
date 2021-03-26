@@ -1,0 +1,17 @@
+{
+  "client_id": "localhost",
+  "client_name": "Local Tests Client",
+  "description": "This client is used for local testing.",
+  "client_secret": "localhost",
+  "scope": "access access.readonly disable_pin",
+  "grant_types": [
+    "authorization_code"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none",
+  "redirect_uris": [
+    "http://localhost:5000/"
+  ]
+}
