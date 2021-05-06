@@ -63,11 +63,12 @@
       "DebtorReservation": {
         "type": "object",
         "properties": {
-          "validUntil": {
+          "debtorId": {
             "readOnly": true,
             "type": "string",
-            "format": "date-time",
-            "description": "The moment at which the reservation will expire."
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$",
+            "description": "The reserved debtor ID.",
+            "example": "1"
           },
           "createdAt": {
             "type": "string",
@@ -75,12 +76,11 @@
             "readOnly": true,
             "description": "The moment at which the reservation was created."
           },
-          "debtorId": {
+          "validUntil": {
             "readOnly": true,
             "type": "string",
-            "pattern": "^[0-9A-Za-z_=-]{1,64}$",
-            "description": "The reserved debtor ID.",
-            "example": "1"
+            "format": "date-time",
+            "description": "The moment at which the reservation will expire."
           },
           "type": {
             "readOnly": true,
@@ -107,14 +107,6 @@
       "Error": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "integer",
-            "description": "Error code"
-          },
-          "status": {
-            "type": "string",
-            "description": "Error name"
-          },
           "errors": {
             "type": "object",
             "description": "Errors"
@@ -122,18 +114,25 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          },
+          "code": {
+            "type": "integer",
+            "description": "Error code"
+          },
+          "status": {
+            "type": "string",
+            "description": "Error name"
           }
         }
       },
       "DebtorsList": {
         "type": "object",
         "properties": {
-          "first": {
-            "type": "string",
+          "type": {
             "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of the first page in the paginated list. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated list; 2) May have a `next` field (a string), which would contain the URI of the next page in the list.",
-            "example": "/list?page=1"
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "DebtorsList"
           },
           "itemsType": {
             "type": "string",
@@ -141,11 +140,12 @@
             "description": "The type of the items in the paginated list.",
             "example": "string"
           },
-          "type": {
-            "readOnly": true,
+          "first": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "DebtorsList"
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of the first page in the paginated list. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated list; 2) May have a `next` field (a string), which would contain the URI of the next page in the list.",
+            "example": "/list?page=1"
           },
           "uri": {
             "type": "string",
@@ -179,6 +179,19 @@
       "ObjectReferencesPage": {
         "type": "object",
         "properties": {
+          "next": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
+            "example": "?prev=111"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "ObjectReferencesPage"
+          },
           "items": {
             "readOnly": true,
             "description": "An array of `ObjectReference`s. Can be empty.",
@@ -197,19 +210,6 @@
             "items": {
               "$ref": "#/components/schemas/ObjectReference"
             }
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "ObjectReferencesPage"
-          },
-          "next": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
-            "example": "?prev=111"
           },
           "uri": {
             "type": "string",
@@ -264,6 +264,63 @@
           "uri"
         ]
       },
+      "DebtorConfig": {
+        "type": "object",
+        "properties": {
+          "debtor": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Debtor`.",
+            "example": {
+              "uri": "/debtors/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "latestUpdateAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment of the latest update on this object."
+          },
+          "type": {
+            "type": "string",
+            "default": "DebtorConfig",
+            "description": "The type of this object.",
+            "example": "DebtorConfig"
+          },
+          "latestUpdateId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807,
+            "format": "int64",
+            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented with each change in the object.\n\n**Note:** When the object is changed by the client, the value of this field must be incremented by the client. The server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
+            "example": 123
+          },
+          "configData": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "The debtor's configuration data. Different implementations may use different formats for this field.",
+            "example": ""
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/1/config"
+          }
+        },
+        "required": [
+          "configData",
+          "debtor",
+          "latestUpdateAt",
+          "latestUpdateId",
+          "uri"
+        ]
+      },
       "DebtorIdentity": {
         "type": "object",
         "properties": {
@@ -285,72 +342,9 @@
           "uri"
         ]
       },
-      "DebtorConfig": {
-        "type": "object",
-        "properties": {
-          "configData": {
-            "type": "string",
-            "maxLength": 2000,
-            "description": "The debtor's configuration data. Different implementations may use different formats for this field.",
-            "example": ""
-          },
-          "latestUpdateAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object."
-          },
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/1/config"
-          },
-          "debtor": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Debtor`.",
-            "example": {
-              "uri": "/debtors/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "type": {
-            "type": "string",
-            "default": "DebtorConfig",
-            "description": "The type of this object.",
-            "example": "DebtorConfig"
-          },
-          "latestUpdateId": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 9223372036854775807,
-            "format": "int64",
-            "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented with each change in the object.\n\n**Note:** When the object is changed by the client, the value of this field must be incremented by the client. The server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
-            "example": 123
-          }
-        },
-        "required": [
-          "configData",
-          "debtor",
-          "latestUpdateAt",
-          "latestUpdateId",
-          "uri"
-        ]
-      },
       "Debtor": {
         "type": "object",
         "properties": {
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the debtor was created."
-          },
           "balance": {
             "type": "integer",
             "readOnly": true,
@@ -358,18 +352,11 @@
             "description": "The total issued amount with a negative sign. Normally, it will be a negative number or a zero. A positive value, although theoretically possible, should be very rare.",
             "example": -1000000
           },
-          "noteMaxBytes": {
-            "type": "integer",
-            "readOnly": true,
-            "format": "int32",
-            "description": "The maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded. This will be a non-negative number.",
-            "example": 500
-          },
-          "configError": {
+          "createdAt": {
             "type": "string",
+            "format": "date-time",
             "readOnly": true,
-            "description": "When this field is present, this means that for some reason, the current `DebtorConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
-            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
+            "description": "The moment at which the debtor was created."
           },
           "account": {
             "readOnly": true,
@@ -384,6 +371,12 @@
               }
             ]
           },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Debtor"
+          },
           "transfersList": {
             "readOnly": true,
             "description": "The URI of the debtor's list of pending credit-issuing transfers (`TransfersList`).",
@@ -393,6 +386,28 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "noteMaxBytes": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int32",
+            "description": "The maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded. This will be a non-negative number.",
+            "example": 500
+          },
+          "configError": {
+            "type": "string",
+            "readOnly": true,
+            "description": "When this field is present, this means that for some reason, the current `DebtorConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
+            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
+          },
+          "config": {
+            "readOnly": true,
+            "description": "Debtor's `DebtorConfig` settings.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DebtorConfig"
               }
             ]
           },
@@ -421,27 +436,12 @@
               }
             ]
           },
-          "config": {
-            "readOnly": true,
-            "description": "Debtor's `DebtorConfig` settings.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DebtorConfig"
-              }
-            ]
-          },
           "uri": {
             "type": "string",
             "readOnly": true,
             "format": "uri-reference",
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/debtors/1/"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "Debtor"
           }
         },
         "required": [
@@ -471,6 +471,18 @@
       "TransfersList": {
         "type": "object",
         "properties": {
+          "debtor": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Debtor`.",
+            "example": {
+              "uri": "/debtors/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
           "items": {
             "readOnly": true,
             "description": "Contains links to all `Transfers` in an array of `ObjectReference`s.",
@@ -486,6 +498,12 @@
             "items": {
               "$ref": "#/components/schemas/ObjectReference"
             }
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransfersList"
           },
           "itemsType": {
             "readOnly": true,
@@ -506,24 +524,6 @@
             "format": "uri-reference",
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/debtors/1/transfers/"
-          },
-          "debtor": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Debtor`.",
-            "example": {
-              "uri": "/debtors/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransfersList"
           }
         },
         "required": [
@@ -538,6 +538,32 @@
       "TransferCreationRequest": {
         "type": "object",
         "properties": {
+          "note": {
+            "type": "string",
+            "default": "",
+            "maxLength": 500,
+            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
+            "example": "Hello, World!"
+          },
+          "type": {
+            "type": "string",
+            "default": "TransferCreationRequest",
+            "description": "The type of this object.",
+            "example": "TransferCreationRequest"
+          },
+          "noteFormat": {
+            "type": "string",
+            "default": "",
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
+          },
+          "transferUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A client-generated UUID for the transfer.",
+            "example": "123e4567-e89b-12d3-a456-426655440000"
+          },
           "recipient": {
             "description": "The recipient's `AccountIdentity` information.",
             "example": {
@@ -550,19 +576,6 @@
               }
             ]
           },
-          "transferUuid": {
-            "type": "string",
-            "format": "uuid",
-            "description": "A client-generated UUID for the transfer.",
-            "example": "123e4567-e89b-12d3-a456-426655440000"
-          },
-          "noteFormat": {
-            "type": "string",
-            "default": "",
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
           "amount": {
             "type": "integer",
             "minimum": 0,
@@ -570,19 +583,6 @@
             "format": "int64",
             "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the debtor wants to verify whether the recipient's account exists and accepts incoming transfers.",
             "example": 1000
-          },
-          "type": {
-            "type": "string",
-            "default": "TransferCreationRequest",
-            "description": "The type of this object.",
-            "example": "TransferCreationRequest"
-          },
-          "note": {
-            "type": "string",
-            "default": "",
-            "maxLength": 500,
-            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
-            "example": "Hello, World!"
           }
         },
         "required": [
@@ -594,18 +594,18 @@
       "TransferError": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransferError"
+          },
           "totalLockedAmount": {
             "readOnly": true,
             "type": "integer",
             "format": "int64",
             "description": "This field will be present only when the transfer has been rejected due to insufficient available amount. In this case, it will contain the total sum secured (locked) for transfers on the account, *after* this transfer has been finalized.",
             "example": 0
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransferError"
           },
           "errorCode": {
             "type": "string",
@@ -622,6 +622,18 @@
       "TransferResult": {
         "type": "object",
         "properties": {
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransferResult"
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the transfer was finalized."
+          },
           "error": {
             "readOnly": true,
             "description": "An error that has occurred during the execution of the transfer. This field will be present if, and only if, the transfer has been unsuccessful.",
@@ -631,24 +643,12 @@
               }
             ]
           },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransferResult"
-          },
           "committedAmount": {
             "type": "integer",
             "readOnly": true,
             "format": "int64",
             "description": "The transferred amount. If the transfer has been successful, the value will be equal to the requested transfer amount (always a positive number). If the transfer has been unsuccessful, the value will be zero.",
             "example": 0
-          },
-          "finalizedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the transfer was finalized."
           }
         },
         "required": [
@@ -660,11 +660,51 @@
       "Transfer": {
         "type": "object",
         "properties": {
-          "initiatedAt": {
+          "note": {
             "type": "string",
-            "format": "date-time",
             "readOnly": true,
-            "description": "The moment at which the transfer was initiated."
+            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
+            "example": "Hello, World!"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Transfer"
+          },
+          "noteFormat": {
+            "type": "string",
+            "readOnly": true,
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
+          },
+          "result": {
+            "readOnly": true,
+            "description": "Contains information about the outcome of the transfer. This field will be preset if, and only if, the transfer has been finalized. Note that a finalized transfer can be either successful, or unsuccessful.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransferResult"
+              }
+            ]
+          },
+          "transfersList": {
+            "readOnly": true,
+            "description": "The URI of creditor's `TransfersList`.",
+            "example": {
+              "uri": "/debtors/1/transfers/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "transferUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A client-generated UUID for the transfer.",
+            "example": "123e4567-e89b-12d3-a456-426655440000"
           },
           "checkupAt": {
             "readOnly": true,
@@ -684,31 +724,6 @@
               }
             ]
           },
-          "transferUuid": {
-            "type": "string",
-            "format": "uuid",
-            "description": "A client-generated UUID for the transfer.",
-            "example": "123e4567-e89b-12d3-a456-426655440000"
-          },
-          "noteFormat": {
-            "type": "string",
-            "readOnly": true,
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
-          "transfersList": {
-            "readOnly": true,
-            "description": "The URI of creditor's `TransfersList`.",
-            "example": {
-              "uri": "/debtors/1/transfers/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
           "amount": {
             "type": "integer",
             "minimum": 0,
@@ -724,26 +739,11 @@
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/debtors/1/transfers/123e4567-e89b-12d3-a456-426655440000"
           },
-          "result": {
-            "readOnly": true,
-            "description": "Contains information about the outcome of the transfer. This field will be preset if, and only if, the transfer has been finalized. Note that a finalized transfer can be either successful, or unsuccessful.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransferResult"
-              }
-            ]
-          },
-          "type": {
-            "readOnly": true,
+          "initiatedAt": {
             "type": "string",
-            "description": "The type of this object.",
-            "example": "Transfer"
-          },
-          "note": {
-            "type": "string",
+            "format": "date-time",
             "readOnly": true,
-            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
-            "example": "Hello, World!"
+            "description": "The moment at which the transfer was initiated."
           }
         },
         "required": [
@@ -1718,6 +1718,188 @@
           }
         }
       ]
+    },
+    "/debtors/{debtorId}/public": {
+      "get": {
+        "responses": {
+          "302": {
+            "description": "The debtor's public info document has been found.",
+            "headers": {
+              "Location": {
+                "description": "The URI of the entry.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/DEFAULT_ERROR"
+          }
+        },
+        "summary": "Redirect to the debtor's public info document.",
+        "tags": [
+          "documents"
+        ],
+        "operationId": "redirectToDebtorsInfo"
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "debtorId",
+          "required": true,
+          "description": "The debtor's ID",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$"
+          }
+        }
+      ]
+    },
+    "/debtors/{debtorId}/documents/": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "Location": {
+                "description": "The URI of the entry.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/DEFAULT_ERROR"
+          },
+          "403": {
+            "description": "Forbidden operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Error code"
+                    },
+                    "errors": {
+                      "type": "object",
+                      "description": "Errors"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Error name"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The document is too big.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Error code"
+                    },
+                    "errors": {
+                      "type": "object",
+                      "description": "Errors"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Error name"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Save a document.",
+        "description": "The body of the request should contain the document to be\nsaved. The document can be of any type, as long as the type is\ncorrectly specified by the `Content-Type` header in the\nrequest.",
+        "tags": [
+          "documents"
+        ],
+        "operationId": "saveDocument",
+        "security": [
+          {
+            "oauth2": [
+              "access"
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "debtorId",
+          "required": true,
+          "description": "The debtor's ID",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$"
+          }
+        }
+      ]
+    },
+    "/debtors/{debtorId}/documents/{documentId}/public": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "$ref": "#/components/responses/DEFAULT_ERROR"
+          }
+        },
+        "summary": "Return a saved document.",
+        "description": "The returned document can be of any type. The document's type\nwill be specified by the `Content-Type` header in the\nresponse.",
+        "tags": [
+          "documents"
+        ],
+        "operationId": "getDocument"
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "debtorId",
+          "required": true,
+          "description": "The debtor's ID",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$"
+          }
+        },
+        {
+          "in": "path",
+          "name": "documentId",
+          "required": true,
+          "description": "The document's ID",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$"
+          }
+        }
+      ]
     }
   },
   "tags": [
@@ -1732,6 +1914,10 @@
     {
       "name": "transfers",
       "description": "Make credit-issuing transfers."
+    },
+    {
+      "name": "documents",
+      "description": "Maintains an ever-growing set of public documents."
     }
   ],
   "openapi": "3.0.2"
