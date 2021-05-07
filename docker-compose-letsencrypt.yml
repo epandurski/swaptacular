@@ -10,25 +10,15 @@ services:
     image: epandurski/docker-nginx-certbot:$NGINX_CERTBOT_VERSION
     volumes:
       - './docker/nginx/templates/default.conf.template:/etc/nginx/user.conf.d/default.conf:ro'
+      - './docker/nginx/templates/proxy_cache_path.conf.template:/etc/nginx/user.conf.d/proxy_cache_path.conf:ro'
       - 'letsencrypt:/etc/letsencrypt'
     ports:
       - 80:80
-      - $PUBLIC_PORT:$PUBLIC_PORT
     environment:
-      PORT: $PUBLIC_PORT
-      CREDITORS_HYDRA_URL: 'http://creditors-login:4444'
-      CREDITORS_LOGIN_URL: 'http://creditors-login:8080'
-      CREDITORS_SERVER_URL: 'http://creditors-server:8080'
-      CREDITORS_SWAGGER_UI_URL: 'http://creditors-swagger-ui:8080'
-      DEBTORS_HYDRA_URL: 'http://debtors-login:4444'
-      DEBTORS_LOGIN_URL: 'http://debtors-login:8080'
-      DEBTORS_SERVER_URL: 'http://debtors-server:8080'
-      DEBTORS_SWAGGER_UI_URL: 'http://debtors-swagger-ui:8080'
       CERTIFICATE_FILE: '/etc/letsencrypt/live/${PUBLIC_HOST}/fullchain.pem'
       CERTIFICATE_KEY_FILE: '/etc/letsencrypt/live/${PUBLIC_HOST}/privkey.pem'
       ENVSUBST_VARS: 'PORT
            CREDITORS_HYDRA_URL CREDITORS_LOGIN_URL CREDITORS_SERVER_URL CREDITORS_SWAGGER_UI_URL
            DEBTORS_HYDRA_URL DEBTORS_LOGIN_URL DEBTORS_SERVER_URL DEBTORS_SWAGGER_UI_URL
-           CERTIFICATE_FILE CERTIFICATE_KEY_FILE'
+           CERTIFICATE_FILE CERTIFICATE_KEY_FILE CACHE_KEYS_ZONE CACHE_MAX_SIZE'
       CERTBOT_EMAIL: $CERTBOT_EMAIL
-    restart: always

@@ -1,0 +1,1 @@
+proxy_cache_path  /var/lib/nginx/data  levels=1:2  keys_zone=STATIC:${CACHE_KEYS_ZONE}  inactive=24h  max_size=${CACHE_MAX_SIZE}  use_temp_path=off;

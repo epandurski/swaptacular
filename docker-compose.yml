@@ -4,7 +4,8 @@ version: '3.6'
 volumes:
   pg-data-volume:
   rabbitmq-data-volume:
-  nginx-cache-volume:
+  gateway-cache-volume:
+  accounts-cache-volume:
   redis-data-volume:
   postfix-spool-volume:
 
@@ -164,6 +165,7 @@ services:
   nginx:
     image: nginx:$NGINX_VERSION
     volumes:
+      - 'gateway-cache-volume:/var/lib/nginx/data'
       - './docker/nginx/templates:/etc/nginx/templates:ro'
       - './docker/nginx/ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro'
       - './docker/nginx/ssl/key.pem:/etc/nginx/ssl/key.pem:ro'
@@ -181,6 +183,8 @@ services:
       DEBTORS_SWAGGER_UI_URL: 'http://debtors-swagger-ui:8080'
       CERTIFICATE_FILE: '/etc/nginx/ssl/cert.pem'
       CERTIFICATE_KEY_FILE: '/etc/nginx/ssl/key.pem'
+      CACHE_KEYS_ZONE: '10m'
+      CACHE_MAX_SIZE: '1g'
       NGINX_ENTRYPOINT_QUIET_LOGS: '1'
     restart: always
 
@@ -196,7 +200,7 @@ services:
   accounts-cache:
     image: nginx:$NGINX_VERSION
     volumes:
-      - 'nginx-cache-volume:/var/lib/nginx/data'
+      - 'accounts-cache-volume:/var/lib/nginx/data'
       - './docker/accounts-cache/nginx.conf:/etc/nginx/nginx.conf'
       - './docker/accounts-cache/templates:/etc/nginx/templates'
     environment:
