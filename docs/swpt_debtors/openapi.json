@@ -63,6 +63,25 @@
       "DebtorReservation": {
         "type": "object",
         "properties": {
+          "validUntil": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "The moment at which the reservation will expire."
+          },
+          "debtorId": {
+            "readOnly": true,
+            "type": "string",
+            "pattern": "^[0-9A-Za-z_=-]{1,64}$",
+            "description": "The reserved debtor ID.",
+            "example": "1"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The moment at which the reservation was created."
+          },
           "type": {
             "readOnly": true,
             "type": "string",
@@ -75,25 +94,6 @@
             "format": "int64",
             "description": "A number that will be needed in order to activate the debtor.",
             "example": 12345
-          },
-          "debtorId": {
-            "readOnly": true,
-            "type": "string",
-            "pattern": "^[0-9A-Za-z_=-]{1,64}$",
-            "description": "The reserved debtor ID.",
-            "example": "1"
-          },
-          "validUntil": {
-            "readOnly": true,
-            "type": "string",
-            "format": "date-time",
-            "description": "The moment at which the reservation will expire."
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment at which the reservation was created."
           }
         },
         "required": [
@@ -107,9 +107,9 @@
       "Error": {
         "type": "object",
         "properties": {
-          "errors": {
-            "type": "object",
-            "description": "Errors"
+          "code": {
+            "type": "integer",
+            "description": "Error code"
           },
           "status": {
             "type": "string",
@@ -119,9 +119,9 @@
             "type": "string",
             "description": "Error message"
           },
-          "code": {
-            "type": "integer",
-            "description": "Error code"
+          "errors": {
+            "type": "object",
+            "description": "Errors"
           }
         }
       },
@@ -135,18 +135,18 @@
             "description": "The URI of the first page in the paginated list. This can be a relative URI. The object retrieved from this URI will have: 1) An `items` field (an array), which will contain the first items of the paginated list; 2) May have a `next` field (a string), which would contain the URI of the next page in the list.",
             "example": "/list?page=1"
           },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "DebtorsList"
+          },
           "uri": {
             "type": "string",
             "readOnly": true,
             "format": "uri-reference",
             "description": "The URI of this object. Can be a relative URI.",
             "example": "/debtors/.list"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "DebtorsList"
           },
           "itemsType": {
             "type": "string",
@@ -179,18 +179,25 @@
       "ObjectReferencesPage": {
         "type": "object",
         "properties": {
-          "uri": {
+          "next": {
             "type": "string",
             "readOnly": true,
             "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/2/enumerate"
+            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
+            "example": "?prev=111"
           },
           "type": {
             "readOnly": true,
             "type": "string",
             "description": "The type of this object.",
             "example": "ObjectReferencesPage"
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/2/enumerate"
           },
           "items": {
             "readOnly": true,
@@ -210,13 +217,6 @@
             "items": {
               "$ref": "#/components/schemas/ObjectReference"
             }
-          },
-          "next": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "An URI of another `ObjectReferencesPage` object which contains more items. When there are no remaining items, this field will not be present. If this field is present, there might be remaining items, even when the `items` array is empty. This can be a relative URI.",
-            "example": "?prev=111"
           }
         },
         "required": [
@@ -247,17 +247,17 @@
       "AccountIdentity": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "maxLength": 200,
-            "format": "uri",
-            "description": "The information contained in this field must be enough to: 1) uniquely and reliably identify the debtor, 2) uniquely and reliably identify the creditor's account with the debtor. Note that a network request *should not be needed* to identify the account.\n\nFor example, if the debtor happens to be a bank, the URI would reveal the type of the debtor (a bank), the ID of the bank, and the bank account number."
-          },
           "type": {
             "type": "string",
             "default": "AccountIdentity",
             "description": "The type of this object.",
             "example": "AccountIdentity"
+          },
+          "uri": {
+            "type": "string",
+            "maxLength": 200,
+            "format": "uri",
+            "description": "The information contained in this field must be enough to: 1) uniquely and reliably identify the debtor, 2) uniquely and reliably identify the creditor's account with the debtor. Note that a network request *should not be needed* to identify the account.\n\nFor example, if the debtor happens to be a bank, the URI would reveal the type of the debtor (a bank), the ID of the bank, and the bank account number."
           }
         },
         "required": [
@@ -267,18 +267,18 @@
       "DebtorIdentity": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "default": "DebtorIdentity",
+            "description": "The type of this object.",
+            "example": "DebtorIdentity"
+          },
           "uri": {
             "type": "string",
             "maxLength": 100,
             "format": "uri",
             "description": "The information contained in this field must be enough to uniquely and reliably identify the debtor. Note that a network request *should not be needed* to identify the debtor.",
             "example": "swpt:1"
-          },
-          "type": {
-            "type": "string",
-            "default": "DebtorIdentity",
-            "description": "The type of this object.",
-            "example": "DebtorIdentity"
           }
         },
         "required": [
@@ -288,18 +288,11 @@
       "DebtorConfig": {
         "type": "object",
         "properties": {
-          "uri": {
+          "latestUpdateAt": {
             "type": "string",
+            "format": "date-time",
             "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/1/config"
-          },
-          "type": {
-            "type": "string",
-            "default": "DebtorConfig",
-            "description": "The type of this object.",
-            "example": "DebtorConfig"
+            "description": "The moment of the latest update on this object."
           },
           "latestUpdateId": {
             "type": "integer",
@@ -308,6 +301,19 @@
             "format": "int64",
             "description": "The sequential number of the latest update in the object. This will always be a positive number, which starts from `1` and gets incremented with each change in the object.\n\n**Note:** When the object is changed by the client, the value of this field must be incremented by the client. The server will use the value of the field to detect conflicts which can occur when two clients try to update the object simultaneously.",
             "example": 123
+          },
+          "configData": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "The debtor's configuration data. Different implementations may use different formats for this field.",
+            "example": ""
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/1/config"
           },
           "debtor": {
             "readOnly": true,
@@ -321,17 +327,11 @@
               }
             ]
           },
-          "latestUpdateAt": {
+          "type": {
             "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The moment of the latest update on this object."
-          },
-          "configData": {
-            "type": "string",
-            "maxLength": 2000,
-            "description": "The debtor's configuration data. Different implementations may use different formats for this field.",
-            "example": ""
+            "default": "DebtorConfig",
+            "description": "The type of this object.",
+            "example": "DebtorConfig"
           }
         },
         "required": [
@@ -345,19 +345,6 @@
       "Debtor": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/1/"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "Debtor"
-          },
           "account": {
             "readOnly": true,
             "description": "The `AccountIdentity` of the debtor's account. It uniquely and reliably identifies the debtor's account when it participates in transfers as sender or recipient. When this field is not present, this means that the debtor's account does not have an identity yet, and can not participate in transfers.",
@@ -371,59 +358,12 @@
               }
             ]
           },
-          "identity": {
-            "readOnly": true,
-            "description": "The debtor's `DebtorIdentity`.",
-            "example": {
-              "type": "DebtorIdentity",
-              "uri": "swpt:1"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DebtorIdentity"
-              }
-            ]
-          },
-          "configError": {
-            "type": "string",
-            "readOnly": true,
-            "description": "When this field is present, this means that for some reason, the current `DebtorConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
-            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
-          },
-          "balance": {
-            "type": "integer",
-            "readOnly": true,
-            "format": "int64",
-            "description": "The total issued amount with a negative sign. Normally, it will be a negative number or a zero. A positive value, although theoretically possible, should be very rare.",
-            "example": -1000000
-          },
           "noteMaxBytes": {
             "type": "integer",
             "readOnly": true,
             "format": "int32",
             "description": "The maximal number of bytes that transfer notes are allowed to contain when UTF-8 encoded. This will be a non-negative number.",
             "example": 500
-          },
-          "config": {
-            "readOnly": true,
-            "description": "Debtor's `DebtorConfig` settings.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DebtorConfig"
-              }
-            ]
-          },
-          "createTransfer": {
-            "readOnly": true,
-            "description": "A URI to which the debtor can POST `TransferCreationRequest`s to create new credit-issuing transfers.",
-            "example": {
-              "uri": "/debtors/1/transfers/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
           },
           "transfersList": {
             "readOnly": true,
@@ -449,6 +389,38 @@
               }
             ]
           },
+          "createTransfer": {
+            "readOnly": true,
+            "description": "A URI to which the debtor can POST `TransferCreationRequest`s to create new credit-issuing transfers.",
+            "example": {
+              "uri": "/debtors/1/transfers/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "balance": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The total issued amount with a negative sign. Normally, it will be a negative number or a zero. A positive value, although theoretically possible, should be very rare.",
+            "example": -1000000
+          },
+          "identity": {
+            "readOnly": true,
+            "description": "The debtor's `DebtorIdentity`.",
+            "example": {
+              "type": "DebtorIdentity",
+              "uri": "swpt:1"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DebtorIdentity"
+              }
+            ]
+          },
           "saveDocument": {
             "readOnly": true,
             "description": "A URI to which the debtor can POST documents to be saved.",
@@ -461,11 +433,39 @@
               }
             ]
           },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/1/"
+          },
+          "configError": {
+            "type": "string",
+            "readOnly": true,
+            "description": "When this field is present, this means that for some reason, the current `DebtorConfig` settings can not be applied, or are not effectual anymore. Usually this means that there has been a network communication problem, or a system configuration problem. The value alludes to the cause of the problem.",
+            "example": "CONFIGURATION_IS_NOT_EFFECTUAL"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
             "readOnly": true,
             "description": "The moment at which the debtor was created."
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Debtor"
+          },
+          "config": {
+            "readOnly": true,
+            "description": "Debtor's `DebtorConfig` settings.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DebtorConfig"
+              }
+            ]
           }
         },
         "required": [
@@ -497,38 +497,6 @@
       "TransfersList": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/1/transfers/"
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransfersList"
-          },
-          "first": {
-            "readOnly": true,
-            "type": "string",
-            "format": "uri-reference",
-            "description": "This will always be an empty string, representing the relative URI of the first and only page in a paginated list.",
-            "example": ""
-          },
-          "debtor": {
-            "readOnly": true,
-            "description": "The URI of the corresponding `Debtor`.",
-            "example": {
-              "uri": "/debtors/1/"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ObjectReference"
-              }
-            ]
-          },
           "items": {
             "readOnly": true,
             "description": "Contains links to all `Transfers` in an array of `ObjectReference`s.",
@@ -550,6 +518,38 @@
             "type": "string",
             "description": "The type of the items in the list.",
             "example": "ObjectReference"
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/1/transfers/"
+          },
+          "debtor": {
+            "readOnly": true,
+            "description": "The URI of the corresponding `Debtor`.",
+            "example": {
+              "uri": "/debtors/1/"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObjectReference"
+              }
+            ]
+          },
+          "first": {
+            "readOnly": true,
+            "type": "string",
+            "format": "uri-reference",
+            "description": "This will always be an empty string, representing the relative URI of the first and only page in a paginated list.",
+            "example": ""
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransfersList"
           }
         },
         "required": [
@@ -564,17 +564,12 @@
       "TransferCreationRequest": {
         "type": "object",
         "properties": {
-          "type": {
+          "noteFormat": {
             "type": "string",
-            "default": "TransferCreationRequest",
-            "description": "The type of this object.",
-            "example": "TransferCreationRequest"
-          },
-          "transferUuid": {
-            "type": "string",
-            "format": "uuid",
-            "description": "A client-generated UUID for the transfer.",
-            "example": "123e4567-e89b-12d3-a456-426655440000"
+            "default": "",
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
           },
           "amount": {
             "type": "integer",
@@ -583,6 +578,19 @@
             "format": "int64",
             "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the debtor wants to verify whether the recipient's account exists and accepts incoming transfers.",
             "example": 1000
+          },
+          "note": {
+            "type": "string",
+            "default": "",
+            "maxLength": 500,
+            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
+            "example": "Hello, World!"
+          },
+          "transferUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A client-generated UUID for the transfer.",
+            "example": "123e4567-e89b-12d3-a456-426655440000"
           },
           "recipient": {
             "description": "The recipient's `AccountIdentity` information.",
@@ -596,19 +604,11 @@
               }
             ]
           },
-          "noteFormat": {
+          "type": {
             "type": "string",
-            "default": "",
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
-          "note": {
-            "type": "string",
-            "default": "",
-            "maxLength": 500,
-            "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
-            "example": "Hello, World!"
+            "default": "TransferCreationRequest",
+            "description": "The type of this object.",
+            "example": "TransferCreationRequest"
           }
         },
         "required": [
@@ -620,17 +620,17 @@
       "TransferError": {
         "type": "object",
         "properties": {
-          "errorCode": {
-            "type": "string",
-            "readOnly": true,
-            "description": "The error code.\n\n* `\"CANCELED_BY_THE_SENDER\"` signifies that the transfer has been   canceled the sender.\n* `\"SENDER_DOES_NOT_EXIST\"` signifies that the sender's account   does not exist.\n* `\"RECIPIENT_IS_UNREACHABLE\"` signifies that the recipient's  account does not exist, or does not accept incoming transfers.\n* `\"NO_RECIPIENT_CONFIRMATION\"` signifies that a confirmation from   the recipient is required, but has not been obtained.\n* `\"TRANSFER_NOTE_IS_TOO_LONG\"` signifies that the transfer has been   rejected because the byte-length of the transfer note is too big.\n* `\"INSUFFICIENT_AVAILABLE_AMOUNT\"` signifies that the transfer   has been rejected due to insufficient amount available on the   sender's account.\n* `\"TERMINATED\"` signifies that the transfer has been terminated   due to expired deadline, unapproved interest rate change, or   some other *temporary or correctable condition*. If the client   verifies the transer options and retries the transfer, chances   are that it will be committed successfully.\n",
-            "example": "INSUFFICIENT_AVAILABLE_AMOUNT"
-          },
           "type": {
             "readOnly": true,
             "type": "string",
             "description": "The type of this object.",
             "example": "TransferError"
+          },
+          "errorCode": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The error code.\n\n* `\"CANCELED_BY_THE_SENDER\"` signifies that the transfer has been   canceled by the sender.\n* `\"SENDER_DOES_NOT_EXIST\"` signifies that the sender's account   does not exist.\n* `\"RECIPIENT_IS_UNREACHABLE\"` signifies that the recipient's  account does not exist, or does not accept incoming transfers.\n* `\"NO_RECIPIENT_CONFIRMATION\"` signifies that a confirmation from   the recipient is required, but has not been obtained.\n* `\"TRANSFER_NOTE_IS_TOO_LONG\"` signifies that the transfer has been   rejected because the byte-length of the transfer note is too big.\n* `\"INSUFFICIENT_AVAILABLE_AMOUNT\"` signifies that the transfer   has been rejected due to insufficient amount available on the   sender's account.\n* `\"TERMINATED\"` signifies that the transfer has been terminated   due to expired deadline, unapproved interest rate change, or   some other *temporary or correctable condition*. If the client   verifies the transer options and retries the transfer, chances   are that it will be committed successfully.\n",
+            "example": "INSUFFICIENT_AVAILABLE_AMOUNT"
           },
           "totalLockedAmount": {
             "readOnly": true,
@@ -648,19 +648,6 @@
       "TransferResult": {
         "type": "object",
         "properties": {
-          "committedAmount": {
-            "type": "integer",
-            "readOnly": true,
-            "format": "int64",
-            "description": "The transferred amount. If the transfer has been successful, the value will be equal to the requested transfer amount (always a positive number). If the transfer has been unsuccessful, the value will be zero.",
-            "example": 0
-          },
-          "type": {
-            "readOnly": true,
-            "type": "string",
-            "description": "The type of this object.",
-            "example": "TransferResult"
-          },
           "error": {
             "readOnly": true,
             "description": "An error that has occurred during the execution of the transfer. This field will be present if, and only if, the transfer has been unsuccessful.",
@@ -675,6 +662,19 @@
             "format": "date-time",
             "readOnly": true,
             "description": "The moment at which the transfer was finalized."
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "TransferResult"
+          },
+          "committedAmount": {
+            "type": "integer",
+            "readOnly": true,
+            "format": "int64",
+            "description": "The transferred amount. If the transfer has been successful, the value will be equal to the requested transfer amount (always a positive number). If the transfer has been unsuccessful, the value will be zero.",
+            "example": 0
           }
         },
         "required": [
@@ -686,24 +686,11 @@
       "Transfer": {
         "type": "object",
         "properties": {
-          "uri": {
-            "type": "string",
-            "readOnly": true,
-            "format": "uri-reference",
-            "description": "The URI of this object. Can be a relative URI.",
-            "example": "/debtors/1/transfers/123e4567-e89b-12d3-a456-426655440000"
-          },
-          "type": {
+          "checkupAt": {
             "readOnly": true,
             "type": "string",
-            "description": "The type of this object.",
-            "example": "Transfer"
-          },
-          "transferUuid": {
-            "type": "string",
-            "format": "uuid",
-            "description": "A client-generated UUID for the transfer.",
-            "example": "123e4567-e89b-12d3-a456-426655440000"
+            "format": "date-time",
+            "description": "The moment at which the debtor is advised to look at the transfer again, to see if it's status has changed. If this field is not present, this means either that the status of the transfer is not expected to change, or that the moment of the expected change can not be predicted."
           },
           "initiatedAt": {
             "type": "string",
@@ -711,11 +698,12 @@
             "readOnly": true,
             "description": "The moment at which the transfer was initiated."
           },
-          "checkupAt": {
-            "readOnly": true,
+          "noteFormat": {
             "type": "string",
-            "format": "date-time",
-            "description": "The moment at which the debtor is advised to look at the transfer again, to see if it's status has changed. If this field is not present, this means either that the status of the transfer is not expected to change, or that the moment of the expected change can not be predicted."
+            "readOnly": true,
+            "pattern": "^[0-9A-Za-z.-]{0,8}$",
+            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
+            "example": ""
           },
           "amount": {
             "type": "integer",
@@ -724,27 +712,6 @@
             "format": "int64",
             "description": "The amount that has to be transferred. Must be a non-negative number. Setting this value to zero can be useful when the debtor wants to verify whether the recipient's account exists and accepts incoming transfers.",
             "example": 1000
-          },
-          "recipient": {
-            "description": "The recipient's `AccountIdentity` information.",
-            "example": {
-              "type": "AccountIdentity",
-              "uri": "swpt:1/2222"
-            },
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccountIdentity"
-              }
-            ]
-          },
-          "result": {
-            "readOnly": true,
-            "description": "Contains information about the outcome of the transfer. This field will be preset if, and only if, the transfer has been finalized. Note that a finalized transfer can be either successful, or unsuccessful.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransferResult"
-              }
-            ]
           },
           "transfersList": {
             "readOnly": true,
@@ -758,18 +725,51 @@
               }
             ]
           },
-          "noteFormat": {
-            "type": "string",
-            "readOnly": true,
-            "pattern": "^[0-9A-Za-z.-]{0,8}$",
-            "description": "The format used for the `note` field. An empty string signifies unstructured text.",
-            "example": ""
-          },
           "note": {
             "type": "string",
             "readOnly": true,
             "description": "A note from the debtor. Can be any string that the debtor wants the recipient to see.",
             "example": "Hello, World!"
+          },
+          "uri": {
+            "type": "string",
+            "readOnly": true,
+            "format": "uri-reference",
+            "description": "The URI of this object. Can be a relative URI.",
+            "example": "/debtors/1/transfers/123e4567-e89b-12d3-a456-426655440000"
+          },
+          "transferUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A client-generated UUID for the transfer.",
+            "example": "123e4567-e89b-12d3-a456-426655440000"
+          },
+          "recipient": {
+            "description": "The recipient's `AccountIdentity` information.",
+            "example": {
+              "type": "AccountIdentity",
+              "uri": "swpt:1/2222"
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountIdentity"
+              }
+            ]
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The type of this object.",
+            "example": "Transfer"
+          },
+          "result": {
+            "readOnly": true,
+            "description": "Contains information about the outcome of the transfer. This field will be preset if, and only if, the transfer has been finalized. Note that a finalized transfer can be either successful, or unsuccessful.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransferResult"
+              }
+            ]
           }
         },
         "required": [
@@ -1709,7 +1709,7 @@
           }
         },
         "summary": "Delete a transfer.",
-        "description": "Note that deleting a running (not finalized) transfer does not\ncancel it. To ensure that a running transfer has not been\nsuccessful, it must be canceled before deletion.",
+        "description": "Before deleting a transfer, client implementations should\nensure that at least 5 days (120 hours) have passed since the\ntransfer was initiated (see the `initiatedAt` field). Also, it\nis recommended successful transfers to stay on the server at\nleast a few weeks after their finalization.\n\nNote that deleting a running (not finalized) transfer does not\ncancel it. To ensure that a running transfer has not been\nsuccessful, it must be canceled before deletion.",
         "tags": [
           "transfers"
         ],
