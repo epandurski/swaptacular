@@ -140,10 +140,11 @@ All the above implementations try to:
 
 A **fully functional demo deployment** from this source code
 repository can be found here:
-* [Debtors Aggent Swagger
+* [Debtors Agent UI](https://demo.swaptacular.org/debtors-webapp/)
+* [Debtors Agent Swagger
   UI](https://demo.swaptacular.org/debtors-swagger-ui/) (client_id:
   `swagger-ui`, client_secret: `swagger-ui`)
-* [Creditors Aggent Swagger
+* [Creditors Agent Swagger
   UI](https://demo.swaptacular.org/creditors-swagger-ui/) (client_id:
   `swagger-ui`, client_secret: `swagger-ui`)
 
@@ -152,7 +153,7 @@ Remaining work
 --------------
 
 - [x] Add link to a demo server, running the reference implementation.
-- [ ] Implement a user friendly UI for currency issuing.
+- [x] Implement a user friendly UI for currency issuing.
 - [ ] Implement a user friendly UI for making and receiving payments.
 - [ ] Define and implement a standard binary serialization for the
   messaging protocol (using [Cap'n Proto](https://capnproto.org/)).

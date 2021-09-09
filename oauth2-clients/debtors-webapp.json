@@ -1,0 +1,17 @@
+{
+  "client_id": "debtors-webapp",
+  "client_name": "Debtors Agent UI",
+  "description": "This is the reference implementation of debtors agent client.",
+  "client_secret": "debtors-webapp",
+  "scope": "access access.readonly",
+  "grant_types": [
+    "authorization_code"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none",
+  "redirect_uris": [
+    "https://demo.swaptacular.org/debtors-webapp/"
+  ]
+}

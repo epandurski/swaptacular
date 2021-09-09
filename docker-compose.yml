@@ -149,6 +149,12 @@ services:
     restart: always
 
 
+  debtors-webapp:
+    image: epandurski/swpt_debtors:$SWPT_DEBTORS_UI_VERSION
+    env_file: configuration/debtors-webapp.env
+    restart: always
+
+
   debtors-swagger-ui:
     image: epandurski/swpt_debtors_swagger_ui:$SWPT_DEBTORS_VERSION
     environment:
@@ -180,6 +186,7 @@ services:
       DEBTORS_HYDRA_URL: 'http://debtors-login:4444'
       DEBTORS_LOGIN_URL: 'http://debtors-login:8080'
       DEBTORS_SERVER_URL: 'http://debtors-server:8080'
+      DEBTORS_WEBAPP_URL: 'http://debtors-webapp:80'
       DEBTORS_SWAGGER_UI_URL: 'http://debtors-swagger-ui:8080'
       CERTIFICATE_FILE: '/etc/nginx/ssl/cert.pem'
       CERTIFICATE_KEY_FILE: '/etc/nginx/ssl/key.pem'
