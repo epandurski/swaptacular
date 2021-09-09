@@ -150,7 +150,7 @@ services:
 
 
   debtors-webapp:
-    image: epandurski/swpt_debtors:$SWPT_DEBTORS_UI_VERSION
+    image: epandurski/swpt_debtors_ui:$SWPT_DEBTORS_UI_VERSION
     env_file: configuration/debtors-webapp.env
     restart: always
 
