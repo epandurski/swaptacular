@@ -129,6 +129,7 @@ Reference implementations
 * [Debtors Agent](https://github.com/epandurski/swpt_debtors)
 * [Creditors Agent](https://github.com/epandurski/swpt_creditors)
 * [Service that manages OAuth2 login and consent](https://github.com/epandurski/swpt_login)
+* [Currency Issuer UI](https://github.com/epandurski/swpt_debtors_ui)
 
 All the above implementations try to:
 
