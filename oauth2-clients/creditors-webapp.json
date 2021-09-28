@@ -1,0 +1,17 @@
+{
+  "client_id": "creditors-webapp",
+  "client_name": "Creditors Agent UI",
+  "description": "This is the reference implementation of creditors agent client.",
+  "client_secret": "creditors-webapp",
+  "scope": "access access.readonly disable_pin",
+  "grant_types": [
+    "authorization_code"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none",
+  "redirect_uris": [
+    "https://demo.swaptacular.org/creditors-webapp/"
+  ]
+}

@@ -95,6 +95,12 @@ services:
     restart: always
 
 
+  creditors-webapp:
+    image: epandurski/swpt_creditors_ui:$SWPT_CREDITORS_UI_VERSION
+    env_file: configuration/creditors-webapp.env
+    restart: always
+
+
   creditors-swagger-ui:
     image: epandurski/swpt_creditors_swagger_ui:$SWPT_CREDITORS_VERSION
     environment:
@@ -182,6 +188,7 @@ services:
       CREDITORS_HYDRA_URL: 'http://creditors-login:4444'
       CREDITORS_LOGIN_URL: 'http://creditors-login:8080'
       CREDITORS_SERVER_URL: 'http://creditors-server:8080'
+      CREDITORS_WEBAPP_URL: 'http://creditors-webapp:80'
       CREDITORS_SWAGGER_UI_URL: 'http://creditors-swagger-ui:8080'
       DEBTORS_HYDRA_URL: 'http://debtors-login:4444'
       DEBTORS_LOGIN_URL: 'http://debtors-login:8080'

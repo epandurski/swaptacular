@@ -35,6 +35,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
+    location /creditors-webapp/ {
+        proxy_pass ${CREDITORS_WEBAPP_URL}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
     location /creditors-swagger-ui/ {
         proxy_pass ${CREDITORS_SWAGGER_UI_URL}/creditors-swagger-ui/;
         proxy_set_header Host $host;
