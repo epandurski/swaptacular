@@ -162,5 +162,5 @@ Remaining work
   accounting authorities, using user friendly UI and/or configuration
   files.
 - [ ] Implement [Circular Multilateral
-      Barter](https://epandurski.github.io/swaptacular/docs/cmb/cmb-general.pdf)
+      Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf)
       currency exchanges, using the Swaptacular Messaging Protocol.
