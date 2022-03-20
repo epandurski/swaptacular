@@ -112,7 +112,7 @@ debtors/creditors agents. The protocol uses a [two-phase
 commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol)
 schema, which allows for the implementation of currency exchanges in
 the spirit of [Circular Multilateral
-Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf)
+Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf).
 
 In order to allow currency holders to use a client application of
 their choice, Swaptacular recommends the following OpenAPI
@@ -165,5 +165,6 @@ Remaining work
 - [ ] Allow creditors/debtors agents to easily connect to multiple
   accounting authorities, using user friendly UI and/or configuration
   files.
-- [ ] Implement currency exchanges in the spirit of Circular
-      Multilateral Barter.
+- [ ] Implement currency exchanges in the spirit of [Circular
+      Multilateral
+      Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf).
