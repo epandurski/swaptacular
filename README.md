@@ -134,6 +134,7 @@ Reference implementations
 * [Creditors Agent](https://github.com/epandurski/swpt_creditors)
 * [Service that manages OAuth2 login and consent](https://github.com/epandurski/swpt_login)
 * [Currency Issuer UI](https://github.com/epandurski/swpt_debtors_ui)
+* [Currency Holder UI](https://github.com/epandurski/swpt_creditors_ui)
 
 All the above implementations try to:
 
@@ -145,7 +146,8 @@ All the above implementations try to:
 
 A **fully functional demo deployment** from this source code
 repository can be found here:
-* [Debtors Agent UI](https://demo.swaptacular.org/debtors-webapp/)
+* [Currency Issuer UI](https://demo.swaptacular.org/debtors-webapp/)
+* [Currency Holder UI](https://demo.swaptacular.org/creditors-webapp/)
 * [Debtors Agent Swagger
   UI](https://demo.swaptacular.org/debtors-swagger-ui/) (client_id:
   `swagger-ui`, client_secret: `swagger-ui`)
@@ -159,7 +161,7 @@ Remaining work
 
 - [x] Add link to a demo server, running the reference implementation.
 - [x] Implement a user friendly UI for currency issuing.
-- [ ] Implement a user friendly UI for making and receiving payments.
+- [x] Implement a user friendly UI for making and receiving payments.
 - [ ] Define and implement a standard binary serialization for the
   messaging protocol (using [Cap'n Proto](https://capnproto.org/)).
 - [ ] Allow creditors/debtors agents to easily connect to multiple
