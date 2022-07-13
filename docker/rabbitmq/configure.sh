@@ -14,8 +14,6 @@ rabbitmqadmin declare exchange name=accounts_in type=topic auto_delete=false dur
 rabbitmqadmin declare exchange name=to_creditors type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_debtors type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_coordinators type=headers auto_delete=false durable=true internal=false
-rabbitmqadmin declare exchange name=accounts_direct type=topic auto_delete=false durable=true internal=true
-rabbitmqadmin declare exchange name=accounts_issuing type=topic auto_delete=false durable=true internal=true
 rabbitmqadmin declare queue name=swpt_accounts.XQ durable=true auto_delete=false\
  'arguments={"x-message-ttl":604800000}'
 rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
@@ -58,13 +56,9 @@ rabbitmqadmin declare binding source="to_creditors" destination_type="exchange"\
 rabbitmqadmin declare binding source="to_debtors" destination_type="exchange"\
  destination="debtors_in" routing_key="#"
 rabbitmqadmin declare binding source="to_coordinators" destination_type="exchange"\
- destination="accounts_direct" routing_key="" 'arguments={"x-match":"all","coordinator-type":"direct"}'
+ destination="to_creditors" routing_key="" 'arguments={"x-match":"all","coordinator-type":"direct"}'
 rabbitmqadmin declare binding source="to_coordinators" destination_type="exchange"\
- destination="accounts_issuing" routing_key="" 'arguments={"x-match":"all","coordinator-type":"issuing"}'
-rabbitmqadmin declare binding source="accounts_direct" destination_type="exchange"\
- destination="creditors_in" routing_key="#"
-rabbitmqadmin declare binding source="accounts_issuing" destination_type="exchange"\
- destination="debtors_in" routing_key="#"
+ destination="to_debtors" routing_key="" 'arguments={"x-match":"all","coordinator-type":"issuing"}'
 rabbitmqadmin declare binding source="creditors_out" destination_type="exchange"\
  destination="accounts_in" routing_key="#"
 rabbitmqadmin declare binding source="debtors_out" destination_type="exchange"\
