@@ -13,10 +13,11 @@ set -e
 rabbitmqadmin declare exchange name=accounts_in type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_creditors type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_debtors type=topic auto_delete=false durable=true internal=false
-rabbitmqadmin declare exchange name=to_coordinators type=header auto_delete=false durable=true internal=false
+rabbitmqadmin declare exchange name=to_coordinators type=headers auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=accounts_direct type=topic auto_delete=false durable=true internal=true
 rabbitmqadmin declare exchange name=accounts_issuing type=topic auto_delete=false durable=true internal=true
-rabbitmqadmin declare queue name=swpt_accounts.XQ durable=true auto_delete=false
+rabbitmqadmin declare queue name=swpt_accounts.XQ durable=true auto_delete=false\
+ 'arguments={"x-message-ttl":604800000}'
 rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
  'arguments={"x-dead-letter-exchange":"", "x-dead-letter-routing-key":"swpt_accounts.XQ"}'
 
@@ -30,7 +31,8 @@ rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
 # either "accounts_in" exchange.
 rabbitmqadmin declare exchange name=creditors_in type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=creditors_out type=topic auto_delete=false durable=true internal=false
-rabbitmqadmin declare queue name=swpt_creditors.XQ durable=true auto_delete=false
+rabbitmqadmin declare queue name=swpt_creditors.XQ durable=true auto_delete=false\
+ 'arguments={"x-message-ttl":604800000}'
 rabbitmqadmin declare queue name=swpt_creditors durable=true auto_delete=false\
  'arguments={"x-dead-letter-exchange":"", "x-dead-letter-routing-key":"swpt_creditors.XQ"}'
 
@@ -44,7 +46,8 @@ rabbitmqadmin declare queue name=swpt_creditors durable=true auto_delete=false\
 # either "accounts_in" exchange.
 rabbitmqadmin declare exchange name=debtors_in type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=debtors_out type=fanout auto_delete=false durable=true internal=false
-rabbitmqadmin declare queue name=swpt_debtors.XQ durable=true auto_delete=false
+rabbitmqadmin declare queue name=swpt_debtors.XQ durable=true auto_delete=false\
+ 'arguments={"x-message-ttl":604800000}'
 rabbitmqadmin declare queue name=swpt_debtors durable=true auto_delete=false\
  'arguments={"x-dead-letter-exchange":"", "x-dead-letter-routing-key":"swpt_debtors.XQ"}'
 
