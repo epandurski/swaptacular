@@ -32,6 +32,7 @@ services:
     hostname: rabbitmq
     volumes:
       - './docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
+      - './docker/rabbitmq/create-bindings.sh:/usr/local/bin/create-bindings.sh'
       - 'rabbitmq-data-volume:/var/lib/rabbitmq/mnesia/rabbit@rabbitmq'
     environment:
       - 'RABBITMQ_LOGS=-'
