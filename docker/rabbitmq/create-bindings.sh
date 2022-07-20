@@ -25,8 +25,8 @@ rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
 # Everything published to the "creditors_in" exchange will be queued
 # to the "swpt_creditors" queue, and processed by the swpt_creditors
 # service. The service itself publishes to the "creditors_out"
-# exchange. All messages posted to this exchange will be routed to
-# either "accounts_in" exchange.
+# exchange. All messages posted to this exchange will be routed to the
+# "accounts_in" exchange.
 rabbitmqadmin declare exchange name=creditors_in type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=creditors_out type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare queue name=swpt_creditors.XQ durable=true auto_delete=false\
@@ -40,8 +40,8 @@ rabbitmqadmin declare queue name=swpt_creditors durable=true auto_delete=false\
 # Everything published to the "debtors_in" exchange will be queued to
 # the "swpt_debtors" queue, and processed by the swpt_debtors
 # service. The service itself publishes to the "debtors_out"
-# exchange. All messages posted to this exchange will be routed to
-# either "accounts_in" exchange.
+# exchange. All messages posted to this exchange will be routed to the
+# "accounts_in" exchange.
 rabbitmqadmin declare exchange name=debtors_in type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=debtors_out type=fanout auto_delete=false durable=true internal=false
 rabbitmqadmin declare queue name=swpt_debtors.XQ durable=true auto_delete=false\
