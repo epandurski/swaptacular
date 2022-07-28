@@ -48,6 +48,7 @@ services:
       - 'PORT=8080'
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
+      - 'CHORES_BROKER_CLASS=RabbitmqBroker'
       - 'CHORES_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
       - 'APP_FETCH_API_URL=http://accounts-cache:80'
     restart: always
