@@ -19,6 +19,13 @@ rabbitmqadmin declare queue name=swpt_accounts.XQ durable=true auto_delete=false
 rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
  'arguments={"x-dead-letter-exchange":"", "x-dead-letter-routing-key":"swpt_accounts.XQ"}'
 
+# Create "swpt_accounts_chores" queue.
+rabbitmqadmin declare queue name=swpt_accounts_chores.XQ durable=true auto_delete=false\
+ 'arguments={"x-message-ttl":604800000}'
+rabbitmqadmin declare queue name=swpt_accounts_chores durable=true auto_delete=false\
+ 'arguments={"x-dead-letter-exchange":"", "x-dead-letter-routing-key":"swpt_accounts_chores.XQ"}'
+
+
 # swpt_creditors
 # --------------
 #
