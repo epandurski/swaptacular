@@ -41,7 +41,7 @@ docker-compose up -d rabbitmq
 docker-compose up -d redis
 echo -n "Waiting for services to become operational ..."; sleep 30; echo " done."
 
-# docker-compose exec rabbitmq create-bindings.sh  # this is redundant, and not needed
+docker-compose exec rabbitmq create-bindings.sh
 docker-compose run accounts-server configure
 docker-compose run creditors-server configure
 docker-compose run creditors-login configure
