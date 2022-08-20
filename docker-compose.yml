@@ -62,6 +62,7 @@ services:
       - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_creditors:swpt_creditors@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
       - 'OAUTH2_INTROSPECT_URL=http://creditors-login:4445/oauth2/introspect'
+      - 'REDIS_URL=redis://redis:6379/2?health_check_interval=30'
       - 'MIN_CREDITOR_ID=$MIN_CREDITOR_ID'
       - 'MAX_CREDITOR_ID=$MAX_CREDITOR_ID'
       - 'APP_PIN_PROTECTION_SECRET=$CREDITORS_PIN_PROTECTION_SECRET'
