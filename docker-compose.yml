@@ -45,12 +45,11 @@ services:
     image: epandurski/swpt_accounts:$SWPT_ACCOUNTS_VERSION
     env_file: configuration/accounts-server.env
     environment:
-      - 'PORT=8080'
-      - 'SQLALCHEMY_DATABASE_URI=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
+      - 'WEBSERVER_PORT=8080'
+      - 'FETCH_API_URL=http://accounts-cache:80'
+      - 'POSTGRES_URL=postgresql://swpt_accounts:swpt_accounts@pg:5432/${POSTGRES_DB}'
       - 'PROTOCOL_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
-      - 'CHORES_BROKER_CLASS=RabbitmqBroker'
       - 'CHORES_BROKER_URL=amqp://guest:guest@rabbitmq:5672'
-      - 'APP_FETCH_API_URL=http://accounts-cache:80'
     restart: always
 
 
@@ -212,7 +211,7 @@ services:
   # responsible for a different range of debtors, and each instance
   # making HTTP requests to other `account-server` instances
   # (including itself). A properly configured HTTP cache ensures that
-  # the system scales well. (See the `APP_FETCH_API_URL` configuration
+  # the system scales well. (See the `FETCH_API_URL` configuration
   # variable.)
   accounts-cache:
     image: nginx:$NGINX_VERSION
