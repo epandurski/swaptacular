@@ -6,7 +6,7 @@ to become a holder of a digital currency, but it is not at all easy to
 become an issuer of a digital currency. Swaptacular tries to make
 creating and issuing new digital currencies possible for
 everyone. [The Swaptacular
-project](https://swaptacular.github.io/overview) consists of three
+Project](https://swaptacular.github.io/overview) consists of three
 things:
 
 1. The overall network architecture
