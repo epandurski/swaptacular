@@ -42,7 +42,7 @@ services:
 
 
   accounts-server:
-    image: epandurski/swpt_accounts:$SWPT_ACCOUNTS_VERSION
+    image: ghcr.io/swaptacular/swpt_accounts:$SWPT_ACCOUNTS_VERSION
     env_file: configuration/accounts-server.env
     environment:
       - 'WEBSERVER_PORT=8080'
@@ -54,7 +54,7 @@ services:
 
 
   creditors-server:
-    image: epandurski/swpt_creditors:$SWPT_CREDITORS_VERSION
+    image: ghcr.io/swaptacular/swpt_creditors:$SWPT_CREDITORS_VERSION
     env_file: configuration/creditors-server.env
     environment:
       - 'WEBSERVER_PORT=8080'
@@ -70,7 +70,7 @@ services:
 
 
   creditors-login:
-    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
+    image: ghcr.io/swaptacular/swpt_login:$SWPT_LOGIN_VERSION
     env_file: configuration/creditors-login.env
     environment:
       - 'SUBJECT_PREFIX=creditors:'
@@ -98,13 +98,13 @@ services:
 
 
   creditors-webapp:
-    image: epandurski/swpt_creditors_ui:$SWPT_CREDITORS_UI_VERSION
+    image: ghcr.io/swaptacular/swpt_creditors_ui:$SWPT_CREDITORS_UI_VERSION
     env_file: configuration/creditors-webapp.env
     restart: always
 
 
   creditors-swagger-ui:
-    image: epandurski/swpt_creditors_swagger_ui:$SWPT_CREDITORS_VERSION
+    image: ghcr.io/swaptacular/swpt_creditors_swagger_ui:$SWPT_CREDITORS_VERSION
     environment:
       - 'API_ROOT=https://$PUBLIC_HOST/'
       - 'BASE_URL=/creditors-swagger-ui'
@@ -116,7 +116,7 @@ services:
 
     
   debtors-server:
-    image: epandurski/swpt_debtors:$SWPT_DEBTORS_VERSION
+    image: ghcr.io/swaptacular/swpt_debtors:$SWPT_DEBTORS_VERSION
     env_file: configuration/debtors-server.env
     environment:
       - 'WEBSERVER_PORT=8080'
@@ -130,7 +130,7 @@ services:
 
 
   debtors-login:
-    image: epandurski/swpt_login:$SWPT_LOGIN_VERSION
+    image: ghcr.io/swaptacular/swpt_login:$SWPT_LOGIN_VERSION
     env_file: configuration/debtors-login.env
     environment:
       - 'SUBJECT_PREFIX=debtors:'
@@ -158,13 +158,13 @@ services:
 
 
   debtors-webapp:
-    image: epandurski/swpt_debtors_ui:$SWPT_DEBTORS_UI_VERSION
+    image: ghcr.io/swaptacular/swpt_debtors_ui:$SWPT_DEBTORS_UI_VERSION
     env_file: configuration/debtors-webapp.env
     restart: always
 
 
   debtors-swagger-ui:
-    image: epandurski/swpt_debtors_swagger_ui:$SWPT_DEBTORS_VERSION
+    image: ghcr.io/swaptacular/swpt_debtors_swagger_ui:$SWPT_DEBTORS_VERSION
     environment:
       - 'API_ROOT=https://$PUBLIC_HOST/'
       - 'BASE_URL=/debtors-swagger-ui'
