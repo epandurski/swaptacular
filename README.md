@@ -105,36 +105,35 @@ Interoperability protocols
 --------------------------
 
 At the core of Swaptacular's network architecture is the [Swaptacular
-Messaging
-Protocol](https://epandurski.github.io/swaptacular/protocol.pdf),
+Messaging Protocol](https://swaptacular.org/public/docs/protocol.pdf),
 which governs the communication between accounting authorities and
 debtors/creditors agents. The protocol uses a [two-phase
 commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol)
 schema, which allows for the implementation of currency exchanges in
 the spirit of [Circular Multilateral
-Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf).
+Barter](https://swaptacular.org/public/docs/cmb-general.pdf).
 
 In order to allow currency holders to use a client application of
 their choice, Swaptacular recommends the following OpenAPI
 specification for the [Payments Web
-API](https://epandurski.github.io/swaptacular/swpt_creditors/redoc.html).
+API](https://swaptacular.org/public/docs/swpt_creditors/redoc.html).
 
 Since interchangeability of client applications for currency issuing
 is not of critical importance, Swaptacular does not make
 recommendations about the *Issuing Web API*. The current reference
 implementation uses a [Simple Issuing Web
-API](https://epandurski.github.io/swaptacular/swpt_debtors/redoc.html).
+API](https://swaptacular.org/public/docs/swpt_debtors/redoc.html).
 
 
 Reference implementations
 -------------------------
 
-* [Accounting Authority](https://github.com/epandurski/swpt_accounts)
-* [Debtors Agent](https://github.com/epandurski/swpt_debtors)
-* [Creditors Agent](https://github.com/epandurski/swpt_creditors)
-* [Service that manages OAuth2 login and consent](https://github.com/epandurski/swpt_login)
-* [Currency Issuer UI](https://github.com/epandurski/swpt_debtors_ui)
-* [Currency Holder UI](https://github.com/epandurski/swpt_creditors_ui)
+* [Accounting Authority](https://github.com/swaptacular/swpt_accounts)
+* [Debtors Agent](https://github.com/swaptacular/swpt_debtors)
+* [Creditors Agent](https://github.com/swaptacular/swpt_creditors)
+* [Service that manages OAuth2 login and consent](https://github.com/swaptacular/swpt_login)
+* [Currency Issuer UI](https://github.com/swaptacular/swpt_debtors_ui)
+* [Currency Holder UI](https://github.com/swaptacular/swpt_creditors_ui)
 
 All the above implementations try to:
 
@@ -154,19 +153,3 @@ repository can be found here:
 * [Creditors Agent Swagger
   UI](https://demo.swaptacular.org/creditors-swagger-ui/) (client_id:
   `swagger-ui`, client_secret: `swagger-ui`)
-
-
-Remaining work
---------------
-
-- [x] Add link to a demo server, running the reference implementation.
-- [x] Implement a user friendly UI for currency issuing.
-- [x] Implement a user friendly UI for making and receiving payments.
-- [ ] Define and implement a standard binary serialization for the
-  messaging protocol (using [Cap'n Proto](https://capnproto.org/)).
-- [ ] Allow creditors/debtors agents to easily connect to multiple
-  accounting authorities, using user friendly UI and/or configuration
-  files.
-- [ ] Implement currency exchanges in the spirit of [Circular
-      Multilateral
-      Barter](https://epandurski.github.io/swaptacular/cmb/cmb-general.pdf).
