@@ -41,6 +41,16 @@ services:
     restart: always
 
 
+  accounts-apiproxy:
+    image: ghcr.io/swaptacular/swpt_apiproxy:latest
+    volumes:
+      - './docker/apiproxy/accounts.conf:/etc/apiproxy.conf'
+    environment:
+      - 'APIPROXY_PORT=8080'
+      - 'APIPROXY_CONFIG_FILE=/etc/apiproxy.conf'
+    restart: always
+
+
   accounts-server:
     image: ghcr.io/swaptacular/swpt_accounts:$SWPT_ACCOUNTS_VERSION
     env_file: configuration/accounts-server.env
@@ -233,7 +243,7 @@ services:
       - './docker/accounts-cache/templates:/etc/nginx/templates'
     environment:
       - 'PORT=80'
-      - 'ACCOUNTS_SERVER_URL=http://accounts-server:8080'
+      - 'ACCOUNTS_SERVER_URL=http://accounts-apiproxy:8080'
       - 'CACHE_KEYS_ZONE=10m'
       - 'CACHE_MAX_SIZE=1g'
       - 'NGINX_ENTRYPOINT_QUIET_LOGS=1'
