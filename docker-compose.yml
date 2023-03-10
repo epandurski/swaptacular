@@ -137,6 +137,18 @@ services:
     restart: always
 
     
+  debtors-apiproxy:
+    image: ghcr.io/swaptacular/swpt_apiproxy:latest
+    volumes:
+      - './docker/apiproxy/debtors.conf:/etc/apiproxy.conf'
+    environment:
+      - 'MIN_DEBTOR_ID=$MIN_DEBTOR_ID'
+      - 'MAX_DEBTOR_ID=$MAX_DEBTOR_ID'
+      - 'APIPROXY_PORT=8080'
+      - 'APIPROXY_CONFIG_FILE=/etc/apiproxy.conf'
+    restart: always
+
+
   debtors-server:
     image: ghcr.io/swaptacular/swpt_debtors:$SWPT_DEBTORS_VERSION
     env_file: configuration/debtors-server.env
@@ -216,7 +228,7 @@ services:
       CREDITORS_SWAGGER_UI_URL: 'http://creditors-swagger-ui:8080'
       DEBTORS_HYDRA_URL: 'http://debtors-login:4444'
       DEBTORS_LOGIN_URL: 'http://debtors-login:8080'
-      DEBTORS_SERVER_URL: 'http://debtors-server:8080'
+      DEBTORS_SERVER_URL: 'http://debtors-apiproxy:8080'
       DEBTORS_WEBAPP_URL: 'http://debtors-webapp:80'
       DEBTORS_SWAGGER_UI_URL: 'http://debtors-swagger-ui:8080'
       CERTIFICATE_FILE: '/etc/nginx/ssl/cert.pem'
