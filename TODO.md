@@ -42,10 +42,21 @@ To allow this the accounting authority should be updated to:
    the accounting authority) secret, which will be required for directly
    obtaining the account balance (point 1).
 
+   **Note:** This probably is not a good idea, because the secret will have
+   to change periodically, to protect against accidentally lost secrets
+   (over which the user has no control). These changes will need to happen
+   periodically: either automatically (requiring periodical updates in the
+   verifying app's database), or be triggered by a change in a configuration
+   field (see point 3). Given that convenient use of a dedicated verifying
+   app is a must (the app supplied by the creditors agent may not be
+   trustworthy); and that it is impossible for the user to know when the
+   secret has been lost; it seems that the approach in point 3 is the only
+   viable one.
+
 3. A new configuration field may be added as well, in which the owner of the
    account can provide an alternative identification method when obtaining
-   the account balance. For example: a public key fingerprint, or a password
-   hash.
+   the account balance. For example: a public key, a public key fingerprint,
+   or a password hash.
 
 # Central registry for accounting authorities
 
