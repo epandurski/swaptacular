@@ -25,6 +25,9 @@ probably, only the `superuser` should be allowed to do this, but the debtors
 should be able to see the issuing limits assigned to them. Eventually, some
 UI should be implemented, for configuring debtor's issuing limits.
 
+**This has been done, except there is no UI yet for setting debtor's
+issuing limits.**
+
 # Allow creditors to check their balances directly with the accounting authority
 
 To prevent creditors agents to secretly practice "fractional reserve
