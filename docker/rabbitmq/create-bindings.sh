@@ -14,6 +14,7 @@ rabbitmqadmin declare exchange name=accounts_in type=topic auto_delete=false dur
 rabbitmqadmin declare exchange name=to_creditors type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_debtors type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare exchange name=to_coordinators type=headers auto_delete=false durable=true internal=false
+rabbitmqadmin declare exchange name=to_trade type=topic auto_delete=false durable=true internal=false
 rabbitmqadmin declare queue name=swpt_accounts.XQ durable=true auto_delete=false\
  'arguments={"x-message-ttl":604800000}'
 rabbitmqadmin declare queue name=swpt_accounts durable=true auto_delete=false\
