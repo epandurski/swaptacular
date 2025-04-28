@@ -116,6 +116,7 @@ services:
       - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
       - 'MAIL_SERVER=mail'
       - 'MAIL_PORT=25'
+      - 'MAX_CONTENT_LENGTH=4096'
     restart: always
 
 
@@ -188,6 +189,7 @@ services:
       - 'RECAPTCHA_PIVATE_KEY=$RECAPTCHA_PIVATE_KEY'
       - 'MAIL_SERVER=mail'
       - 'MAIL_PORT=25'
+      - 'MAX_CONTENT_LENGTH=4096'
     restart: always
 
 
