@@ -92,7 +92,7 @@ services:
 
 
   creditors-login:
-    image: ghcr.io/swaptacular/swpt_login:$SWPT_LOGIN_VERSION
+    image: ghcr.io/swaptacular/swpt_login_old:$SWPT_LOGIN_VERSION
     env_file: configuration/creditors-login.env
     environment:
       - 'SUBJECT_PREFIX=creditors:'
@@ -165,7 +165,7 @@ services:
 
 
   debtors-login:
-    image: ghcr.io/swaptacular/swpt_login:$SWPT_LOGIN_VERSION
+    image: ghcr.io/swaptacular/swpt_login_old:$SWPT_LOGIN_VERSION
     env_file: configuration/debtors-login.env
     environment:
       - 'SUBJECT_PREFIX=debtors:'
