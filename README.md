@@ -1,6 +1,9 @@
 Software for managing syndicated digital currencies
 ===================================================
 
+**IMPORTANT NOTE: The official repository for this project moved
+[here](https://github.com/swaptacular/).**
+
 Digital currencies are all around us. Nowadays, it is relatively easy
 to become a holder of a digital currency, but it is not at all easy to
 become an issuer of a digital currency. Swaptacular tries to make
